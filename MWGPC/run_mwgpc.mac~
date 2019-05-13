@@ -1,4 +1,4 @@
-/ALICE/geometry/SetGasPressure 0.6 bar
+/MWGPC/geometry/SetGasPressure 0.6 bar
 
 /gasModelParameters/heed/heeddeltaelectron/addparticle e- 0. 0.001
 /gasModelParameters/heed/heeddeltaelectron/addparticle gamma 0. 10000000
@@ -29,9 +29,9 @@
 /run/numberOfThreads 1
 /control/cout/ignoreThreadsExcept 0
 #/control/cout/setCoutFile output.dmp
-/ALICE/phys/setLowLimitE 20. eV
-/ALICE/phys/InitializePhysics emlivermore
-/ALICE/phys/AddParametrisation
+/MWGPC/phys/setLowLimitE 20. eV
+/MWGPC/phys/InitializePhysics emlivermore
+/MWGPC/phys/AddParametrisation
 ##/process/em/AddPAIRegion all RegionGasBox PAIPhoton
 
 #/random/setSeeds 0 0

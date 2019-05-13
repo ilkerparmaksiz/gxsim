@@ -1,7 +1,7 @@
 #----------------------------------------------------------------------------
 # Setup the project
 cmake_minimum_required(VERSION 2.6 FATAL_ERROR)
-project(ALICE)
+project(MWGPC)
 
 #----------------------------------------------------------------------------
 # Find Geant4 package, activating all available UI and Vis drivers by default
@@ -25,7 +25,7 @@ list(APPEND CMAKE_PREFIX_PATH $ENV{ROOTSYS})
 #
 find_package(ROOT QUIET REQUIRED COMPONENTS RIO Net)
 if(NOT ROOT_FOUND)
-  message(STATUS "ALICE: ROOT package not found. --> ALICE disabled")  
+  message(STATUS "MWGPC: ROOT package not found. --> MWGPC disabled")  
   return()
 endif()
 include(${ROOT_USE_FILE})
@@ -63,21 +63,21 @@ file(GLOB headers ${PROJECT_SOURCE_DIR}/include/*.hh)
 # Add the executable, and link it to the Geant4 and GARFIELD++ libraries
 #
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -g")
-add_executable(ALICE ALICE.cc ${sources} ${headers})
-target_link_libraries(ALICE  -lGarfield -lgfortran ${ROOT_LIBRARIES} ${Geant4_LIBRARIES})
+add_executable(MWGPC MWGPC.cc ${sources} ${headers})
+target_link_libraries(MWGPC  -lGarfield -lgfortran ${ROOT_LIBRARIES} ${Geant4_LIBRARIES})
 #----------------------------------------------------------------------------
 # Copy all scripts to the build directory, i.e. the directory in which we
 # build B1. This is so that we can run the executable directly because it
 # relies on these scripts being in the current working directory.
 #
 
-set(ALICE_SCRIPTS
-  vis.mac
-  run1.mac
-  Ne_90_CO2_10_N2_5_with_mg.gas
+set(MWGPC_SCRIPTS
+  vis_mwgpc.mac
+  run_mwgpc.mac
+  Ar_90_CH4_10.gas
 )
 
-foreach(_script ${ALICE_SCRIPTS})
+foreach(_script ${MWGPC_SCRIPTS})
   configure_file(
     ${PROJECT_SOURCE_DIR}/${_script}
     ${PROJECT_BINARY_DIR}/${_script}
@@ -88,4 +88,4 @@ endforeach()
 #----------------------------------------------------------------------------
 # Install the executable to 'bin' directory under CMAKE_INSTALL_PREFIX
 #
-install(TARGETS ALICE DESTINATION bin)
+install(TARGETS MWGPC DESTINATION bin)

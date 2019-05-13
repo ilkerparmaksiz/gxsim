@@ -1,4 +1,4 @@
-/ALICE/geometry/SetGasPressure 0.6 bar
+/MWGPC/geometry/SetGasPressure 0.6 bar
 
 /gasModelParameters/heed/heeddeltaelectron/addparticle e- 0. 0.001
 /gasModelParameters/heed/heeddeltaelectron/addparticle gamma 0. 10000000
@@ -10,7 +10,7 @@
 /gasModelParameters/heed/heednewtrack/addparticle mu 1000. 1000000.
 #/gasModelParameters/heed/heednewtrack/addparticle pi+ 100. 1000000.
 
-/gasModelParameters/heed/gasfile /mnt/ksf9/H2/user/u0111340/linux/AliceTPC/AliceTPC/Ne_90_CO2_10_N2_5_with_mg.gas
+#/gasModelParameters/heed/gasfile /mnt/ksf9/H2/user/u0111340/linux/AliceTPC/AliceTPC/Ne_90_CO2_10_N2_5_with_mg.gas
 /gasModelParameters/heed/ionmobilityfile IonMobility_Ne+_Ne.txt
 /gasModelParameters/heed/drift 0
 /gasModelParameters/heed/driftRKF 1
@@ -29,9 +29,9 @@
 /run/numberOfThreads 1
 /control/cout/ignoreThreadsExcept 0
 #/control/cout/setCoutFile output.dmp
-/ALICE/phys/setLowLimitE 20. eV
-/ALICE/phys/InitializePhysics emlivermore
-/ALICE/phys/AddParametrisation
+/MWGPC/phys/setLowLimitE 20. eV
+/MWGPC/phys/InitializePhysics emlivermore
+/MWGPC/phys/AddParametrisation
 ##/process/em/AddPAIRegion all RegionGasBox PAIPhoton
 
 #/random/setSeeds 0 0
@@ -52,10 +52,10 @@
 ####################################
 ########### Visualization ##########
 ####################################
-/gps/particle proton
-/gps/position 0. 0. 0. cm
-/gps/direction 1. 0. 0.
+/gps/particle electron
+/gps/position 0.5 0.0 0. cm
+/gps/direction 0. 0. 1.0
 /gps/ene/type Mono
-/gps/ene/mono 2000 MeV
+/gps/ene/mono 2.7 keV
 
 /run/beamOn 1

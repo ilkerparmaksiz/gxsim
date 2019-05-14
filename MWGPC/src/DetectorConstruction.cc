@@ -153,7 +153,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
   //Copper Wall
   G4Tubs* solidWalls = new G4Tubs("solid_tube_wall",gasboxR,gasboxR+wallThickness,gasboxH*0.5+wallThickness, 0., twopi);
   G4LogicalVolume* logicWall =
-  new G4LogicalVolume(solidWalls, copperMaterial, "solidWall1_log");
+  new G4LogicalVolume(solidWalls, copperMaterial, "solidWall_log");
   new G4PVPlacement(myRotation,G4ThreeVector(), logicWall,
                     "solidWall_phys",logicWorld,false,0,checkOverlaps);
 

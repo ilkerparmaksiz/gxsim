@@ -40,7 +40,7 @@
 /run/initialize
 
 #/param/InActivateModel HeedNewTrackModel
-#/param/InActivateModel HeedDeltaElectronModel
+/param/InActivateModel HeedDeltaElectronModel
 
 /analysis/setFileName test
 

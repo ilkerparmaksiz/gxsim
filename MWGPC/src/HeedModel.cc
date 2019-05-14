@@ -182,6 +182,7 @@ void HeedModel::BuildCompField(){
     int mr(0);
     int inc(0);
     bool newrow(true);
+    int rowstop(0);
     for (int nhexes = 0; nhexes<hexrad.find(nRad)->second; ++nhexes) {
 
 
@@ -192,25 +193,25 @@ void HeedModel::BuildCompField(){
 	xhex += 2*rC ; yhex = 0.0; 
 	if (nhexes == hexrad.find(nRad)->first-1) {
 	  mr=1; // finished middle row
-	  newrow = true;
+	  inc = hexrad.find(nRad)->first - 1;
+	  newrow = true; rowstop = hexrad.find(nRad)->first + inc;
 	  xstart += rC; ystart+= ypt;
 	}
       }
       else if (mr%2) { // just finished middle row or a bottom row, now on a top row
 	xhex += 2*rC; yhex = ystart;
-	if (nhexes == (hexrad.find(nRad)->first*(mr+1) - (mr+1+inc))) {
+	if (nhexes == rowstop-1) {
 	  mr++; // finished top row
-	  newrow = true;
+	  newrow = true; rowstop += inc ; // don't decrement rowstop on this top row.
 	  ystart-= mr*(ypt);
 	}
       }
       else if (mr!=0 && mr%2==0) { // just finished top row, on a bottom row
 	xhex += 2*rC; yhex = ystart;
-	if (nhexes == (hexrad.find(nRad)->first*(mr+1) - (mr+1+inc))) {
+	if (nhexes == rowstop-1) {
 	  mr++; // finished bot row
-	  newrow = true;
+	  newrow = true; inc--; rowstop += inc ; // to force one less hex for each new top row.
 	  xstart += rC; ystart+= mr*(ypt);
-	  inc++; // to force one less hex for each new top row.
 	}
 
       }
@@ -261,9 +262,19 @@ void HeedModel::BuildCompField(){
 
 //Build sensor (see Garfield++ documentation)
 void HeedModel::BuildSensor(){
+
+  // X-width [cm?] of drift simulation will cover between +/- axis_x
+  const double axis_x = 0.1;  
+  // Y-width of drift simulation will cover between +/- axis_y
+  const double axis_y = 0.1;  
+  const double axis_z = 5.0;
+
   fSensor = new Garfield::Sensor();
+  fSensor->EnableDebugging(true);
   fSensor->AddComponent(comp);
   fSensor->SetTimeWindow(0.,12.,100); //Lowest time [ns], time bins [ns], number of bins
+  
+  fSensor->SetArea(-axis_x, -axis_y, -axis_z, axis_x, axis_y, axis_z); // just central anode wire for now.
   fSensor->AddElectrode(comp,"el");
 }
 

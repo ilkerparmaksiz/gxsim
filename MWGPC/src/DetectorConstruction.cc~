@@ -85,7 +85,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
      << G4endl;
   G4cout << "gasDensityAr: " << G4BestUnit(gasDensityAr, "Volumic Mass")
      << G4endl;
-  G4cout << "numHexes: " << std::to_string(numHexes) +  "Number of Hexes/anode-wires"
+  G4cout << "numHexes: " << std::to_string(numHexes) 
      << G4endl;
 
   G4Material* Argon = new G4Material("ar", 10, molarMass, gasDensityAr,

@@ -10,7 +10,7 @@
 /gasModelParameters/heed/heednewtrack/addparticle mu 1000. 1000000.
 #/gasModelParameters/heed/heednewtrack/addparticle pi+ 100. 1000000.
 
-/gasModelParameters/heed/gasfile /mnt/ksf9/H2/user/u0111340/linux/AliceTPC/AliceTPC/Ne_90_CO2_10_N2_5_with_mg.gas
+#/gasModelParameters/heed/gasfile /mnt/ksf9/H2/user/u0111340/linux/AliceTPC/AliceTPC/Ne_90_CO2_10_N2_5_with_mg.gas
 /gasModelParameters/heed/ionmobilityfile IonMobility_Ne+_Ne.txt
 /gasModelParameters/heed/drift 0
 /gasModelParameters/heed/driftRKF 1
@@ -52,10 +52,10 @@
 ####################################
 ########### Visualization ##########
 ####################################
-/gps/particle proton
-/gps/position 0. 0. 0. cm
-/gps/direction 1. 0. 0.
+/gps/particle electron
+/gps/position 0.5 0.0 0. cm
+/gps/direction 0. 0. 1.0
 /gps/ene/type Mono
-/gps/ene/mono 2000 MeV
+/gps/ene/mono 2.7 keV
 
 /run/beamOn 1

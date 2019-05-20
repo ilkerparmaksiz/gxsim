@@ -1,4 +1,6 @@
-/MWGPC/geometry/SetGasPressure 0.6 bar
+/MWGPC/geometry/SetGasPressure 10. bar
+# this is number of hexes in middle row. Must be one of 1,3,5,7,9.
+/MWGPC/geometry/SetNumHexes 3
 
 /gasModelParameters/heed/heeddeltaelectron/addparticle e- 0. 0.001
 /gasModelParameters/heed/heeddeltaelectron/addparticle gamma 0. 10000000
@@ -11,17 +13,17 @@
 #/gasModelParameters/heed/heednewtrack/addparticle pi+ 100. 1000000.
 
 #/gasModelParameters/heed/gasfile /mnt/ksf9/H2/user/u0111340/linux/AliceTPC/AliceTPC/Ne_90_CO2_10_N2_5_with_mg.gas
-/gasModelParameters/heed/ionmobilityfile IonMobility_Ne+_Ne.txt
-/gasModelParameters/heed/drift 0
-/gasModelParameters/heed/driftRKF 1
+#/gasModelParameters/heed/ionmobilityfile IonMobility_Ne+_Ne.txt
+/gasModelParameters/heed/drift 1
+/gasModelParameters/heed/driftRKF 0
 /gasModelParameters/heed/trackmicroscopic 0
-/gasModelParameters/heed/createAval 0
+/gasModelParameters/heed/createAval 1
 /gasModelParameters/heed/visualizechamber 1
-/gasModelParameters/heed/visualizesignals 0
+/gasModelParameters/heed/visualizesignals 1
 /gasModelParameters/heed/visualizefield 1
 /gasModelParameters/heed/voltageplanehv -100000
 /gasModelParameters/heed/voltageplanelow 0
-/gasModelParameters/heed/voltageanodewire 1460.
+/gasModelParameters/heed/voltageanodewire 1000.
 /gasModelParameters/heed/voltagecathodewire 0.
 /gasModelParameters/heed/voltagegate -70.
 /gasModelParameters/heed/voltagedeltagate 90.
@@ -56,6 +58,7 @@
 /gps/position 0.5 0.0 0. cm
 /gps/direction 0. 0. 1.0
 /gps/ene/type Mono
-/gps/ene/mono 2.7 keV
+#/gps/ene/mono 2.7 keV
+/gps/ene/mono 100.0 keV
 
 /run/beamOn 1

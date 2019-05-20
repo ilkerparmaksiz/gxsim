@@ -1,10 +1,10 @@
-/MWGPC/geometry/SetGasPressure 1. bar
+/MWGPC/geometry/SetGasPressure 10. bar
 # this is number of hexes in middle row. Must be one of 1,3,5,7,9.
-/MWGPC/geometry/SetNumHexes 1
+/MWGPC/geometry/SetNumHexes 3
 
-/gasModelParameters/heed/heeddeltaelectron/addparticle e- 0. 0.001
+#/gasModelParameters/heed/heeddeltaelectron/addparticle e- 0.001
 /gasModelParameters/heed/heeddeltaelectron/addparticle gamma 0. 10000000
-#/gasModelParameters/heed/heednewtrack/addparticle e- 0.1 100000.
+/gasModelParameters/heed/heednewtrack/addparticle e- 0.0000001 2000000.
 /gasModelParameters/heed/heednewtrack/addparticle e+ 1000. 100000.
 /gasModelParameters/heed/heednewtrack/addparticle proton 1000. 1000000.
 /gasModelParameters/heed/heednewtrack/addparticle mu+ 1000. 1000000.
@@ -13,7 +13,8 @@
 #/gasModelParameters/heed/heednewtrack/addparticle pi+ 100. 1000000.
 
 /gasModelParameters/heed/gasfile Ar_90_CH4_10.gas
-#/gasModelParameters/heed/ionmobilityfile IonMobility_Ne+_Ne.txt
+#/gasModelParameters/heed/gasfile Ne_90_CO2_10_N2_5_with_mg.gas
+/gasModelParameters/heed/ionmobilityfile IonMobility_Ar+_Ar.txt
 /gasModelParameters/heed/drift 1
 /gasModelParameters/heed/driftRKF 0
 /gasModelParameters/heed/trackmicroscopic 0
@@ -40,7 +41,7 @@
 /run/initialize
 
 #/param/InActivateModel HeedNewTrackModel
-/param/InActivateModel HeedDeltaElectronModel
+#/param/InActivateModel HeedDeltaElectronModel
 
 /analysis/setFileName test
 
@@ -90,11 +91,13 @@
 
 /tracking/storeTrajectory 1
 
-/gps/position 0.3 0. 0. cm
+/gps/position 1.0 1.0 0. cm
 /gps/direction 0. 0. 1. 
 /gps/particle e-
 /gps/ene/type Mono
+## below is total energy = m+K
 #/gps/ene/mono 2.7 keV
+#/gps/ene/mono 611 keV
 /gps/ene/mono 1 MeV
 
 /run/beamOn 1

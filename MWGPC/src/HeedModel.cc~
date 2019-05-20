@@ -19,7 +19,13 @@ const static G4double torr = 1. / 760. * atmosphere;
 
 
 HeedModel::HeedModel(G4String modelName, G4Region* envelope,DetectorConstruction* dc,GasBoxSD* sd)
-: G4VFastSimulationModel(modelName, envelope), detCon(dc), fGasBoxSD(sd)	{}
+  : G4VFastSimulationModel(modelName, envelope), detCon(dc), fGasBoxSD(sd)	{
+  fhexrad[1] = 1;
+  fhexrad[3] = 7;
+  fhexrad[5] = 19; 
+  fhexrad[7] = 37;
+  fhexrad[9] = 61;
+}
 
 HeedModel::~HeedModel() {}
 
@@ -123,7 +129,14 @@ void HeedModel::makeGas(){
   if(ionMobFile!="")
     fMediumMagboltz->LoadIonMobility(path + "/Data/" + ionMobFile);
   if(gasFile!=""){
+    const bool useLog = true; // to use Logarithmic spacing.
+    int nwires = fhexrad.find(detCon->GetNumHexes())->second;
+    // After file is successfully created/written, comment out next 3 lines.
+    /*
+    fMediumMagboltz->SetFieldGrid(10.,10000.,10,useLog); // 20 is a more reasonable number than 4+nwires: num E-fields at which to calc things.
+    fMediumMagboltz->GenerateGasTable(5); // num of 1E7 collisions to do ... something.
     fMediumMagboltz->WriteGasFile(gasFile.c_str());
+    */
     fMediumMagboltz->LoadGasFile(gasFile.c_str());
   }
 }
@@ -135,6 +148,7 @@ void HeedModel::buildBox(){
   // Somehow, this lays everything along the y-axis, and despite AddWire(), etc taking only x,y coordinates it's presumed 
   // that the wires are laid along the y-axis with no explicit rotation required? EC, 11-May-2019
   box = new Garfield::SolidTube(0.,0., 0.,0.,(detCon->GetGasBoxR())/CLHEP::cm,(detCon->GetGasBoxH()*0.5)/CLHEP::cm,0.,1.,0.);
+
   geo->AddSolid(box, fMediumMagboltz);
   
 }
@@ -165,11 +179,11 @@ void HeedModel::BuildCompField(){
     comp->SetGeometry(geo);
     
     // make 1 hexagon, then repeat it 1, 7, 19, 37, ..., times.
-    std::map<int,int> hexrad{{1,1}, {3,7}, {5,19}, {7,37}, {9,61} };
+
     double nRad = detCon->GetNumHexes(); // read this from config. number of hexes along horizontal diameter (1, 3, 5, 7 ...)
 
-    if (hexrad.find(nRad) == hexrad.end()) {
-      std::cout << "Throwing, " + std::to_string(nRad) + " not in hexrad map." << std::endl;
+    if (fhexrad.find(nRad) == fhexrad.end()) {
+      std::cout << "Throwing, " + std::to_string(nRad) + " not in fhexrad map." << std::endl;
       throw;
     }
 
@@ -183,18 +197,18 @@ void HeedModel::BuildCompField(){
     int inc(0);
     bool newrow(true);
     int rowstop(0);
-    for (int nhexes = 0; nhexes<hexrad.find(nRad)->second; ++nhexes) {
+    for (int nhexes = 0; nhexes<fhexrad.find(nRad)->second; ++nhexes) {
 
 
       if (newrow) { // leftmost in row
 	xhex = xstart ; yhex = ystart;  newrow = false;
       }
-      else if (nhexes<hexrad.find(nRad)->first) { // on middle row
+      else if (nhexes<fhexrad.find(nRad)->first) { // on middle row
 	xhex += 2*rC ; yhex = 0.0; 
-	if (nhexes == hexrad.find(nRad)->first-1) {
+	if (nhexes == fhexrad.find(nRad)->first-1) {
 	  mr=1; // finished middle row
-	  inc = hexrad.find(nRad)->first - 1;
-	  newrow = true; rowstop = hexrad.find(nRad)->first + inc;
+	  inc = fhexrad.find(nRad)->first - 1;
+	  newrow = true; rowstop = fhexrad.find(nRad)->first + inc;
 	  xstart += rC; ystart+= ypt;
 	}
       }
@@ -215,8 +229,13 @@ void HeedModel::BuildCompField(){
 	}
 
       }
-	// sense wire
-	comp->AddWire(0.0/CLHEP::cm + xhex, 0.0/CLHEP::cm + yhex, dSens, vAnodeWires, "s");
+      // sense wire. 
+      // label the middle wire s1 and the last one s2. the rest are generically known as s. 
+	std::string sensorName("s");
+	if (xhex==0.0 && yhex==0.0) sensorName = "s1";
+	if (nhexes == fhexrad.find(nRad)->second-1) sensorName="s2";
+
+	comp->AddWire(0.0/CLHEP::cm + xhex, 0.0/CLHEP::cm + yhex, dSens, vAnodeWires, sensorName);
 	// bump xs and ys here.
 
 
@@ -224,6 +243,7 @@ void HeedModel::BuildCompField(){
 	double xside = rC + xhex;
 	double yside = -rC/2 + yhex; 
 	double spacing = rC/nRepC; 
+
 	for (int i = 0; i < nRepC; ++i) {
 	  yside+=spacing;
 	  comp->AddWire( xside, yside, dCath, vCathodeWires, "c");
@@ -256,25 +276,31 @@ void HeedModel::BuildCompField(){
     }
     
     double gnd(0.0);
-    comp->AddTube(detCon->GetGasBoxR()/CLHEP::cm-0.0001, vCathodeWires, gnd, "w");
+    comp->AddTube(detCon->GetGasBoxR()/CLHEP::cm-0.001/CLHEP::cm, vCathodeWires, gnd, "w");
 
 }
 
 //Build sensor (see Garfield++ documentation)
 void HeedModel::BuildSensor(){
 
-  // X-width [cm?] of drift simulation will cover between +/- axis_x
-  const double axis_x = 0.1;  
+  // X-width [cm?] of drift simulation will cover between +/- axis_x... rough wire separation, EC.
+  const double axis_x = detCon->GetGasBoxR()/detCon->GetNumHexes()/CLHEP::cm;  
   // Y-width of drift simulation will cover between +/- axis_y
-  const double axis_y = 0.1;  
-  const double axis_z = 5.0;
+  const double axis_y = detCon->GetGasBoxR()/detCon->GetNumHexes()/CLHEP::cm;  
+  const double axis_z = detCon->GetGasBoxH()*0.5/CLHEP::cm;
 
   fSensor = new Garfield::Sensor();
+  fSensor->EnableDebugging(true);
   fSensor->AddComponent(comp);
-  fSensor->SetTimeWindow(0.,12.,100); //Lowest time [ns], time bins [ns], number of bins
-  
-  fSensor->SetArea(-axis_x, -axis_y, -axis_z, axis_x, axis_y, axis_z); // just central anode wire for now.
-  fSensor->AddElectrode(comp,"el");
+  //  fSensor->SetTimeWindow(0.,2500.,100); //Lowest time [ns], time bins [ns], number of bins
+  fSensor->SetTimeWindow(0.,120.,100); //Lowest time [ns], time bins [ns], number of bins
+
+  comp->AddReadout("s1");
+  comp->AddReadout("s2");
+
+  fSensor->SetArea(-axis_x, -axis_y, -axis_z, axis_x, axis_y, axis_z);
+  fSensor->AddElectrode(comp,"s1");
+  fSensor->AddElectrode(comp,"s2");
 }
 
 //Set which tracking mechanism to be used: Runge-kutta, Monte-Carlo or Microscopic (see Garfield++ documentation)
@@ -291,9 +317,11 @@ void HeedModel::SetTracking(){
   }
   else{  
     fDrift = new Garfield::AvalancheMC();
+    fDrift->SetIons();
     fDrift->SetSensor(fSensor);
     fDrift->EnableSignalCalculation();
-    fDrift->SetDistanceSteps(2.e-3);
+    fDrift->SetTimeSteps(0.05); // nsec, per example
+    fDrift->SetDistanceSteps(2.e-2); // cm, 10x example
     if(createAval) fDrift->EnableAttachment();
     else fDrift->DisableAttachment();
 
@@ -341,14 +369,6 @@ void HeedModel::CreateSignalView(){
   fSignal = new TCanvas(str, "Signal on the wire", 700, 700);
   viewSignal = new Garfield::ViewSignal();
   viewSignal->SetCanvas(fSignal);
-  viewSignal->SetSensor(fSensor);
-
-  //plot the signal here.	
-  char str2[30];
-  strcpy(str2,name);
-  strcat(str2,"_signal.pdf");
-  viewSignal->PlotSignal("el");
-  fSignal->Print(str2);
 
 }
 
@@ -423,4 +443,22 @@ void HeedModel::PlotTrack(){
       fChamber->Update();
       fChamber->Print("PrimaryTrack.pdf");
     }
+
+  //plot the signal here.	
+    if(fVisualizeSignal){
+      viewSignal->SetSensor(fSensor);
+      char str[30];
+      strcpy(str,name);
+      char str2[30];
+      strcpy(str2,name);
+
+      strcat(str,"_signal1.pdf");
+      viewSignal->PlotSignal("s1");
+      fSignal->Print(str);
+
+      strcat(str2,"_signal2.pdf");
+      viewSignal->PlotSignal("s2");
+      fSignal->Print(str2);
+    }
+
 }

@@ -118,6 +118,8 @@ class HeedModel : public G4VFastSimulationModel {
   Garfield::ViewDrift* viewDrift;
   Garfield::ViewSignal* viewSignal;
   Garfield::ViewField* viewField;
+
+  std::map<int,int> fhexrad;
   
 };
 

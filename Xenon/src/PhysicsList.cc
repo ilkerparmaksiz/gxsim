@@ -30,7 +30,8 @@
 #include "G4Decay.hh"
 #include "G4RadioactiveDecay.hh"
 #include "G4OpticalPhysics.hh"
-#include "G4OpticalProcessIndex.hh"
+//#include "G4OpticalProcessIndex.hh"
+#include "G4OpticalParameters.hh" // EC, 25-Oct-2021. Change required starting G4 v10.7
 
 #include "G4IonFluctuations.hh"
 #include "G4IonParametrisedLossModel.hh"

@@ -49,17 +49,22 @@ void HeedDeltaElectronModel::Run(G4FastStep& fastStep,const G4FastTrack& fastTra
             double y_cm, double z_cm, double dx, double dy, double dz){
     double eKin_eV = ekin_keV * 1000;
     int nc = 0, ni=0;
-    G4cout << "Run Interface" << G4endl;
-    G4cout << "Electron energy(in eV): " << eKin_eV << G4endl;
+    // TrackHeed produces clusters, which we will then drift below.
+    G4cout << "HeedDeltaElectronModel::Run Interface" << G4endl;
+    G4cout << "Particle KE (in eV): " << eKin_eV << G4endl;
     if(particleName == "e-"){
         G4AutoLock lock(&aMutex);
         fTrackHeed->TransportDeltaElectron(x_cm, y_cm, z_cm, t, eKin_eV, dx, dy,
                                            dz, nc, ni);
+	if (nc>0)
+	  G4cout << "Post e- transport electrons: " << nc << G4endl;
     }
     else{
         G4AutoLock lock(&aMutex);
+	G4cout << "HeedDeltaElectronModel::Run calling TransportPhoton() with nc: " << nc << G4endl;
         fTrackHeed->TransportPhoton(x_cm, y_cm, z_cm, t, eKin_eV, dx, dy,
                                     dz, nc);
+	G4cout << "HeedDeltaElectronModel::Run post TransportPhoton() now nc is: " << nc << G4endl;
     }
     for (int cl = 0; cl < nc; cl++) {
         double xe, ye, ze, te;
@@ -69,14 +74,16 @@ void HeedDeltaElectronModel::Run(G4FastStep& fastStep,const G4FastTrack& fastTra
         gbh->SetPos(G4ThreeVector(xe*CLHEP::cm,ye*CLHEP::cm,ze*CLHEP::cm));
         gbh->SetTime(te);
         fGasBoxSD->InsertGasBoxHit(gbh);
-        if(G4VVisManager::GetConcreteInstance() && cl % 100 == 0)
+        if(G4VVisManager::GetConcreteInstance() /*&& cl % 100 == 0*/)
             Drift(xe,ye,ze,te);
     }
+
     PlotTrack();
     fastStep.KillPrimaryTrack();
     fastStep.SetPrimaryTrackPathLength(0.0);
     fastStep.SetTotalEnergyDeposited(ekin_keV*keV);
 
+    
 }
 
 void HeedDeltaElectronModel::ProcessEvent(){

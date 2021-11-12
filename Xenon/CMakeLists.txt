@@ -33,10 +33,12 @@ include(${ROOT_USE_FILE})
 include_directories(${PROJECT_SOURCE_DIR}/include)
 
 # Setup GARFIELD++ include directories
-include_directories($ENV{GARFIELD_HOME}/Include)
+include_directories($ENV{GARFIELD_HOME}/Include/Garfield)
 include_directories($ENV{GARFIELD_HOME}/Heed)
 # Add additional libraries needed for GARFIELD++
-link_directories($ENV{GARFIELD_LIB})
+#link_directories($ENV{GARFIELD_LIB})
+link_directories($ENV{GARFIELD_HOME}/build/lib)
+link_directories(/usr/local/gfortran/lib)
 IF(APPLE)
     # Fix linking on 10.14+. See https://stackoverflow.com/questions/54068035
     LINK_DIRECTORIES(/usr/local/lib)

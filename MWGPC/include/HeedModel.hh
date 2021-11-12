@@ -88,6 +88,10 @@ class HeedModel : public G4VFastSimulationModel {
   GasBoxSD* fGasBoxSD;
 
   const char* name;
+
+  double fBinsz;
+  int fMaxbin;
+  Garfield::Sensor* fSensor;
   
   /*The following private methods and variables are user-dependent*/
  private:
@@ -102,7 +106,7 @@ class HeedModel : public G4VFastSimulationModel {
   void CreateFieldView();
 
   Garfield::MediumMagboltz* fMediumMagboltz;
-  Garfield::Sensor* fSensor;
+
 //  Garfield::TrackHeed* fTrackHeed;
   Garfield::GeometrySimple* geo;
   Garfield::SolidTube* box;
@@ -120,7 +124,7 @@ class HeedModel : public G4VFastSimulationModel {
   Garfield::ViewField* viewField;
 
   std::map<int,int> fhexrad;
-  
+
 };
 
 #endif /* HeedModel_H_ */

@@ -39,7 +39,10 @@ class HeedDeltaElectronModel : public HeedModel {
   virtual void Reset();
   
   /*Getters and Setters*/
-
+  Garfield::Sensor* GetSensor() {return fSensor;};
+  G4int GetMaxbin() {return fMaxbin;};
+  G4int GetBinsz() {return fBinsz;};
+  
  private:
   virtual void Run(G4FastStep& fastStep,const G4FastTrack& fastTrack, G4String particleName, double ekin_keV, double t, double x_cm,
             double y_cm, double z_cm, double dx, double dy, double dz);

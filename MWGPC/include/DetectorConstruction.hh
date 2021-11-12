@@ -71,7 +71,8 @@ class DetectorConstruction : public G4VUserDetectorConstruction {
   inline G4double GetTemperature(){return temperature;};
   inline G4double GetArgonPercentage(){return argonPercentage;};
   inline G4double GetCH4Percentage(){return ch4Percentage;};
-    
+
+  HeedDeltaElectronModel* fHDEt;
   
  private:
   DetectorMessenger* detectorMessenger;

@@ -1,5 +1,4 @@
 #include "MyUserActionInitialization.hh"
-#include "DetectorConstruction.hh"
 #include "RunAction.hh"
 #include "PrimaryGeneratorAction.hh"
 #include "EventAction.hh"
@@ -8,6 +7,7 @@
 #include "SteppingAction.hh"
 
 MyUserActionInitialization::MyUserActionInitialization(){}
+MyUserActionInitialization::MyUserActionInitialization(DetectorConstruction *det){ fdetCon = det;}
 
 MyUserActionInitialization::~MyUserActionInitialization(){}
 
@@ -16,7 +16,7 @@ void MyUserActionInitialization::Build() const {
 	SetUserAction(primary);
 	SteppingAction* stepAct = new SteppingAction();
 	SetUserAction(stepAct);
-	EventAction* evt = new EventAction();
+	EventAction* evt = new EventAction(fdetCon);
 	SetUserAction(evt);
 	SetUserAction(new RunAction());
 }

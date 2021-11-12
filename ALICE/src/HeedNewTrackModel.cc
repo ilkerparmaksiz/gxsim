@@ -89,9 +89,10 @@ void HeedNewTrackModel::Run(G4FastStep& fastStep,const G4FastTrack& fastTrack, G
     G4double retSafety = -1.0;
     ELimited retStepLimited;
     G4FieldTrack endTrack( 'a' );
-    G4double currentMinimumStep = 10.0*m;  // Temporary: change that to sth connected
+    G4double currentMinimumStep = 1.00*m;  // Temporary: change that to sth connected
     // to particle momentum.
     G4PathFinder* fPathFinder = G4PathFinder::GetInstance();
+    fPathFinder->SetVerboseLevel(3);
     /*G4double lengthAlongCurve = */
     fPathFinder->ComputeStep( aFieldTrack,
                              currentMinimumStep,
@@ -106,6 +107,7 @@ void HeedNewTrackModel::Run(G4FastStep& fastStep,const G4FastTrack& fastTrack, G
     // (at the place it would reach without the change of its momentum).
     fastStep.ProposePrimaryTrackFinalPosition( endTrack.GetPosition(), false );
     G4cout << "Particle location: " << endTrack.GetPosition() << G4endl;
+    G4cout << "Step No: " << fastTrack.GetPrimaryTrack()->GetCurrentStepNumber() << G4endl;
     fastStep.SetPrimaryTrackFinalKineticEnergyAndDirection(ekin_eV*eV, G4ThreeVector(dx,dy,dz),false);
     fastStep.SetTotalEnergyDeposited((ekin_keV*1000-ekin_eV)*eV);
     std::cout << "Particle Tracked out of the gas volume" << std::endl;

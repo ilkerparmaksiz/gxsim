@@ -51,10 +51,13 @@ void GasBoxSD::EndOfEvent (G4HCofThisEvent * hce){
     auto HC = static_cast<GasBoxHitsCollection*>(hce->GetHC(GBHCID));
     int entries = HC->entries();
     G4cout << "Number of Electrons: " << entries << G4endl;
+    // Comment below coordinate dump. EC, 26-Oct-2021.
+    /*
     for(int i=0;i<entries;i++){
         auto hit = (*HC)[i];
         G4cout << hit->GetPos() << " " << hit->GetTime() << G4endl;
     }
+    */
     DrawAll();
 }
 

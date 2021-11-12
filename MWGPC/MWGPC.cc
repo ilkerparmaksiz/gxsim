@@ -55,7 +55,8 @@ int main(int argc, char** argv) {
   PhysicsList* physics = new PhysicsList();
   runManager->SetUserInitialization(physics);
   
-  runManager->SetUserInitialization(new MyUserActionInitialization());
+  //  runManager->SetUserInitialization(new MyUserActionInitialization());
+  runManager->SetUserInitialization(new MyUserActionInitialization(detector));
  
    // get the pointer to the User Interface manager
   G4UImanager* UImanager = G4UImanager::GetUIpointer();
@@ -70,7 +71,7 @@ int main(int argc, char** argv) {
     //#ifdef G4UI_USE
     G4UIExecutive* ui = new G4UIExecutive(argc, argv);
     //#ifdef G4VIS_USE
-    UImanager->ApplyCommand("/control/execute ./MWGPC/vis_mwgpc.mac");
+    UImanager->ApplyCommand("/control/execute /Users/chur558/mwsim/MWGPC/vis_mwgpc.mac");
     //#endif
 
     ui->SessionStart();

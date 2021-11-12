@@ -17,8 +17,8 @@ RunAction::RunAction(){
   analysisManager->SetVerboseLevel(1);
   analysisManager->SetActivation(true);  
   analysisManager->SetFileName("output.root"); 
-  analysisManager->SetHistoDirectoryName("histo");
-  analysisManager->SetNtupleDirectoryName("ntuple");
+  //  analysisManager->SetHistoDirectoryName("histo");
+  //  analysisManager->SetNtupleDirectoryName("ntuple");
   
   analysisManager->SetNtupleActivation(false);
 
@@ -44,7 +44,7 @@ void RunAction::BeginOfRunAction(const G4Run* aRun) {
   auto analysisManager = G4AnalysisManager::Instance();
   analysisManager->OpenFile();
   
-  
+  analysisManager->CreateP1("0","Title", 100, 0., 2000.,-1E5,+1E5);  // profile histo in bins of 2000/100 nsec
 }
 
 void RunAction::EndOfRunAction(const G4Run* aRun) {

@@ -27,7 +27,7 @@ DetectorConstruction::DetectorConstruction(GasModelParameters* gmp)
     checkOverlaps(0),
     worldHalfLength(3.*m), //World volume is a cube with side length = 3m;
     wallThickness(0.002*m), //thickness of the Copper walls
-    gasPressure(10.*bar), // Pressure inside the gas
+    gasPressure(10.*bar), // Pressure inside the gas ..... also used for magboltz, EC 28-Oct-2021.
     numHexes(1), // number of anode wires
     temperature(273.15*kelvin), // temperature
     argonPercentage(90.00), // mixture settings
@@ -65,6 +65,9 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
   G4NistManager* man = G4NistManager::Instance();
   man->SetVerbose(1);
   G4Material* vacuum = man->FindOrBuildMaterial("G4_Galactic");
+
+  gasPressure = GetGasPressure();
+  temperature = GetTemperature();
   
   //Gas material: P10
   G4double nMoles = gasPressure / (8.314 * joule / mole * temperature);
@@ -73,7 +76,8 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
   // TPC setup
   gasboxR = 0.0325*m;
   gasboxH = 0.19*m;
-
+  G4double wireR = 80 * um;
+  
   G4Element* elC = man->FindOrBuildElement("C");
   G4Element* elH = man->FindOrBuildElement("H");
   G4Element* elAr = man->FindOrBuildElement("Ar");
@@ -83,7 +87,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
   G4double gasDensityAr = nMoles * molarMass;
   G4cout << "gasPressure: " << G4BestUnit(gasPressure, "Pressure")
      << G4endl;
-  G4cout << "gasDensityAr: " << G4BestUnit(gasDensityAr, "Volumic Mass")
+  G4cout << "gasTemperature: " << G4BestUnit(temperature, "Temperature")
      << G4endl;
   G4cout << "numHexes: " << std::to_string(numHexes) 
      << G4endl;
@@ -95,8 +99,6 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
   // CH4
   molarMass = 16.0*g/mole;  // source wikipedia
   G4double gasDensityCH4 = nMoles * molarMass;
-  G4cout << "gasDensityCH4: " << G4BestUnit(gasDensityCH4, "Volumic Mass")
-         << G4endl;
   G4Material* CH4 = new G4Material("ch4", gasDensityCH4, 2,
                                     kStateGas, temperature, gasPressure);
   CH4->AddElement(elC, 1);
@@ -108,20 +110,51 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
   G4double molfracAr_norm = molfracAr/(molfracAr+molfracCH4);
   G4double molfracCH4_norm = molfracCH4/(molfracAr+molfracCH4);
 
+
+  G4double gasDensityMixture = (argonPercentage/100.) * gasDensityAr +
+    ch4Percentage/100. * gasDensityCH4;
+
+
+
+  // Coment in one or the other code chunk below. EC, 26-Oct-2021.
+  // Also remember to have correct gasfile name in *.mac. And code commented in HeedModel.cc if not creating the gasfile.
+
+  /*
+  
+  G4cout << "gasDensityAr: " << G4BestUnit(gasDensityAr, "Volumic Mass")
+     << G4endl;
+  G4cout << "gasDensityCH4: " << G4BestUnit(gasDensityCH4, "Volumic Mass")
+         << G4endl;
   G4cout << "Molar fraction Ar: " << molfracAr_norm << G4endl;
   G4cout << "Molar fraction CH4: " << molfracCH4_norm << G4endl;
 
 
-  G4double gasDensityMixture = (argonPercentage/100.) * gasDensityAr +
-    ch4Percentage/100. * gasDensityCH4;
-  
   mixture = new G4Material("mixture", gasDensityMixture, 2);
   
   mixture->AddMaterial(Argon, molfracAr_norm);
   mixture->AddMaterial(CH4, molfracCH4_norm);
 
-  G4cout << "gasDensityP10: " << G4BestUnit(gasDensityMixture,
-                                                "Volumic Mass") << G4endl;
+  G4cout << "gasDensityP10: " << G4BestUnit(gasDensityMixture, "Volumic Mass") << G4endl;
+  */
+  
+
+  
+  G4double a = 14.01*g/mole;
+  G4double z;
+  G4String symbol, name;
+  G4Element* elN =
+    new G4Element(name="Nitrogen",symbol="N",z= 7.,a);
+  a = 16.00*g/mole;
+  G4Element* elO =
+    new G4Element(name="Oxygen",symbol="O",z= 8.,a);
+  G4double density = 1.17*mg/cm3 * gasPressure; 
+  G4int ncomponents;
+  G4double perCent = 0.01;
+  mixture =
+    new G4Material(name="mixture",density,ncomponents=2,kStateGas, temperature,gasPressure);
+    mixture->AddElement(elN, 99.0*perCent);
+    mixture->AddElement(elO, 1.0*perCent);
+  
   
   //geometry dimensions:
   //Aluminum walls
@@ -144,17 +177,17 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
   myRotation->rotateX(90.*deg);
   myRotation->rotateY(0.*deg);
   myRotation->rotateZ(0.*rad);
-  G4Tubs* solidGasBox = new G4Tubs("solid_gasbox_tube",0,gasboxR,gasboxH*0.5, 0., twopi);
+  G4Tubs* solidGasBox = new G4Tubs("solid_gasbox_tube",wireR,gasboxR,gasboxH*0.5, 0., twopi);
   logicGasBox =
-  new G4LogicalVolume(solidGasBox, mixture, "solidGasBox_log");
-  new G4PVPlacement(myRotation,G4ThreeVector(), logicGasBox,"solidGasBox_phys",logicWorld,false,0,checkOverlaps);
+    new G4LogicalVolume(solidGasBox, mixture, "solidGasBox_log");
+  new G4PVPlacement(0/*myRotation*/,G4ThreeVector(), logicGasBox,"solidGasBox_phys",logicWorld,false,0,checkOverlaps);
   
   
   //Copper Wall
   G4Tubs* solidWalls = new G4Tubs("solid_tube_wall",gasboxR,gasboxR+wallThickness,gasboxH*0.5+wallThickness, 0., twopi);
   G4LogicalVolume* logicWall =
   new G4LogicalVolume(solidWalls, copperMaterial, "solidWall_log");
-  new G4PVPlacement(myRotation,G4ThreeVector(), logicWall,
+  new G4PVPlacement(0/*myRotation*/,G4ThreeVector(), logicWall,
                     "solidWall_phys",logicWorld,false,0,checkOverlaps);
 
   //logicGasBox->SetVisAttributes(blue);
@@ -187,6 +220,7 @@ void DetectorConstruction::ConstructSDandField(){
   //These commands generate the four gas models and connect it to the GasRegion
   G4Region* region = G4RegionStore::GetInstance()->GetRegion("GasRegion");
   new HeedNewTrackModel(fGasModelParameters,"HeedNewTrackModel",region,this,myGasBoxSD);
-  new HeedDeltaElectronModel(fGasModelParameters,"HeedDeltaElectronModel",region,this,myGasBoxSD);
+  fHDEt = new HeedDeltaElectronModel(fGasModelParameters,"HeedDeltaElectronModel",region,this,myGasBoxSD);
+
 }
 

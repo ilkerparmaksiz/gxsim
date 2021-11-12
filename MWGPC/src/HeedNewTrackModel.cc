@@ -61,14 +61,17 @@ void HeedNewTrackModel::Run(G4FastStep& fastStep,const G4FastTrack& fastTrack, G
     double ekin_eV = ekin_keV * 1000;
     fTrackHeed->EnableDebugging();
     fTrackHeed->SetParticle(particleName);
-    fTrackHeed->SetEnergy(ekin_eV);
+    fTrackHeed->SetKineticEnergy(ekin_eV); // Was SetEnergy(), though that method wants total energy. EC, 8-Nov-2021
+    std::cout << "HeedNewTrackModel::Run() KE is " << ekin_eV << " [eV]" << std::endl;
     fTrackHeed->NewTrack(x_cm, y_cm, z_cm, t, dx, dy, dz);
     double xcl, ycl, zcl, tcl, ecl, extra;
     int ncl = 0;
+    int nclTot(0);
     while (fTrackHeed->GetCluster(xcl, ycl, zcl, tcl, ncl, ecl, extra)) {
         ekin_eV-=ecl;
-        std::cout << "New Cluster: " << xcl << " " << ycl << " " << zcl << std::endl;
+	//	std::cout << "New Cluster: ncl: x,y,z. ecl[eV]  " << ncl << ": " << xcl << " " << ycl << " " << zcl << ". " << ecl << std::endl;
     // Retrieve the electrons of the cluster.
+	nclTot += ncl;
         for (int i = 0; i < ncl; ++i) {
             double x, y, z, te, ee, dxe, dye, dze;
             fTrackHeed->GetElectron(i, x, y, z, te, ee, dxe, dye, dze);
@@ -76,10 +79,11 @@ void HeedNewTrackModel::Run(G4FastStep& fastStep,const G4FastTrack& fastTrack, G
             gbh->SetPos(G4ThreeVector(x*CLHEP::cm,y*CLHEP::cm,z*CLHEP::cm));
             gbh->SetTime(te);
             fGasBoxSD->InsertGasBoxHit(gbh);
-            if(G4VVisManager::GetConcreteInstance() && i % 100 == 0)
+            if(G4VVisManager::GetConcreteInstance() /*&& i % 100 == 0*/)
                 Drift(x,y,z,te);
         }
     }
+    std::cout << "New Cluster: nclTot: x,y,z  " << nclTot << std::endl;
     PlotTrack();
     // try to estimate the exit location of the high energy particle out of the gas volume from the initial location and momentum direction and update the track parameters: location, direction, energy
     G4Track track = * fastTrack.GetPrimaryTrack();
@@ -89,7 +93,7 @@ void HeedNewTrackModel::Run(G4FastStep& fastStep,const G4FastTrack& fastTrack, G
     G4double retSafety = -1.0;
     ELimited retStepLimited;
     G4FieldTrack endTrack( 'a' );
-    G4double currentMinimumStep = 10.0*m;  // Temporary: change that to sth connected
+    G4double currentMinimumStep = 1.0*mm;  // Temporary: change that to sth connected
     // to particle momentum.
     G4PathFinder* fPathFinder = G4PathFinder::GetInstance();
     /*G4double lengthAlongCurve = */
@@ -106,9 +110,13 @@ void HeedNewTrackModel::Run(G4FastStep& fastStep,const G4FastTrack& fastTrack, G
     // (at the place it would reach without the change of its momentum).
     fastStep.ProposePrimaryTrackFinalPosition( endTrack.GetPosition(), false );
     G4cout << "Particle location: " << endTrack.GetPosition() << G4endl;
+    G4cout << "Particle direction: " << dx << ", " << dy << ", " << dz << G4endl;
     fastStep.SetPrimaryTrackFinalKineticEnergyAndDirection(ekin_eV*eV, G4ThreeVector(dx,dy,dz),false);
     fastStep.SetTotalEnergyDeposited((ekin_keV*1000-ekin_eV)*eV);
-    std::cout << "Particle Tracked out of the gas volume" << std::endl;
+    G4cout << "Step No: " << fastTrack.GetPrimaryTrack()->GetCurrentStepNumber() << G4endl;
+    std::cout << "Particle Tracked out of the gas volume with " << (ekin_keV*1000-ekin_eV)/1000. << " [keV] deposited. Now kill it. " << std::endl;
+    fastStep.KillPrimaryTrack();
+    
 }
 
 
@@ -120,3 +128,4 @@ void HeedNewTrackModel::ProcessEvent(){
 void HeedNewTrackModel::Reset(){
 
 }
+

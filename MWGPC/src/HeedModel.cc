@@ -12,6 +12,10 @@
 #include "G4EventManager.hh"
 #include "G4VVisManager.hh"
 
+#include "G4LogicalVolumeStore.hh"
+#include "G4LogicalVolume.hh"
+#include "G4Material.hh"
+
 #include "G4AutoLock.hh"
 namespace{G4Mutex aMutex = G4MUTEX_INITIALIZER;}
 
@@ -32,6 +36,7 @@ HeedModel::~HeedModel() {}
 //Method called when a particle is created, checks if the model is applicable for this particle
 G4bool HeedModel::IsApplicable(const G4ParticleDefinition& particleType) {
   G4String particleName = particleType.GetParticleName();
+  G4cout << "HeedModel::IsApplicable(): particle " << particleName  << " allowed? " << FindParticleName(particleName) << G4endl;
   return FindParticleName(particleName);
 }
 
@@ -40,6 +45,9 @@ G4bool HeedModel::ModelTrigger(const G4FastTrack& fastTrack) {
   G4double ekin = fastTrack.GetPrimaryTrack()->GetKineticEnergy();
   G4String particleName =
       fastTrack.GetPrimaryTrack()->GetParticleDefinition()->GetParticleName();
+
+  G4cout << "HeedModel::ModelTrigger(): particle, ekin " << particleName << ", " << ekin << " allowed? " << FindParticleNameEnergy(particleName, ekin / keV) << G4endl;
+  
   return FindParticleNameEnergy(particleName, ekin / keV);
 }
 
@@ -55,7 +63,7 @@ void HeedModel::DoIt(const G4FastTrack& fastTrack, G4FastStep& fastStep) {
   G4String particleName =
       fastTrack.GetPrimaryTrack()->GetParticleDefinition()->GetParticleName();
 
-
+  std::cout << "HeedModel::DoIt: track position " << worldPosition[0] << ", " << worldPosition[1] << ", " << worldPosition[2] << std::endl;
   Run(fastStep, fastTrack, particleName, ekin/keV, time, worldPosition.x() / CLHEP::cm,
       worldPosition.y() / CLHEP::cm, worldPosition.z() / CLHEP::cm,
       dir.x(), dir.y(), dir.z());
@@ -115,14 +123,18 @@ void HeedModel::makeGas(){
   double temperature = detCon->GetTemperature()/kelvin;
   double arPerc = detCon->GetArgonPercentage();
   double ch4Perc = detCon->GetCH4Percentage();
-
-  fMediumMagboltz->SetComposition("ar", arPerc, "ch4", ch4Perc);
+  std::cout <<  "HeedModel::makeGas: pressure to magboltz is " << pressure << " torr." << std::endl;
+  // Another line to comment in/out !   EC, 26-Oct-2021.
+  //  fMediumMagboltz->SetComposition("ar", arPerc, "ch4", ch4Perc);
+  //fMediumMagboltz->SetComposition("ar", 90, /* "n2", 99, */ "ch4", 10/* "o2", 1*/);
+  fMediumMagboltz->SetComposition( "n2", 99,  "o2", 1);
+  //fMediumMagboltz->SetComposition("n2", 100);
   fMediumMagboltz->SetTemperature(temperature);
   fMediumMagboltz->SetPressure(pressure); 
-  fMediumMagboltz->EnableDebugging();
+  fMediumMagboltz->EnableDebugging(); 
   fMediumMagboltz->Initialise(true);
   fMediumMagboltz->DisableDebugging();
-
+  
   G4cout << gasFile << G4endl;
   const std::string path = getenv("GARFIELD_HOME");
   G4AutoLock lock(&aMutex);
@@ -131,26 +143,38 @@ void HeedModel::makeGas(){
   if(gasFile!=""){
     const bool useLog = true; // to use Logarithmic spacing.
     int nwires = fhexrad.find(detCon->GetNumHexes())->second;
-    // After file is successfully created/written, comment out next 3 lines.
+    // After file is successfully created/written, comment out next 3 lines. Also remember to have correct mixture in DetectorConstruction.cc and gasfile name in *.mac.
+    // And also note comment above about ar/ch4 vs n2/o2 AND correct gasfile name in .mac file !!
+
+    //    fMediumMagboltz->SetFieldGrid(1.,600000.,20,useLog); // In P10 E/p = 7000000/10 causes Magboltz to crash. EC, 5-Nov-2021.
     /*
-    fMediumMagboltz->SetFieldGrid(10.,10000.,10,useLog); // 20 is a more reasonable number than 4+nwires: num E-fields at which to calc things.
+    fMediumMagboltz->SetFieldGrid(10.,200000.,20,useLog); // In 99:1 N2:O2 E/p = 3000000/3 causes Magboltz to crash. EC, 5-Nov-2021.`
     fMediumMagboltz->GenerateGasTable(5); // num of 1E7 collisions to do ... something.
     fMediumMagboltz->WriteGasFile(gasFile.c_str());
     */
     fMediumMagboltz->LoadGasFile(gasFile.c_str());
+    //fMediumMagboltz->MergeGasFile(gasFile.c_str(),true); // not clear why one does this. EC, 4-Nov-2021.
+
   }
 }
   
 //Geometry (see Garfield++ documentation)
 void HeedModel::buildBox(){
   geo = new Garfield::GeometrySimple();
-
+  double wireR = (80.0E-6*100)/CLHEP::cm;
   // Somehow, this lays everything along the y-axis, and despite AddWire(), etc taking only x,y coordinates it's presumed 
-  // that the wires are laid along the y-axis with no explicit rotation required? EC, 11-May-2019
-  box = new Garfield::SolidTube(0.,0., 0.,0.,(detCon->GetGasBoxR())/CLHEP::cm,(detCon->GetGasBoxH()*0.5)/CLHEP::cm,0.,1.,0.);
+  // that the wires are laid along the y-axis with no explicit rotation required? EC, 11-May-2019. Yes.
+  box = new Garfield::SolidTube(0., 0., 0., 0. /*wireR*/,(detCon->GetGasBoxR())/CLHEP::cm,(detCon->GetGasBoxH()*0.5)/CLHEP::cm,0.,1.,0.);
+  std::cout << "HeedModel::buildBox() putting cylinder of radius/halfLength " << (detCon->GetGasBoxR())/CLHEP::cm << "/" << (detCon->GetGasBoxH()*0.5)/CLHEP::cm << " [cm] along Garfield y-axis." << std::endl;
 
   geo->AddSolid(box, fMediumMagboltz);
-  
+
+  std::cout << " .....   now forcing density for the Garfield gas medium -- via P, T." << std::endl;
+  geo->GetMedium(0.,0.,0.)->SetPressure(detCon->GetGasPressure()/torr);
+  geo->GetMedium(0.,0.,0.)->SetTemperature(detCon->GetTemperature()/kelvin);
+  // pull out the density to see if our pressure-setting in .mac file is in fact effected down in Garfield. EC, 28-Oct-2021.
+  double ggeodens = geo->GetMedium(0.,0.,0.)->GetMassDensity();
+  std::cout << "HeedModel::buildBox(): Garfield mass density [g/cm3] is: " << ggeodens << std::endl;
 }
 
 //Construction of the electric field (see Garfield++ documentation)
@@ -166,8 +190,16 @@ void HeedModel::BuildCompField(){
     // Periodicity (wire spacing)
     const double period = 0.25;
     const int nRep = 2;
-    const int nRepC = 10; // randomly chosen number for each side of hex, EC    
-    const int nRepG = 40; // randomly chosen number for guard ring, EC    
+    int nRepC = 10; // randomly chosen number for each side of hex, EC    
+    int nRepG = 40; // randomly chosen number for guard ring, EC
+
+    // For 1 Hex I want no cathode/guard wires, just the tube. EC, 14-Oct-2021
+    if (detCon->GetNumHexes()==1) {
+	nRepC = 0;
+	nRepG = 0;
+      }
+
+    
     const double dc = period;
     const double dg = period / 2;
     
@@ -235,6 +267,7 @@ void HeedModel::BuildCompField(){
 	if (xhex==0.0 && yhex==0.0) sensorName = "s1";
 	if (nhexes == fhexrad.find(nRad)->second-1) sensorName="s2";
 
+	std::cout << "HeedModel::BuildCompField(): Adding anode wire " << sensorName << " of potential " << vAnodeWires << " at " << xhex << ", " << yhex << std::endl;
 	comp->AddWire(0.0/CLHEP::cm + xhex, 0.0/CLHEP::cm + yhex, dSens, vAnodeWires, sensorName);
 	// bump xs and ys here.
 
@@ -290,10 +323,14 @@ void HeedModel::BuildSensor(){
   const double axis_z = detCon->GetGasBoxH()*0.5/CLHEP::cm;
 
   fSensor = new Garfield::Sensor();
-  fSensor->EnableDebugging(true);
+  //  fSensor->EnableDebugging(true);
+    fSensor->EnableDebugging(false);
   fSensor->AddComponent(comp);
   //  fSensor->SetTimeWindow(0.,2500.,100); //Lowest time [ns], time bins [ns], number of bins
-  fSensor->SetTimeWindow(0.,5.,100); //Lowest time [ns], time bins [ns], number of bins
+  //  fSensor->SetTimeWindow(0.,5.,100); //Lowest time [ns], time bins [ns], number of bins
+  fMaxbin = 1000;
+  fBinsz = 20.;
+  fSensor->SetTimeWindow(0.,fBinsz,fMaxbin); //Lowest time [ns], time bins [ns], number of bins
 
   comp->AddReadout("s1");
   comp->AddReadout("s2");
@@ -322,6 +359,7 @@ void HeedModel::SetTracking(){
     fDrift->EnableSignalCalculation();
     fDrift->SetTimeSteps(0.05); // nsec, per example
     fDrift->SetDistanceSteps(2.e-2); // cm, 10x example
+    //    fDrift->EnableDebugging(); // way too much information. EC, 2-Nov-2021.
     if(createAval) fDrift->EnableAttachment();
     else fDrift->DisableAttachment();
 
@@ -421,18 +459,28 @@ void HeedModel::Drift(double x, double y, double z, double t){
             }
         }
         else{
-            fDrift->DriftElectron(x,y,z,t);
+  	    fDrift->DriftElectron(x,y,z,t); // this is where it all happens: drifting, Townshend gain, Signal placement. See my notebook. EC, 2-Nov2021.
+
             unsigned int n = fDrift->GetNumberOfDriftLinePoints();
             double xi,yi,zi,ti;
+	    //	    std::cout << "HeedModeel::Drift(): avalanchetracking, n DLTs is " << n << std::endl;
             for(unsigned int i=0;i<n;i++){
                 fDrift->GetDriftLinePoint(i,xi,yi,zi,ti);
-                if(G4VVisManager::GetConcreteInstance() && i % 1000 == 0)
+                if(G4VVisManager::GetConcreteInstance() ) //&& i % 1000 == 0)
                   dlt->AppendStep(G4ThreeVector(xi*CLHEP::cm,yi*CLHEP::cm,zi*CLHEP::cm),ti);
             }
         }
 
 
     }
+
+    // get the sensor signals here.
+    for (int bin = 0; bin<1000; bin++)
+      {
+	if (fSensor->GetSignal("s2", bin) != 0.)
+	  std::cout << " wire electron signal: " << bin*20 << " nsec: "<< fSensor->GetSignal("s2", bin) << std::endl;
+      }
+
 }
 
 // Plot the track, only called when visualization is turned on by the user
@@ -452,13 +500,19 @@ void HeedModel::PlotTrack(){
       char str2[30];
       strcpy(str2,name);
 
+      std::cout << "HeedModel::PlotTrack 0"<< std::endl;
       strcat(str,"_signal1.pdf");
       viewSignal->PlotSignal("s1");
+      std::cout << "HeedModel::PlotTrack 1"<< std::endl;
       fSignal->Print(str);
+      std::cout << "HeedModel::PlotTrack 2"<< std::endl;
 
       strcat(str2,"_signal2.pdf");
+      std::cout << "HeedModel::PlotTrack 3"<< std::endl;
       viewSignal->PlotSignal("s2");
+      std::cout << "HeedModel::PlotTrack 4"<< std::endl;
       fSignal->Print(str2);
+      std::cout << "HeedModel::PlotTrack 5"<< std::endl;
     }
 
 }

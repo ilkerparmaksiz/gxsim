@@ -30,7 +30,9 @@
 #include "G4Decay.hh"
 #include "G4RadioactiveDecay.hh"
 #include "G4OpticalPhysics.hh"
-#include "G4OpticalProcessIndex.hh"
+
+/// Below is not found in my 10.7.2 build. Try commenting out to see if we get away w it. EC, 12-Oct-2021.
+/////#include "G4OpticalProcessIndex.hh"
 
 #include "G4IonFluctuations.hh"
 #include "G4IonParametrisedLossModel.hh"
@@ -150,6 +152,7 @@ void PhysicsList::SetCuts() {
   SetCutValue(cutForElectron, "e-");
   SetCutValue(cutForPositron, "e+");
   
+  G4cout << "The lower energy production cut is set to: " << lowE << G4endl;
   if(lowE>0)
       G4ProductionCutsTable::GetProductionCutsTable()->SetEnergyRange(lowE, 100. * MeV);
   
@@ -163,6 +166,7 @@ void PhysicsList::SetCuts() {
     region->SetProductionCuts(cuts);
   }
 
+  G4cout << "The lower energy production cut after call to GetProductionCutsTable()->SetEnergyRange(lowE, 100. * MeV) is now set to: " << lowE << G4endl;
   if (verboseLevel > 0) DumpCutValuesTable();
 }
 

@@ -83,20 +83,25 @@ void HeedDeltaElectronModel::Run(G4FastStep& fastStep,const G4FastTrack& fastTra
     }
 
     PlotTrack();
+    const G4Track* pG4trk = fastTrack.GetPrimaryTrack();
+    
     fastStep.KillPrimaryTrack();
     fastStep.SetPrimaryTrackPathLength(0.0);
     fastStep.SetTotalEnergyDeposited(ekin_keV*keV);
 
-    auto analysisManager = G4AnalysisManager::Instance();
-    //    if (analysisManager->GetP1(0))
-    //      analysisManager->GetP1(0)->Reset(); // we only want the final P1 from final track with access to cumulative signal to survive. EC, 16-Nov-2021.
-
-    
-    for (int bin = 0; bin<fNumbins; bin++)
+    G4int pntid = pG4trk->GetParentID();
+    G4int tid = pG4trk->GetTrackID();
+    if (pntid + 1 == tid ) // This is the last Heed track to be fasttracked here
       {
-        if (fSensor->GetSignal("s2", bin) != 0.)
-          std::cout << " wire electron signal: " << bin*fBinsz << " nsec: "<< fSensor->GetSignal("s2", bin) << std::endl;
-	analysisManager->FillP1(0,(bin+bin+1)/2.*fBinsz,fSensor->GetSignal("s2", bin));
+	auto analysisManager = G4AnalysisManager::Instance();
+
+	for (int bin = 0; bin<fNumbins; bin++)
+	  {
+	    if (fSensor->GetSignal("s2", bin) != 0.)
+	      std::cout << " wire electron signal: " << bin*fBinsz << " nsec: "<< fSensor->GetSignal("s2", bin) << std::endl;
+	    //	analysisManager->GetP1(0)->SetBinEntries(bin,0.);
+	    analysisManager->FillP1(0,(bin+bin+1)/2.*fBinsz,fSensor->GetSignal("s2", bin));
+	  }
       }
 
 }

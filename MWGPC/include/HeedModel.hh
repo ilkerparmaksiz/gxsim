@@ -90,7 +90,7 @@ class HeedModel : public G4VFastSimulationModel {
   const char* name;
 
   double fBinsz;
-  int fMaxbin;
+  int fNumbins;
   Garfield::Sensor* fSensor;
   
   /*The following private methods and variables are user-dependent*/

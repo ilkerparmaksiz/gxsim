@@ -16,6 +16,8 @@
 #include "G4FastStep.hh"
 #include "G4FastTrack.hh"
 
+#include "Analysis.hh"
+
 #include "G4AutoLock.hh"
 namespace{G4Mutex aMutex = G4MUTEX_INITIALIZER;}
 
@@ -40,9 +42,11 @@ HeedDeltaElectronModel::HeedDeltaElectronModel(GasModelParameters* gmp,G4String 
         vDeltaGate = gmp->GetVoltageDeltaGate();
         name="HeedDeltaElectronModel";
         InitialisePhysics();
+
+	std::cout << "HeedDeltaElectronModel::Constructor() this pointer " << this << std::endl;
     }
 
-HeedDeltaElectronModel::~HeedDeltaElectronModel() {}
+HeedDeltaElectronModel::~HeedDeltaElectronModel() { std::cout << "HeedDeltaElectronModel Destructor Called." << std::endl; }
 
 //This method is called in the DoIt-method in parent class HeedModel
 void HeedDeltaElectronModel::Run(G4FastStep& fastStep,const G4FastTrack& fastTrack, G4String particleName, double ekin_keV, double t, double x_cm,
@@ -83,7 +87,18 @@ void HeedDeltaElectronModel::Run(G4FastStep& fastStep,const G4FastTrack& fastTra
     fastStep.SetPrimaryTrackPathLength(0.0);
     fastStep.SetTotalEnergyDeposited(ekin_keV*keV);
 
+    auto analysisManager = G4AnalysisManager::Instance();
+    //    if (analysisManager->GetP1(0))
+    //      analysisManager->GetP1(0)->Reset(); // we only want the final P1 from final track with access to cumulative signal to survive. EC, 16-Nov-2021.
+
     
+    for (int bin = 0; bin<fNumbins; bin++)
+      {
+        if (fSensor->GetSignal("s2", bin) != 0.)
+          std::cout << " wire electron signal: " << bin*fBinsz << " nsec: "<< fSensor->GetSignal("s2", bin) << std::endl;
+	analysisManager->FillP1(0,(bin+bin+1)/2.*fBinsz,fSensor->GetSignal("s2", bin));
+      }
+
 }
 
 void HeedDeltaElectronModel::ProcessEvent(){

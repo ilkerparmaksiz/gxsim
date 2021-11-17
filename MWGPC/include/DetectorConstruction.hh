@@ -73,6 +73,12 @@ class DetectorConstruction : public G4VUserDetectorConstruction {
   inline G4double GetCH4Percentage(){return ch4Percentage;};
 
   HeedDeltaElectronModel* fHDEt;
+  HeedDeltaElectronModel* GetHDETracks() { std::cout << "DetCon::GetHDETracks()" << std::endl; return fHDEt;};
+
+  G4double fBinSz;
+  G4double fNumBins;
+  G4double GetBinsz() {return fBinSz;};
+  G4int GetMaxBin() {return fNumBins;};
   
  private:
   DetectorMessenger* detectorMessenger;
@@ -90,5 +96,7 @@ class DetectorConstruction : public G4VUserDetectorConstruction {
   G4double admixturePercentage;
   G4double argonPercentage;
   G4double ch4Percentage;
+  
+  
 };
 #endif

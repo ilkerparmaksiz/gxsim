@@ -34,7 +34,7 @@ DetectorConstruction::DetectorConstruction(GasModelParameters* gmp)
     ch4Percentage(10.00)
 {
   detectorMessenger = new DetectorMessenger(this);
-
+  fHDEt = 0;
 
 }
 
@@ -119,8 +119,8 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
   // Coment in one or the other code chunk below. EC, 26-Oct-2021.
   // Also remember to have correct gasfile name in *.mac. And code commented in HeedModel.cc if not creating the gasfile.
 
-  /*
   
+  /*
   G4cout << "gasDensityAr: " << G4BestUnit(gasDensityAr, "Volumic Mass")
      << G4endl;
   G4cout << "gasDensityCH4: " << G4BestUnit(gasDensityCH4, "Volumic Mass")
@@ -137,23 +137,22 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
   G4cout << "gasDensityP10: " << G4BestUnit(gasDensityMixture, "Volumic Mass") << G4endl;
   */
   
+  
+  
+  G4String symbol, name;
+  G4double density = 1.17*mg/cm3 * gasPressure/bar;
+  std::cout << "DetectorConstruction: density is " << G4BestUnit(density, "Volumic Mass")  << std::endl;
+  G4int ncomponents;
+
+  //  mixture =
+  //  new G4Material(name="mixture",density,ncomponents=2);//,kStateGas, temperature,gasPressure);
+  mixture = new G4Material("mixture", density, 2);
+  G4Material* O2 =  man->FindOrBuildMaterial("G4_O");
+  G4Material* N2 =  man->FindOrBuildMaterial("G4_N");
+  mixture->AddMaterial(N2, 0.99);
+  mixture->AddMaterial(O2, 0.01);
 
   
-  G4double a = 14.01*g/mole;
-  G4double z;
-  G4String symbol, name;
-  G4Element* elN =
-    new G4Element(name="Nitrogen",symbol="N",z= 7.,a);
-  a = 16.00*g/mole;
-  G4Element* elO =
-    new G4Element(name="Oxygen",symbol="O",z= 8.,a);
-  G4double density = 1.17*mg/cm3 * gasPressure; 
-  G4int ncomponents;
-  G4double perCent = 0.01;
-  mixture =
-    new G4Material(name="mixture",density,ncomponents=2,kStateGas, temperature,gasPressure);
-    mixture->AddElement(elN, 99.0*perCent);
-    mixture->AddElement(elO, 1.0*perCent);
   
   
   //geometry dimensions:
@@ -220,7 +219,15 @@ void DetectorConstruction::ConstructSDandField(){
   //These commands generate the four gas models and connect it to the GasRegion
   G4Region* region = G4RegionStore::GetInstance()->GetRegion("GasRegion");
   new HeedNewTrackModel(fGasModelParameters,"HeedNewTrackModel",region,this,myGasBoxSD);
-  fHDEt = new HeedDeltaElectronModel(fGasModelParameters,"HeedDeltaElectronModel",region,this,myGasBoxSD);
 
+
+  fHDEt = new HeedDeltaElectronModel(fGasModelParameters,"HeedDeltaElectronModel",region,this,myGasBoxSD);
+  // at this point fbins and fNumbins have values in the HeedModel track instance. Let us hold them in this detcon object rather than
+  // needing to get them at EndEventAction, by which time trackstack is empty and these are unavailable.
+
+  fBinSz = fHDEt->GetBinsz();
+  fNumBins = fHDEt->GetNumbins();
+
+  std::cout << "DetCon::ConSDandField(): this, binsz, numbins" << this << ", " << fBinSz << "," << fNumBins << std::endl;
 }
 

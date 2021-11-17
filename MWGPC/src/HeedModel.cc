@@ -328,9 +328,9 @@ void HeedModel::BuildSensor(){
   fSensor->AddComponent(comp);
   //  fSensor->SetTimeWindow(0.,2500.,100); //Lowest time [ns], time bins [ns], number of bins
   //  fSensor->SetTimeWindow(0.,5.,100); //Lowest time [ns], time bins [ns], number of bins
-  fMaxbin = 1000;
-  fBinsz = 20.;
-  fSensor->SetTimeWindow(0.,fBinsz,fMaxbin); //Lowest time [ns], time bins [ns], number of bins
+  fNumbins = 1000;
+  fBinsz = 20.; //nsec
+  fSensor->SetTimeWindow(0.,fBinsz,fNumbins*fBinsz); //Lowest time [ns], time bins [ns], number of bins
 
   comp->AddReadout("s1");
   comp->AddReadout("s2");

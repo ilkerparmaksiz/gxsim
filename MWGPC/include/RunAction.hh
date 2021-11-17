@@ -2,7 +2,7 @@
 #define RunAction_hh 1
 
 #include "G4UserRunAction.hh"
-
+#include "DetectorConstruction.hh"
 
 #include "TROOT.h"
 #include "TROOT.h"
@@ -24,6 +24,7 @@ class RunAction : public G4UserRunAction {
   // order to get details of the readout geometry.
   // Accepts pointer to detector construction class:
   RunAction();
+  RunAction(DetectorConstruction* );
   ~RunAction();
 
   void BeginOfRunAction(const G4Run *);
@@ -31,6 +32,7 @@ class RunAction : public G4UserRunAction {
 
 
  private:
-
+  DetectorConstruction* fdetCon;
+  DetectorConstruction* GetDetCon() { return fdetCon;};
 };
 #endif

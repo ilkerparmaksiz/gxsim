@@ -44,19 +44,22 @@
 
 /MWGPC/phys/InitializePhysics emlivermore
 /MWGPC/phys/AddParametrisation
-/MWGPC/phys/setLowLimitE 10. eV
+
 
 #/process/em/lowestElectronEnergy 10 eV
 /process/em/AddPAIRegion all GasRegion PAIphoton
 #/MWGPC/phys/setCuts 1 mm
+/MWGPC/phys/setLowLimitE 10. eV
+
 
 #/random/setSeeds 0 0
 /run/initialize
 
+/analysis/setFileName test.root
 #/param/InActivateModel HeedNewTrackModel
 #/param/InActivateModel HeedDeltaElectronModel
 
-/analysis/setFileName test
+
 
 ####################################
 ############ Verbosities ###########

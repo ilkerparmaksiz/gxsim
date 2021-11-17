@@ -40,7 +40,7 @@ class HeedDeltaElectronModel : public HeedModel {
   
   /*Getters and Setters*/
   Garfield::Sensor* GetSensor() {return fSensor;};
-  G4int GetMaxbin() {return fMaxbin;};
+  G4int GetNumbins() {return fNumbins;};
   G4int GetBinsz() {return fBinsz;};
   
  private:

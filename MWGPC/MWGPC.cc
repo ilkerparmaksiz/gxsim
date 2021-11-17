@@ -50,13 +50,17 @@ int main(int argc, char** argv) {
   DetectorConstruction* detector = new DetectorConstruction(gmp);
   runManager->SetUserInitialization(detector);
 
-  
+  auto hdetrks2 = detector->GetHDETracks();
+  std::cout << "MWGPC::main detector,hdetrks is  " << detector << ", " << hdetrks2 << std::endl;
+
   G4cout << "Creation of PhysicsList" << G4endl;
   PhysicsList* physics = new PhysicsList();
   runManager->SetUserInitialization(physics);
   
-  //  runManager->SetUserInitialization(new MyUserActionInitialization());
   runManager->SetUserInitialization(new MyUserActionInitialization(detector));
+  //runManager->SetUserInitialization(new MyUserActionInitialization(detector));
+  auto hdetrks3 = detector->GetHDETracks();
+  std::cout << "MWGPC::main detector,hdetrks is  " << detector << ", " << hdetrks3 << std::endl;
  
    // get the pointer to the User Interface manager
   G4UImanager* UImanager = G4UImanager::GetUIpointer();

@@ -10,7 +10,8 @@
 #include "G4SDManager.hh"
 #include "G4RunManager.hh"
 
-RunAction::RunAction(){
+RunAction::RunAction(DetectorConstruction* dc){
+  fdetCon = dc;
   G4cout << "Creating AnalysisManager" << G4endl;
   auto analysisManager = G4AnalysisManager::Instance();
 //  analysisManager->SetNtupleMerging(true,0,0,10000000);
@@ -22,6 +23,8 @@ RunAction::RunAction(){
   
   analysisManager->SetNtupleActivation(false);
 
+  std::cout << "RunAction constructor  detCon " << GetDetCon() << std::endl;
+  
   G4cout << "Creating RunAction" << G4endl;
 }
 
@@ -42,9 +45,11 @@ void RunAction::BeginOfRunAction(const G4Run* aRun) {
   G4cout << "Time: " << asctime(ptm) << G4endl;
 
   auto analysisManager = G4AnalysisManager::Instance();
+  //  analysisManager->SetFileName("test-hc.root");
   analysisManager->OpenFile();
-  
-  analysisManager->CreateP1("0","Title", 100, 0., 2000.,-1E5,+1E5);  // profile histo in bins of 2000/100 nsec
+
+  std::cout << "RunAction:BeginOfRunAction() detCon, nbins, binsz" << GetDetCon() << ", " << GetDetCon()->fNumBins << ", " << GetDetCon()->fBinSz << std::endl;
+  analysisManager->CreateP1("WireSig","ULBPC Wire Signal [fC/nsec]", GetDetCon()->fNumBins, 0., GetDetCon()->fNumBins*GetDetCon()->fBinSz,-1E5,+1E5);  // profile histo in bins of 2000/100 nsec
 }
 
 void RunAction::EndOfRunAction(const G4Run* aRun) {

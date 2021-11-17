@@ -98,8 +98,9 @@ PhysicsList::PhysicsList()
   fastSimulationPhysics = new G4FastSimulationPhysics("fastSimPhys");
   RegisterPhysics(fastSimulationPhysics);
 
+  
   RegisterPhysics(new G4OpticalPhysics());
-
+  std::cout << "Finished PhysicsList constructor" << std::endl;
   
 }
 
@@ -137,6 +138,8 @@ void PhysicsList::InitializePhysicsList(const G4String& name) {
     ReplacePhysics(new G4EmStandardPhysics(1));
     AddIonGasModels();
   }
+
+
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

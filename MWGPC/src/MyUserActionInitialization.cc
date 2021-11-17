@@ -7,7 +7,7 @@
 #include "SteppingAction.hh"
 
 MyUserActionInitialization::MyUserActionInitialization(){}
-MyUserActionInitialization::MyUserActionInitialization(DetectorConstruction *det){ fdetCon = det;}
+MyUserActionInitialization::MyUserActionInitialization(DetectorConstruction *det){ fdetCon = det; std::cout << "MyUserActionInitialization::Constructor():  " << fdetCon<< std::endl;}
 
 MyUserActionInitialization::~MyUserActionInitialization(){}
 
@@ -16,11 +16,14 @@ void MyUserActionInitialization::Build() const {
 	SetUserAction(primary);
 	SteppingAction* stepAct = new SteppingAction();
 	SetUserAction(stepAct);
+
+	std::cout << "MyUserActionInitialization::Build(): Registering EventAction() " << fdetCon << std::endl;
 	EventAction* evt = new EventAction(fdetCon);
 	SetUserAction(evt);
-	SetUserAction(new RunAction());
+	std::cout << "MyUserActionInitialization::Build(): Registering RunAction() " << fdetCon<< std::endl;	
+	SetUserAction(new RunAction(fdetCon));
 }
 
 void MyUserActionInitialization::BuildForMaster() const {
-	SetUserAction(new RunAction());
+	SetUserAction(new RunAction(fdetCon));
 }

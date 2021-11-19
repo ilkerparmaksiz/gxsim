@@ -17,6 +17,9 @@
 #include "G4FastTrack.hh"
 
 #include "Analysis.hh"
+#include "G4Event.hh"
+#include "G4EventManager.hh"
+
 
 #include "G4AutoLock.hh"
 namespace{G4Mutex aMutex = G4MUTEX_INITIALIZER;}
@@ -54,21 +57,21 @@ void HeedDeltaElectronModel::Run(G4FastStep& fastStep,const G4FastTrack& fastTra
     double eKin_eV = ekin_keV * 1000;
     int nc = 0, ni=0;
     // TrackHeed produces clusters, which we will then drift below.
-    G4cout << "HeedDeltaElectronModel::Run Interface" << G4endl;
-    G4cout << "Particle KE (in eV): " << eKin_eV << G4endl;
+    //    G4cout << "HeedDeltaElectronModel::Run Interface" << G4endl;
+    //  G4cout << "Particle KE (in eV): " << eKin_eV << G4endl;
     if(particleName == "e-"){
         G4AutoLock lock(&aMutex);
         fTrackHeed->TransportDeltaElectron(x_cm, y_cm, z_cm, t, eKin_eV, dx, dy,
                                            dz, nc, ni);
-	if (nc>0)
-	  G4cout << "Post e- transport electrons: " << nc << G4endl;
+	//	if (nc>0)
+	//  G4cout << "Post e- transport electrons: " << nc << G4endl;
     }
     else{
         G4AutoLock lock(&aMutex);
-	G4cout << "HeedDeltaElectronModel::Run calling TransportPhoton() with nc: " << nc << G4endl;
+	//G4cout << "HeedDeltaElectronModel::Run calling TransportPhoton() with nc: " << nc << G4endl;
         fTrackHeed->TransportPhoton(x_cm, y_cm, z_cm, t, eKin_eV, dx, dy,
                                     dz, nc);
-	G4cout << "HeedDeltaElectronModel::Run post TransportPhoton() now nc is: " << nc << G4endl;
+	//G4cout << "HeedDeltaElectronModel::Run post TransportPhoton() now nc is: " << nc << G4endl;
     }
     for (int cl = 0; cl < nc; cl++) {
         double xe, ye, ze, te;
@@ -91,17 +94,24 @@ void HeedDeltaElectronModel::Run(G4FastStep& fastStep,const G4FastTrack& fastTra
 
     G4int pntid = pG4trk->GetParentID();
     G4int tid = pG4trk->GetTrackID();
+
+    auto evt = G4EventManager::GetEventManager()->GetConstCurrentEvent();
+    G4int evID (evt->GetEventID());
     if (pntid + 1 == tid ) // This is the last Heed track to be fasttracked here
       {
 	auto analysisManager = G4AnalysisManager::Instance();
-
+	G4double sigsum(0);
 	for (int bin = 0; bin<fNumbins; bin++)
-	  {
-	    if (fSensor->GetSignal("s2", bin) != 0.)
-	      std::cout << " wire electron signal: " << bin*fBinsz << " nsec: "<< fSensor->GetSignal("s2", bin) << std::endl;
+	  { 
+	    //if (fSensor->GetSignal("s2", bin) != 0.)
+	      //  std::cout << " wire electron signal: " << bin*fBinsz << " nsec: "<< fSensor->GetSignal("s2", bin) << std::endl;
 	    //	analysisManager->GetP1(0)->SetBinEntries(bin,0.);
-	    analysisManager->FillP1(0,(bin+bin+1)/2.*fBinsz,fSensor->GetSignal("s2", bin));
+	    analysisManager->FillP1(evID,(bin+bin+1)/2.*fBinsz,fSensor->GetSignal("s2", bin));
+	    sigsum += fSensor->GetSignal("s2", bin)*fBinsz;
 	  }
+	fSensor->ClearSignal(); // prepare for next event.
+	G4int id(0);
+	analysisManager->FillNtupleDColumn(id, 10, sigsum);    
       }
 
 }
@@ -113,5 +123,4 @@ void HeedDeltaElectronModel::ProcessEvent(){
 void HeedDeltaElectronModel::Reset(){
   
 }
-
 

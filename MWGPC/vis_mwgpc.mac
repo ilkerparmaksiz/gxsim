@@ -55,7 +55,7 @@
 #/random/setSeeds 0 0
 /run/initialize
 
-/analysis/setFileName test.root
+/analysis/setFileName halfcm_60kev.root
 #/param/InActivateModel HeedNewTrackModel
 #/param/InActivateModel HeedDeltaElectronModel
 
@@ -64,9 +64,9 @@
 ####################################
 ############ Verbosities ###########
 ####################################
-/tracking/verbose 2
-/run/verbose 2
-/event/verbose 1
+/tracking/verbose 0
+/run/verbose 1
+/event/verbose 0
 /vis/verbose 1
 ####################################
 ########### Visualization ##########
@@ -112,17 +112,21 @@
 /tracking/storeTrajectory 0
 
 
-/gps/position 1. 1. 0.  cm
-/gps/direction 0. 0. -1.
+/gps/position 0.5 0.5 0.  cm
+/gps/ang/type iso
 
+##/gps/direction 0. 0. +1.
+#/gps/ang/user_coor true
+#/gps/ang/mintheta 0
+#/gps/ang/maxtheta 3.14159 rad
 
 /gps/particle e-
 #/gps/particle gamma
 /gps/ene/type Mono
 ## below is total energy = m+K
 #/gps/ene/mono 2.7 keV
-/gps/ene/mono 600 keV
+/gps/ene/mono 60 keV
 
 
-/run/beamOn 1
+/run/beamOn 800
 

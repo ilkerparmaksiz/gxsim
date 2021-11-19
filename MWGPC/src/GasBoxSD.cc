@@ -15,6 +15,8 @@
 #include "G4Colour.hh"
 #include "G4VisAttributes.hh"
 
+#include "Analysis.hh"
+
 GasBoxSD::GasBoxSD(G4String name) : G4VSensitiveDetector(name), fGasBoxHitsCollection(NULL){
     collectionName.insert("GBHC");
     GBHCID=-1;
@@ -36,9 +38,9 @@ G4bool GasBoxSD::ProcessHits(G4Step* aStep, G4TouchableHistory* hist){
     G4Track* aTrack = aStep->GetTrack();
 
     if(aTrack->GetDefinition()->GetParticleName() == "e-"){
-        G4cout << "GasBox Hit!!" << G4endl;
-        G4cout << "Particle ID: " << aTrack->GetTrackID() << G4endl;
-        G4cout << "Energy electron: " << aTrack->GetKineticEnergy() << G4endl;
+      //        G4cout << "GasBox Hit!!" << G4endl;
+      //  G4cout << "Particle ID: " << aTrack->GetTrackID() << G4endl;
+      //  G4cout << "Energy electron: " << aTrack->GetKineticEnergy() << G4endl;
         return true;
     }
 
@@ -52,12 +54,19 @@ void GasBoxSD::EndOfEvent (G4HCofThisEvent * hce){
     int entries = HC->entries();
     G4cout << "Number of Electrons: " << entries << G4endl;
     // Comment below coordinate dump. EC, 26-Oct-2021.
-    /*
+
+    // Calculate here the d.o.c.a. of the primary G4Track to the wire.
+    G4double doca(121212.12);
     for(int i=0;i<entries;i++){
         auto hit = (*HC)[i];
-        G4cout << hit->GetPos() << " " << hit->GetTime() << G4endl;
+	//    G4cout << hit->GetPos() << " " << hit->GetTime() << G4endl;
+	doca = std::min(doca,sqrt(hit->GetPos()[0]*hit->GetPos()[0] + hit->GetPos()[1]*hit->GetPos()[1]));
     }
-    */
+
+    G4int id(0);
+    auto analysisManager = G4AnalysisManager::Instance();
+    analysisManager->FillNtupleDColumn(id, 9, doca);    
+    analysisManager->AddNtupleRow(id); // by this point the other rows of this nt have been filled in TrackingAction.cc.
     DrawAll();
 }
 

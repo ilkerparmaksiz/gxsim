@@ -9,10 +9,11 @@
 #include "GasBoxSD.hh"
 #include "G4SDManager.hh"
 #include "G4RunManager.hh"
+#include "G4EventManager.hh"
 
 RunAction::RunAction(DetectorConstruction* dc){
   fdetCon = dc;
-  G4cout << "Creating AnalysisManager" << G4endl;
+
   auto analysisManager = G4AnalysisManager::Instance();
 //  analysisManager->SetNtupleMerging(true,0,0,10000000);
   analysisManager->SetVerboseLevel(1);
@@ -20,11 +21,8 @@ RunAction::RunAction(DetectorConstruction* dc){
   analysisManager->SetFileName("output.root"); 
   //  analysisManager->SetHistoDirectoryName("histo");
   //  analysisManager->SetNtupleDirectoryName("ntuple");
-  
-  analysisManager->SetNtupleActivation(false);
+  analysisManager->SetNtupleActivation(true);
 
-  std::cout << "RunAction constructor  detCon " << GetDetCon() << std::endl;
-  
   G4cout << "Creating RunAction" << G4endl;
 }
 
@@ -48,8 +46,22 @@ void RunAction::BeginOfRunAction(const G4Run* aRun) {
   //  analysisManager->SetFileName("test-hc.root");
   analysisManager->OpenFile();
 
-  std::cout << "RunAction:BeginOfRunAction() detCon, nbins, binsz" << GetDetCon() << ", " << GetDetCon()->fNumBins << ", " << GetDetCon()->fBinSz << std::endl;
-  analysisManager->CreateP1("WireSig","ULBPC Wire Signal [fC/nsec]", GetDetCon()->fNumBins, 0., GetDetCon()->fNumBins*GetDetCon()->fBinSz,-1E5,+1E5);  // profile histo in bins of 2000/100 nsec
+  analysisManager->CreateNtuple("T1", "Launched Particles");
+  analysisManager->CreateNtupleDColumn("Evt");       //column 0
+  analysisManager->CreateNtupleDColumn("PID");       //column 1
+  analysisManager->CreateNtupleDColumn("KEnergy");    //column 2
+  analysisManager->CreateNtupleDColumn("x");      //column 3
+  analysisManager->CreateNtupleDColumn("y");    //column 4
+  analysisManager->CreateNtupleDColumn("z");    //column 5
+  analysisManager->CreateNtupleDColumn("px");      //column 6
+  analysisManager->CreateNtupleDColumn("py");    //column 7
+  analysisManager->CreateNtupleDColumn("pz");    //column 8
+  analysisManager->CreateNtupleDColumn("doca");    //column 9
+  analysisManager->CreateNtupleDColumn("sigsum");  //column 10
+  analysisManager->FinishNtuple();
+
+
+
 }
 
 void RunAction::EndOfRunAction(const G4Run* aRun) {

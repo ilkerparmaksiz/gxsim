@@ -5,6 +5,7 @@
 #include "G4SDManager.hh"
 #include "GasBoxSD.hh"
 #include "SteppingAction.hh"
+#include "TrackingAction.hh"
 
 MyUserActionInitialization::MyUserActionInitialization(){}
 MyUserActionInitialization::MyUserActionInitialization(DetectorConstruction *det){ fdetCon = det; std::cout << "MyUserActionInitialization::Constructor():  " << fdetCon<< std::endl;}
@@ -22,6 +23,10 @@ void MyUserActionInitialization::Build() const {
 	SetUserAction(evt);
 	std::cout << "MyUserActionInitialization::Build(): Registering RunAction() " << fdetCon<< std::endl;	
 	SetUserAction(new RunAction(fdetCon));
+
+	TrackingAction* trackingAction = new TrackingAction(fdetCon,evt);
+	SetUserAction(trackingAction);
+
 }
 
 void MyUserActionInitialization::BuildForMaster() const {

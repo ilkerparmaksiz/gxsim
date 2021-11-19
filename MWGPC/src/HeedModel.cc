@@ -36,7 +36,7 @@ HeedModel::~HeedModel() {}
 //Method called when a particle is created, checks if the model is applicable for this particle
 G4bool HeedModel::IsApplicable(const G4ParticleDefinition& particleType) {
   G4String particleName = particleType.GetParticleName();
-  G4cout << "HeedModel::IsApplicable(): particle " << particleName  << " allowed? " << FindParticleName(particleName) << G4endl;
+  //  G4cout << "HeedModel::IsApplicable(): particle " << particleName  << " allowed? " << FindParticleName(particleName) << G4endl;
   return FindParticleName(particleName);
 }
 
@@ -46,7 +46,7 @@ G4bool HeedModel::ModelTrigger(const G4FastTrack& fastTrack) {
   G4String particleName =
       fastTrack.GetPrimaryTrack()->GetParticleDefinition()->GetParticleName();
 
-  G4cout << "HeedModel::ModelTrigger(): particle, ekin " << particleName << ", " << ekin << " allowed? " << FindParticleNameEnergy(particleName, ekin / keV) << G4endl;
+  //  G4cout << "HeedModel::ModelTrigger(): particle, ekin " << particleName << ", " << ekin << " allowed? " << FindParticleNameEnergy(particleName, ekin / keV) << G4endl;
   
   return FindParticleNameEnergy(particleName, ekin / keV);
 }
@@ -63,7 +63,7 @@ void HeedModel::DoIt(const G4FastTrack& fastTrack, G4FastStep& fastStep) {
   G4String particleName =
       fastTrack.GetPrimaryTrack()->GetParticleDefinition()->GetParticleName();
 
-  std::cout << "HeedModel::DoIt: track position " << worldPosition[0] << ", " << worldPosition[1] << ", " << worldPosition[2] << std::endl;
+  //  std::cout << "HeedModel::DoIt: track position " << worldPosition[0] << ", " << worldPosition[1] << ", " << worldPosition[2] << std::endl;
   Run(fastStep, fastTrack, particleName, ekin/keV, time, worldPosition.x() / CLHEP::cm,
       worldPosition.y() / CLHEP::cm, worldPosition.z() / CLHEP::cm,
       dir.x(), dir.y(), dir.z());
@@ -328,8 +328,8 @@ void HeedModel::BuildSensor(){
   fSensor->AddComponent(comp);
   //  fSensor->SetTimeWindow(0.,2500.,100); //Lowest time [ns], time bins [ns], number of bins
   //  fSensor->SetTimeWindow(0.,5.,100); //Lowest time [ns], time bins [ns], number of bins
-  fNumbins = 1000;
-  fBinsz = 20.; //nsec
+  fNumbins = 100;
+  fBinsz = 10.; //nsec
   fSensor->SetTimeWindow(0.,fBinsz,fNumbins*fBinsz); //Lowest time [ns], time bins [ns], number of bins
 
   comp->AddReadout("s1");
@@ -473,13 +473,6 @@ void HeedModel::Drift(double x, double y, double z, double t){
 
 
     }
-
-    // get the sensor signals here.
-    for (int bin = 0; bin<1000; bin++)
-      {
-	if (fSensor->GetSignal("s2", bin) != 0.)
-	  std::cout << " wire electron signal: " << bin*20 << " nsec: "<< fSensor->GetSignal("s2", bin) << std::endl;
-      }
 
 }
 

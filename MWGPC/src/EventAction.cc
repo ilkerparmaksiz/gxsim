@@ -24,13 +24,15 @@ EventAction::~EventAction() {
 
 void EventAction::BeginOfEventAction(const G4Event *ev) {
 
+  auto analysisManager = G4AnalysisManager::Instance();
+
+  G4int evID (ev->GetEventID());
+  std::string p1name("WireSig_");
+  analysisManager->CreateP1(p1name+std::to_string(evID),"ULBPC Wire Signal [fC/nsec]", fdetCon->fNumBins, 0., fdetCon->fNumBins*fdetCon->fBinSz,-1E5,+1E5);  // profile histo in bins of 2000/100 nsec
+
 }
 
 void EventAction::EndOfEventAction(const G4Event *evt) {
-
-  auto analysisManager = G4AnalysisManager::Instance();
-  //  analysisManager->ChangeDirectory("histo");
-
  
 }
 

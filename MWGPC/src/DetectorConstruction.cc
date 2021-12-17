@@ -24,7 +24,7 @@
 DetectorConstruction::DetectorConstruction(GasModelParameters* gmp)
     :
     fGasModelParameters(gmp),
-    checkOverlaps(0),
+    checkOverlaps(1),
     worldHalfLength(3.*m), //World volume is a cube with side length = 3m;
     wallThickness(0.002*m), //thickness of the Copper walls
     gasPressure(10.*bar), // Pressure inside the gas ..... also used for magboltz, EC 28-Oct-2021.
@@ -146,12 +146,12 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
 
   //  mixture =
   //  new G4Material(name="mixture",density,ncomponents=2);//,kStateGas, temperature,gasPressure);
-  mixture = new G4Material("mixture", density, 2);
+  mixture = new G4Material("mixture", density, 1 /*2*/);
   G4Material* O2 =  man->FindOrBuildMaterial("G4_O");
   G4Material* N2 =  man->FindOrBuildMaterial("G4_N");
-  mixture->AddMaterial(N2, 0.99);
-  mixture->AddMaterial(O2, 0.01);
-
+  //    mixture->AddMaterial(N2, 0.99);
+  //  mixture->AddMaterial(O2, 0.01);
+    mixture->AddMaterial(N2, 1.00);
   
   
   
@@ -162,7 +162,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
   //World Volume
   G4Box* solidWorld = new G4Box("solidWorld_box", worldHalfLength, worldHalfLength, worldHalfLength);
   G4LogicalVolume* logicWorld =
-  new G4LogicalVolume(solidWorld, vacuum, "solidWorld_log");
+    new G4LogicalVolume(solidWorld, vacuum, "solidWorld_log");
   
   physiWorld = new G4PVPlacement(0, G4ThreeVector(), logicWorld,
                                                     "solidWorld_phys", 0, false, 0, checkOverlaps);
@@ -176,24 +176,42 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
   myRotation->rotateX(90.*deg);
   myRotation->rotateY(0.*deg);
   myRotation->rotateZ(0.*rad);
-  G4Tubs* solidGasBox = new G4Tubs("solid_gasbox_tube",wireR,gasboxR,gasboxH*0.5, 0., twopi);
+  std::cout << "DetCon:: gas radius, half-height [mm]: " <<gasboxR << ", " << gasboxH*0.5 << std::endl;
+  G4Tubs* solidGasBox = new G4Tubs("solid_gasbox_tube",0.0/*wireR*/,gasboxR,gasboxH*0.5, 0., twopi);
   logicGasBox =
     new G4LogicalVolume(solidGasBox, mixture, "solidGasBox_log");
-  new G4PVPlacement(0/*myRotation*/,G4ThreeVector(), logicGasBox,"solidGasBox_phys",logicWorld,false,0,checkOverlaps);
+  new G4PVPlacement(myRotation,G4ThreeVector(), logicGasBox,"solidGasBox_phys",logicWorld,false,0,checkOverlaps);
   
   
   //Copper Wall
-  G4Tubs* solidWalls = new G4Tubs("solid_tube_wall",gasboxR,gasboxR+wallThickness,gasboxH*0.5+wallThickness, 0., twopi);
+  G4Tubs* solidWalls = new G4Tubs("solid_tube_wall",gasboxR,gasboxR+wallThickness, gasboxH*0.5+wallThickness, 0., twopi);
   G4LogicalVolume* logicWall =
-  new G4LogicalVolume(solidWalls, copperMaterial, "solidWall_log");
-  new G4PVPlacement(0/*myRotation*/,G4ThreeVector(), logicWall,
+    new G4LogicalVolume(solidWalls, copperMaterial, "solidWall_log");
+  new G4PVPlacement(myRotation,G4ThreeVector(), logicWall,
                     "solidWall_phys",logicWorld,false,0,checkOverlaps);
+  logicGasBox->SetVisAttributes(blue);
+  logicWall->SetVisAttributes(green);
 
+  //Copper S End Wall
+  G4Tubs* solidWallsS = new G4Tubs("solid_tube_wallS",0.,gasboxR+wallThickness,0.5*wallThickness, 0., twopi);
+  G4LogicalVolume* logicWallS =
+    new G4LogicalVolume(solidWallsS, copperMaterial, "solidWallS_log");
+  new G4PVPlacement(myRotation,G4ThreeVector(0.,gasboxH*0.5+wallThickness*0.5,0.), logicWallS,
+                    "solidWallS_phys",logicWorld,false,0,checkOverlaps);
   //logicGasBox->SetVisAttributes(blue);
-  logicWall->SetVisAttributes(red);
+  logicWallS->SetVisAttributes(red);
+
+  //Copper N End Wall
+  G4Tubs* solidWallsN = new G4Tubs("solid_tube_wallN",0.,gasboxR+wallThickness,0.5*wallThickness, 0., twopi);
+  G4LogicalVolume* logicWallN =
+    new G4LogicalVolume(solidWallsN, copperMaterial, "solidWallN_log");
+  new G4PVPlacement(myRotation,G4ThreeVector(0.,-gasboxH*0.5-0.5-wallThickness*0.5,0.), logicWallN,
+                    "solidWallN_phys",logicWorld,false,0,checkOverlaps);
+  //logicGasBox->SetVisAttributes(blue);
+  logicWallN->SetVisAttributes(red);
 
   
-  //Construct a G4Region, connected to the logical volume in which you want to use the G4FastSimulationModel
+  //Construct a G4Region, connected to the logical volume in which you want to use the G4FastSimrghasulationModel
   // THIS REGION IS THE ONE IN HeedModel.cc IN WHICH WE INSERT ENERGIZED WIRES AND MAGBOLTZ GAS.
   // NOTE THE call below in ConstructSDandField() to create local variable called region from this "GasRegion" string,
   // which is then passed to HeedNewTrackModel constructor.

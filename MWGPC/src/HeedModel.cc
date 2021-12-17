@@ -63,7 +63,7 @@ void HeedModel::DoIt(const G4FastTrack& fastTrack, G4FastStep& fastStep) {
   G4String particleName =
       fastTrack.GetPrimaryTrack()->GetParticleDefinition()->GetParticleName();
 
-  //  std::cout << "HeedModel::DoIt: track position " << worldPosition[0] << ", " << worldPosition[1] << ", " << worldPosition[2] << std::endl;
+  //  std::cout << "HeedModel::DoIt: track ke [keV], position " << ekin/keV << ",  " << worldPosition[0] << ", " << worldPosition[1] << ", " << worldPosition[2] << std::endl;
   Run(fastStep, fastTrack, particleName, ekin/keV, time, worldPosition.x() / CLHEP::cm,
       worldPosition.y() / CLHEP::cm, worldPosition.z() / CLHEP::cm,
       dir.x(), dir.y(), dir.z());
@@ -127,8 +127,8 @@ void HeedModel::makeGas(){
   // Another line to comment in/out !   EC, 26-Oct-2021.
   //  fMediumMagboltz->SetComposition("ar", arPerc, "ch4", ch4Perc);
   //fMediumMagboltz->SetComposition("ar", 90, /* "n2", 99, */ "ch4", 10/* "o2", 1*/);
-  fMediumMagboltz->SetComposition( "n2", 99,  "o2", 1);
-  //fMediumMagboltz->SetComposition("n2", 100);
+  // fMediumMagboltz->SetComposition( "n2", 99,  "o2", 1);
+  fMediumMagboltz->SetComposition("n2", 100);
   fMediumMagboltz->SetTemperature(temperature);
   fMediumMagboltz->SetPressure(pressure); 
   fMediumMagboltz->EnableDebugging(); 
@@ -153,7 +153,7 @@ void HeedModel::makeGas(){
     fMediumMagboltz->WriteGasFile(gasFile.c_str());
     */
     fMediumMagboltz->LoadGasFile(gasFile.c_str());
-    //fMediumMagboltz->MergeGasFile(gasFile.c_str(),true); // not clear why one does this. EC, 4-Nov-2021.
+
 
   }
 }
@@ -164,7 +164,9 @@ void HeedModel::buildBox(){
   double wireR = (80.0E-6*100)/CLHEP::cm;
   // Somehow, this lays everything along the y-axis, and despite AddWire(), etc taking only x,y coordinates it's presumed 
   // that the wires are laid along the y-axis with no explicit rotation required? EC, 11-May-2019. Yes.
-  box = new Garfield::SolidTube(0., 0., 0., 0. /*wireR*/,(detCon->GetGasBoxR())/CLHEP::cm,(detCon->GetGasBoxH()*0.5)/CLHEP::cm,0.,1.,0.);
+
+  box = new Garfield::SolidTube(0., 0., 0., 0. /*wireR*/,(detCon->GetGasBoxR())/CLHEP::cm,((detCon->GetGasBoxH())*0.5)/CLHEP::cm,0.,1.,0.);
+
   std::cout << "HeedModel::buildBox() putting cylinder of radius/halfLength " << (detCon->GetGasBoxR())/CLHEP::cm << "/" << (detCon->GetGasBoxH()*0.5)/CLHEP::cm << " [cm] along Garfield y-axis." << std::endl;
 
   geo->AddSolid(box, fMediumMagboltz);
@@ -231,7 +233,6 @@ void HeedModel::BuildCompField(){
     int rowstop(0);
     for (int nhexes = 0; nhexes<fhexrad.find(nRad)->second; ++nhexes) {
 
-
       if (newrow) { // leftmost in row
 	xhex = xstart ; yhex = ystart;  newrow = false;
       }
@@ -267,10 +268,11 @@ void HeedModel::BuildCompField(){
 	if (xhex==0.0 && yhex==0.0) sensorName = "s1";
 	if (nhexes == fhexrad.find(nRad)->second-1) sensorName="s2";
 
-	std::cout << "HeedModel::BuildCompField(): Adding anode wire " << sensorName << " of potential " << vAnodeWires << " at " << xhex << ", " << yhex << std::endl;
-	comp->AddWire(0.0/CLHEP::cm + xhex, 0.0/CLHEP::cm + yhex, dSens, vAnodeWires, sensorName);
+	std::cout << "HeedModel::BuildCompField(): Adding anode wire " << sensorName << " of potential " << vAnodeWires << " at " << xhex << ", " << yhex << ". Length [cm] " << detCon->GetGasBoxH()*0.5*4/CLHEP::cm << std::endl;
+	comp->AddWire(0.0/CLHEP::cm + xhex, 0.0/CLHEP::cm + yhex, dSens, vAnodeWires, sensorName, detCon->GetGasBoxH()*0.5/CLHEP::cm);
 	// bump xs and ys here.
 
+  
 
 	// y axis sides
 	double xside = rC + xhex;
@@ -309,7 +311,9 @@ void HeedModel::BuildCompField(){
     }
     
     double gnd(0.0);
-    comp->AddTube(detCon->GetGasBoxR()/CLHEP::cm-0.001/CLHEP::cm, vCathodeWires, gnd, "w");
+    //    comp->AddTube(detCon->GetGasBoxR()/CLHEP::cm-0.001/CLHEP::cm, gnd, 0, "tubewall");
+    comp->AddPlaneY((detCon->GetGasBoxH()*0.5)/CLHEP::cm, gnd, "topcap");
+    comp->AddPlaneY(-(detCon->GetGasBoxH()*0.5)/CLHEP::cm, gnd, "bottomcap");
 
 }
 
@@ -319,25 +323,31 @@ void HeedModel::BuildSensor(){
   // X-width [cm?] of drift simulation will cover between +/- axis_x... rough wire separation, EC.
   const double axis_x = detCon->GetGasBoxR()/detCon->GetNumHexes()/CLHEP::cm;  
   // Y-width of drift simulation will cover between +/- axis_y
-  const double axis_y = detCon->GetGasBoxR()/detCon->GetNumHexes()/CLHEP::cm;  
-  const double axis_z = detCon->GetGasBoxH()*0.5/CLHEP::cm;
+  const double axis_z = detCon->GetGasBoxR()/detCon->GetNumHexes()/CLHEP::cm;  
+  const double axis_y = detCon->GetGasBoxH()*0.5/CLHEP::cm;
 
   fSensor = new Garfield::Sensor();
-  //  fSensor->EnableDebugging(true);
-    fSensor->EnableDebugging(false);
+  //  fSensor->EnableDebugging();
   fSensor->AddComponent(comp);
   //  fSensor->SetTimeWindow(0.,2500.,100); //Lowest time [ns], time bins [ns], number of bins
   //  fSensor->SetTimeWindow(0.,5.,100); //Lowest time [ns], time bins [ns], number of bins
   fNumbins = 100;
-  fBinsz = 10.; //nsec
+  fBinsz = 300.; //nsec
   fSensor->SetTimeWindow(0.,fBinsz,fNumbins*fBinsz); //Lowest time [ns], time bins [ns], number of bins
 
-  comp->AddReadout("s1");
+  //comp->AddReadout("s1");
   comp->AddReadout("s2");
 
   fSensor->SetArea(-axis_x, -axis_y, -axis_z, axis_x, axis_y, axis_z);
-  fSensor->AddElectrode(comp,"s1");
+
+  //fSensor->AddElectrode(comp,"s1");
   fSensor->AddElectrode(comp,"s2");
+
+  // Sensor E field check belongs back here. Temporarily moved up to comp.
+
+  std::cout << "HeedModel::BuildSensor() Is geometry a tube?: " << geo->GetSolid(0)->IsTube() << std::endl;  
+  std::cout << "HeedModel::BuildSensor() Geometry halflength, radius: " << geo->GetSolid(0)->GetHalfLength() << ", " << geo->GetSolid(0)->GetRadius() << std::endl;
+  
 }
 
 //Set which tracking mechanism to be used: Runge-kutta, Monte-Carlo or Microscopic (see Garfield++ documentation)
@@ -360,6 +370,7 @@ void HeedModel::SetTracking(){
     fDrift->SetTimeSteps(0.05); // nsec, per example
     fDrift->SetDistanceSteps(2.e-2); // cm, 10x example
     //    fDrift->EnableDebugging(); // way too much information. EC, 2-Nov-2021.
+    fDrift->DisableDebugging();
     if(createAval) fDrift->EnableAttachment();
     else fDrift->DisableAttachment();
 
@@ -427,6 +438,48 @@ void HeedModel::CreateFieldView(){
   strcpy(str2,name);
   strcat(str2,"_efield.pdf");
   fField->Print(str2);
+
+  int nbinsxz(50); int nbinsy(100); double binedgesxz(4); double binedgesy(10);
+  
+  TFile* f3d = new TFile("Efield3d.root","recreate");
+  TH3F* e3d = new TH3F("E3D","E3Dname",nbinsxz,-binedgesxz,binedgesxz,nbinsy,-binedgesy,binedgesy,nbinsxz,-binedgesxz,binedgesxz);
+  TH2F* e2d = new TH2F("E2D","E2Dname",nbinsxz,-binedgesxz,binedgesxz,nbinsy,-binedgesy,binedgesy);
+
+    	    int status(0); Garfield::Medium* medium;
+	    double ex,ey,ez;
+	    double xmin(+12),xmax(-12),ymin(+12),ymax(-12),zmin(+12),zmax(-12);
+
+	    int nbiny(0);
+	    for (double yh=-binedgesy; yh<binedgesy; yh+=2*binedgesy/nbinsy) {
+	      nbiny++;
+	      int nbinz(0);
+	      for (double zr=-binedgesxz; zr<binedgesxz; zr+=2*binedgesxz/nbinsxz) {
+		nbinz++;
+		int nbinx(0);
+		for (double xr=-binedgesxz; xr<binedgesxz; xr+=2*binedgesxz/nbinsxz) {
+		  nbinx++;
+		  fSensor->ElectricField(xr, yh, zr, ex, ey, ez, medium, status);
+		  //		  comp->ElectricField(xr, yh, zr, ex, ey, ez, medium, status);
+		  //		  std::cout << "Filling TH3F bin " << xr << "," << yh << "," << zr << std::endl;
+		  e3d->SetBinContent(nbinx-1,nbiny-1,nbinz-1,pow(ex*ex+ey*ey+ez*ez,0.5));
+		  //		  e2d->SetBinContent(pow((xr+binedgesxz/nbinsxz)*(xr+binedgesxz/nbinsxz)+(zr+binedgesxz/nbinsxz)*(zr+binedgesxz/nbinsxz),0.5),yh+binedgesy/nbinsy,pow(ex*ex+ey*ey+ez*ez,0.5));
+		  if (pow(ex*ex+ey*ey+ez*ez,0.5)>0.0001 ) {
+		    if (xr<xmin) xmin=xr;
+		    if (xr>xmax) xmax=xr;
+		    if (zr<zmin) zmin=zr;
+		    if (zr>zmax) zmax=zr;
+		    if (yh<ymin) ymin=yh;
+		    if (yh>ymax) ymax=yh;
+	  
+		  }
+		}}}
+
+	    std::cout << "xmin,xmax; ymin,ymax; zmin,zmax [cm]"<< xmin <<","<<xmax<<"; "<<ymin<< ","<<ymax<<"; "<<zmin<<"," <<zmax  << std::endl;
+
+  
+  f3d->Write();
+  f3d->Close();
+  
 }
 
 // Drift the electrons from point of creation towards the electrodes (This is common for both models, i.e. HeedDeltaElectron and HeedModel) (see Garfield++ documentation)

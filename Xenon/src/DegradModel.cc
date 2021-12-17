@@ -67,7 +67,9 @@ void DegradModel::DoIt(const G4FastTrack& fastTrack, G4FastStep& fastStep) {
         stdout=system("./convertDegradFile.py");
 
         GetElectronsFromDegrad(fastStep,degradPos,degradTime);
-        processOccured=true;
+	// We call Degrad only once, which now that we have the x,y,z location of our primary Xray interaction, re-simulates that interaction. 
+	// Note the 5900 in the Degrad config file. The following line forces the single Degrad execution. EC, 2-Dec-2021.
+	processOccured=true; 
     }
 
 }
@@ -149,10 +151,10 @@ void DegradModel::GetElectronsFromDegrad(G4FastStep& fastStep,G4ThreeVector degr
                     xh->SetTime(time);
                     fGasBoxSD->InsertXenonHit(xh);
                         // Create secondary electron
-                    if(electronNumber % 50 == 0){    
-                        G4DynamicParticle electron(G4Electron::ElectronDefinition(),G4RandomDirection(), 7.0*eV);
-                        G4Track *newTrack=fastStep.CreateSecondaryTrack(electron, myPoint, time,false);
-                    }
+		    //		    if(electronNumber % 50 == 0){     // comment this condition, EC, 2-Dec-2021.
+		    G4DynamicParticle electron(G4Electron::ElectronDefinition(),G4RandomDirection(), 7.0*eV);
+		    G4Track *newTrack=fastStep.CreateSecondaryTrack(electron, myPoint, time,false);
+		    //		    }
                 }
             }
             v.clear(); //Faz reset ao vector senão vai continuar a adicionar os dadosadicionar os dados

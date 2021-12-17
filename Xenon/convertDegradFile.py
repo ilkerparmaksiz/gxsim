@@ -4,15 +4,15 @@ import re
 
 
 WORKING_DIRECTORY = os.getcwd()
-print WORKING_DIRECTORY
+print (WORKING_DIRECTORY)
 for files in os.listdir(WORKING_DIRECTORY):
     if files.endswith(".OUT"):
         # replace all space characters by tab
         infile = open(files, "r")
         outfile = open("tempFile.dat", "w")
         replacements = {' ': '\t'}
-        print files
-        print "replacing lines..."
+        print (files)
+        print ("replacing lines...")
         for line in infile:
             for src, target in replacements.iteritems():
                 line = line.replace(src, target)

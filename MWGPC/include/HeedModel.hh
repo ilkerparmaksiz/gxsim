@@ -27,6 +27,9 @@
 #include "GasModelParameters.hh"
 #include "GasBoxSD.hh"
 
+#include "TFile.h"
+#include "TH3F.h"
+#include "TH2F.h"
 
 class G4VPhysicalVolume;
 class DetectorConstruction;

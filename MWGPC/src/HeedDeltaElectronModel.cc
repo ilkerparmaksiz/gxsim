@@ -64,7 +64,7 @@ void HeedDeltaElectronModel::Run(G4FastStep& fastStep,const G4FastTrack& fastTra
         fTrackHeed->TransportDeltaElectron(x_cm, y_cm, z_cm, t, eKin_eV, dx, dy,
                                            dz, nc, ni);
 	//	if (nc>0)
-	//  G4cout << "Post e- transport electrons: " << nc << G4endl;
+	//		  G4cout << "Post e- transport electrons: " << nc << G4endl;
     }
     else{
         G4AutoLock lock(&aMutex);
@@ -82,7 +82,10 @@ void HeedDeltaElectronModel::Run(G4FastStep& fastStep,const G4FastTrack& fastTra
         gbh->SetTime(te);
         fGasBoxSD->InsertGasBoxHit(gbh);
         if(G4VVisManager::GetConcreteInstance() /*&& cl % 100 == 0*/)
+	  {
+	    //	    std::cout << "HeedDeltaElectronModel::Run() drifting e's from x,y,z [mmm]: " << xe <<"," << ye << ","  << ze << std::endl;
             Drift(xe,ye,ze,te);
+	  }
     }
 
     PlotTrack();
@@ -99,12 +102,13 @@ void HeedDeltaElectronModel::Run(G4FastStep& fastStep,const G4FastTrack& fastTra
     G4int evID (evt->GetEventID());
     if (pntid + 1 == tid ) // This is the last Heed track to be fasttracked here
       {
+	std::cout << "HeedDeltaElectronModel::Run() last track. Get signal" << std::endl;
 	auto analysisManager = G4AnalysisManager::Instance();
 	G4double sigsum(0);
 	for (int bin = 0; bin<fNumbins; bin++)
 	  { 
-	    //if (fSensor->GetSignal("s2", bin) != 0.)
-	      //  std::cout << " wire electron signal: " << bin*fBinsz << " nsec: "<< fSensor->GetSignal("s2", bin) << std::endl;
+	    if (fSensor->GetSignal("s2", bin) != 0.)
+	      //	        std::cout << " wire electron signal: " << bin*fBinsz << " nsec: "<< fSensor->GetSignal("s2", bin) << std::endl;
 	    //	analysisManager->GetP1(0)->SetBinEntries(bin,0.);
 	    analysisManager->FillP1(evID,(bin+bin+1)/2.*fBinsz,fSensor->GetSignal("s2", bin));
 	    sigsum += fSensor->GetSignal("s2", bin)*fBinsz;

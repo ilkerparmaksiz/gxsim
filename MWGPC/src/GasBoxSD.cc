@@ -59,8 +59,8 @@ void GasBoxSD::EndOfEvent (G4HCofThisEvent * hce){
     G4double doca(121212.12);
     for(int i=0;i<entries;i++){
         auto hit = (*HC)[i];
-	//    G4cout << hit->GetPos() << " " << hit->GetTime() << G4endl;
-	doca = std::min(doca,sqrt(hit->GetPos()[0]*hit->GetPos()[0] + hit->GetPos()[1]*hit->GetPos()[1]));
+	//	G4cout <<"GasBoxSD::EndOfEvent(): GasBoxHits"<< hit->GetPos() << " " << hit->GetTime() << G4endl;
+	doca = std::min(doca,sqrt(hit->GetPos()[0]*hit->GetPos()[0] + hit->GetPos()[2]*hit->GetPos()[2]));
     }
 
     G4int id(0);

@@ -24,7 +24,7 @@
 /tracking/verbose 0
 /run/verbose 1
 /event/verbose 1
-/vis/verbose 6
+/vis/verbose 0
 ####################################
 ########### Visualization ##########
 ####################################
@@ -64,7 +64,7 @@
 /gps/direction 0. 1. 0 
 /gps/particle gamma
 /gps/ene/type Mono
-/gps/ene/mono 6.9 keV
+/gps/ene/mono 5.9 keV
 
 /run/beamOn 1
 

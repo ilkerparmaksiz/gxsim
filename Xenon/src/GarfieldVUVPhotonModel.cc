@@ -53,7 +53,20 @@ G4bool GarfieldVUVPhotonModel::ModelTrigger(const G4FastTrack& fastTrack){
 	
 void GarfieldVUVPhotonModel::DoIt(const G4FastTrack& fastTrack, G4FastStep& fastStep) 
 {
-    
+
+  /* 
+     This tracks all the ionization/conversion electrons created by Degrad in its simulation of the primary gamma's photoelectric effect on Xe.
+     Each such electron is drifted in the E-field and avalanched, as appropriate. That creates excited Xe atoms. We put one ELM photon
+     per excitation of 172/7.2 nm/eV onto the optical photon stack. Geant4 will track those in the normal way. 
+     (I think Garfield creates these photons too, but we're throwing 'em out.)
+
+     Note, the weirdness of userHandle, which seems to be called at each excitation by the AvalancheMicroscopic model and fills our
+     GarfieldExcitationHitCollection. And which somehow we're allowed to grab here.
+
+     EC, 2-Dec-2021.
+
+   */
+  
     //G4cout<<"HELLO Garfield"<<G4endl;
     ////The details of the Garfield model are implemented here
      fastStep.KillPrimaryTrack();//KILL DEGRAD TRACKS
@@ -72,7 +85,7 @@ GarfieldExcitationHitsCollection *garfExcHitsCol;
 void GarfieldVUVPhotonModel::GenerateVUVPhotons(const G4FastTrack& fastTrack, G4FastStep& fastStep,G4ThreeVector garfPos,G4double garfTime)
 {
 
-	
+
 	G4double x0=garfPos.getX()*0.1;//Garfield length units are in cm
 	G4double y0=garfPos.getY()*0.1;
 	G4double z0=garfPos.getZ()*0.1;
@@ -84,22 +97,24 @@ void GarfieldVUVPhotonModel::GenerateVUVPhotons(const G4FastTrack& fastTrack, G4
 	unsigned int nElastic, nIonising, nAttachment, nInelastic, nExcitation, nSuperelastic;
 	fMediumMagboltz->GetNumberOfElectronCollisions(nElastic, nIonising, nAttachment, nInelastic, nExcitation, nSuperelastic);
 	
-	G4cout<<"NExcitation "<<nExcitation<<G4endl;	
+	G4cout<<"NExcitation "<<nExcitation<<G4endl; // This quantity seems to be cumulative over (at least) the event. ... EC, 2-Dec-2021.
 
 	G4int colHitsEntries=garfExcHitsCol->entries();
+	G4cout<<"GarfExcHits entries "<<colHitsEntries<<G4endl; // This one is not cumulative.
+	
 	for (G4int i=0;i<colHitsEntries;i++){
 	  GarfieldExcitationHit* newExcHit=new GarfieldExcitationHit();
 	  newExcHit->SetPos((*garfExcHitsCol)[i]->GetPos());
 	  newExcHit->SetTime((*garfExcHitsCol)[i]->GetTime());
 	  fGasBoxSD->InsertGarfieldExcitationHit(newExcHit);
-	  fastStep.SetNumberOfSecondaryTracks(1);	//1 photon per excitation
-	  if(i % (colHitsEntries/10) == 0){
+	  //	  fastStep.SetNumberOfSecondaryTracks(1);	//1 photon per excitation .... Must be commented when I comment below condition too.
+	  //if(i % (colHitsEntries/10) == 0){ // Need to uncomment this condition, along with one in degradmodel.cc. EC, 2-Dec-2021.
 	    G4DynamicParticle VUVphoton(G4OpticalPhoton::OpticalPhotonDefinition(),G4RandomDirection(), 7.2*eV);
 	    // Create photons track
 	    G4Track *newTrack=fastStep.CreateSecondaryTrack(VUVphoton, (*garfExcHitsCol)[i]->GetPos(),(*garfExcHitsCol)[i]->GetTime(),false);
 	    //	G4ProcessManager* pm= newTrack->GetDefinition()->GetProcessManager();
 	    //	G4ProcessVectorfAtRestDoItVector = pm->GetAtRestProcessVector(typeDoIt);
-	  }						
+	    //}						
 	}
 	delete garfExcHitsCol;
 }

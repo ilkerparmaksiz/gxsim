@@ -1,4 +1,4 @@
-/MWGPC/geometry/SetGasPressure 3 bar
+/MWGPC/geometry/SetGasPressure 3.0 bar
 # this is number of hexes in middle row. Must be one of 1,3,5,7,9.
 /MWGPC/geometry/SetNumHexes 1
 
@@ -6,10 +6,11 @@
 
 ##### energy in MeV
 #/gasModelParameters/heed/heeddeltaelectron/addparticle e- 0.001
-/gasModelParameters/heed/heeddeltaelectron/addparticle gamma 0. 10000000
+/gasModelParameters/heed/heeddeltaelectron/addparticle gamma 0.001 10000000
 #/gasModelParameters/heed/heednewtrack/addparticle e- 0.0000001 2000000.
 
-/gasModelParameters/heed/heeddeltaelectron/addparticle e- 0. 0.001
+/gasModelParameters/heed/heeddeltaelectron/addparticle e- 0.000010 0.010 
+# This line forces only highly relativistic e-s to be tracked by Heed. Elsewise, G4 PAI does it.
 /gasModelParameters/heed/heednewtrack/addparticle e- 5.0 100000.
 
 /gasModelParameters/heed/heednewtrack/addparticle e+ 1000. 100000.
@@ -20,8 +21,8 @@
 #/gasModelParameters/heed/heednewtrack/addparticle pi+ 100. 1000000.
 
 #/gasModelParameters/heed/gasfile Ar_90_CH4_10.gas
-/gasModelParameters/heed/gasfile N2_99_O2_1.gas
-#/gasModelParameters/heed/gasfile N2.gas 
+#/gasModelParameters/heed/gasfile N2_99_O2_1.gas
+/gasModelParameters/heed/gasfile N2.gas 
 #/gasModelParameters/heed/gasfile /Users/chur558/mwsim/ALICE/Ne_90_CO2_10_N2_5_with_mg.gas
 /gasModelParameters/heed/ionmobilityfile IonMobility_Ar+_Ar.txt
 /gasModelParameters/heed/drift 1
@@ -46,16 +47,18 @@
 /MWGPC/phys/AddParametrisation
 
 
-#/process/em/lowestElectronEnergy 10 eV
+/process/em/lowestElectronEnergy 10 eV
+
 /process/em/AddPAIRegion all GasRegion PAIphoton
-#/MWGPC/phys/setCuts 1 mm
-/MWGPC/phys/setLowLimitE 10. eV
+/MWGPC/phys/setCuts 1 mm
+/MWGPC/phys/setLowLimitE 1. eV
 
 
 #/random/setSeeds 0 0
 /run/initialize
 
-/analysis/setFileName halfcm_60kev.root
+#/analysis/setFileName uni_60kev_99N2_102_3atm.root
+/analysis/setFileName uni_60kev_N2_3atm.root
 #/param/InActivateModel HeedNewTrackModel
 #/param/InActivateModel HeedDeltaElectronModel
 
@@ -67,7 +70,7 @@
 /tracking/verbose 0
 /run/verbose 1
 /event/verbose 0
-/vis/verbose 1
+/vis/verbose 0
 ####################################
 ########### Visualization ##########
 ####################################
@@ -81,11 +84,13 @@
 /vis/viewer/set/lightsThetaPhi 90. 0.
 #/vis/viewer/set/viewpointThetaPhi 150. 90.
 /vis/viewer/set/viewpointThetaPhi 90. 0.
-/vis/viewer/set/style surface
+#/vis/viewer/set/style wireframe
+##surface
 
 
 /vis/viewer/set/hiddenEdge true
 /vis/viewer/set/style surface
+#/vis/viewer/set/style wireframe
 /vis/viewer/set/lineSegmentsPerCircle 100
 
 # Draw smooth trajectories at end of event.
@@ -102,8 +107,11 @@
 
 /vis/scene/endOfEventAction accumulate 
 
+#/vis/geometry/set/forceWireframe solidWorld_log -1 1
 /vis/geometry/set/forceWireframe solidGasBox_log -1 1
 /vis/geometry/set/forceWireframe solidWall_log -1 1
+/vis/geometry/set/forceWireframe solidWallS_log -1 1
+/vis/geometry/set/forceWireframe solidWallN_log -1 1
 
 # If this is 1 I segFault at G4MergeTracks() which seems to be trying to append trajectory points
 # of G4Tracking to those for HeedTrack, which could be of null size -- for reasons I don't understand. Lennert says
@@ -112,10 +120,8 @@
 /tracking/storeTrajectory 0
 
 
-/gps/position 0.5 0.5 0.  cm
-/gps/ang/type iso
 
-##/gps/direction 0. 0. +1.
+##/gps/direction 0. +1. 0.
 #/gps/ang/user_coor true
 #/gps/ang/mintheta 0
 #/gps/ang/maxtheta 3.14159 rad
@@ -127,6 +133,19 @@
 #/gps/ene/mono 2.7 keV
 /gps/ene/mono 60 keV
 
+#/gps/position 0.5 0.0 0.5  cm
 
-/run/beamOn 800
+/gps/ang/type iso
+/gps/position 0 0 0 cm
+
+/gps/pos/type Volume
+/gps/pos/shape Cylinder
+/gps/pos/radius 3.2 cm
+/gps/pos/halfz 9.5 cm
+/gps/pos/centre 0. 0. 0. cm
+/gps/pos/rot1 1 0 0
+/gps/pos/rot2 0 0 1
+/gps/pos/confine solidGasBox_phys
+
+/run/beamOn 80
 

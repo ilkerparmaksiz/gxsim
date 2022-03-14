@@ -146,12 +146,12 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
 
   //  mixture =
   //  new G4Material(name="mixture",density,ncomponents=2);//,kStateGas, temperature,gasPressure);
-  mixture = new G4Material("mixture", density, 1 /*2*/);
+  mixture = new G4Material("mixture", density, 2);
   G4Material* O2 =  man->FindOrBuildMaterial("G4_O");
   G4Material* N2 =  man->FindOrBuildMaterial("G4_N");
-  //    mixture->AddMaterial(N2, 0.99);
-  //  mixture->AddMaterial(O2, 0.01);
-    mixture->AddMaterial(N2, 1.00);
+  mixture->AddMaterial(N2, 0.99);
+  mixture->AddMaterial(O2, 0.01);
+  //    mixture->AddMaterial(N2, 1.00);
   
   
   

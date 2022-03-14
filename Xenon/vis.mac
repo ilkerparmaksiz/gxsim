@@ -36,7 +36,7 @@
 /vis/scene/add/trajectories smooth
 /vis/scene/add/hits
 /vis/viewer/set/lightsThetaPhi 90. 0.
-/vis/viewer/set/viewpointThetaPhi 150. 90.
+/vis/viewer/set/viewpointThetaPhi 180. 90.
 /vis/viewer/set/style surface
 /vis/viewer/set/hiddenEdge true
 # Draw smooth trajectories at end of event.
@@ -52,11 +52,11 @@
 
 /vis/scene/endOfEventAction accumulate 1
 #/vis/scene/endOfRunAction accumulate
-/vis/geometry/set/forceWireframe collimatorLogical -1 1
-/vis/geometry/set/forceWireframe collimatorLogical2 -1 1
+#/vis/geometry/set/forceWireframe collimatorLogical -1 1
+#/vis/geometry/set/forceWireframe collimatorLogical2 -1 1
 /vis/geometry/set/forceWireframe windowLogical -1 1
 /vis/geometry/set/forceWireframe detectorLogical -1 1
-/vis/geometry/set/forceWireframe macorLogical -1 1
+#/vis/geometry/set/forceWireframe macorLogical -1 1
 /vis/geometry/set/forceWireframe pmtLogical -1 1
 /tracking/storeTrajectory 1
 

@@ -182,8 +182,8 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
   
   
   
-  new G4PVPlacement(transform,collimatorLogical,"collimatorPhysical",worldLogical,
-                                                            false,0,checkOverlaps);
+  //  new G4PVPlacement(transform,collimatorLogical,"collimatorPhysical",worldLogical,
+  //                                                          false,0,checkOverlaps);
   
   
   
@@ -200,8 +200,8 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
   
   
   
-  new G4PVPlacement(transform2,collimatorLogical2,"collimatorPhysical2",worldLogical,
-                                                             false,0,checkOverlaps);
+  // new G4PVPlacement(transform2,collimatorLogical2,"collimatorPhysical2",worldLogical,
+  //                                                             false,0,checkOverlaps);
   
   
   
@@ -259,7 +259,8 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
   
   G4ThreeVector position4 = G4ThreeVector(0.,macorHalfY,0.*mm);
   G4Transform3D transform4 = G4Transform3D(rotm,position4);
-  
+
+/*
   new G4PVPlacement(transform4,             //rotation and position
                     macorLogical,            //its logical volume
                     "macorPhysical",             //its name
@@ -267,7 +268,8 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
                     true,                 //no boolean operation
                     0,                 //copy number
                     checkOverlaps);       // checking overlaps
-  
+*/
+
   //PMT
   G4VSolid* pmtSolid = new G4Tubs("pmtWindow",0.,pmtRadius,pmtHalfLength,0.,twopi);
   G4LogicalVolume* pmtLogical = new G4LogicalVolume(pmtSolid,glass,"pmtLogical");
@@ -290,17 +292,19 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
   //Xenon-GLASS
   
   G4OpticalSurface* opXenon_Glass = new G4OpticalSurface("XenonGlassSurface");
-  opXenon_Glass->SetModel(unified);                  // SetModel
+  opXenon_Glass->SetModel(glisur);                  // SetModel
   opXenon_Glass->SetType(dielectric_dielectric);   // SetType
-  opXenon_Glass->SetFinish(polished);                 // SetFinish
+  //  opXenon_Glass->SetFinish(polished);                 // SetFinish
+  opXenon_Glass->SetFinish(ground);                 // SetFinish, EC, 11-Mar-2022
+
   
   new G4LogicalBorderSurface("XenonGlass",detectorPhysical,pmtPhysical,opXenon_Glass);
   
   //    // visualization attributes ------------------------------------------------
   
   worldLogical->SetVisAttributes(G4VisAttributes::Invisible);
-  collimatorLogical->SetVisAttributes(red);
-  collimatorLogical2->SetVisAttributes(green);
+//  collimatorLogical->SetVisAttributes(red);
+//  collimatorLogical2->SetVisAttributes(green);
   logicGasBox->SetVisAttributes(blue);
   pmtLogical->SetVisAttributes(yellow);
   windowLogical->SetVisAttributes(purple);

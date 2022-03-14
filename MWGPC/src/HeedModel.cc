@@ -127,8 +127,8 @@ void HeedModel::makeGas(){
   // Another line to comment in/out !   EC, 26-Oct-2021.
   //  fMediumMagboltz->SetComposition("ar", arPerc, "ch4", ch4Perc);
   //fMediumMagboltz->SetComposition("ar", 90, /* "n2", 99, */ "ch4", 10/* "o2", 1*/);
-  // fMediumMagboltz->SetComposition( "n2", 99,  "o2", 1);
-  fMediumMagboltz->SetComposition("n2", 100);
+  fMediumMagboltz->SetComposition( "n2", 99,  "o2", 1);
+  //  fMediumMagboltz->SetComposition("n2", 100);
   fMediumMagboltz->SetTemperature(temperature);
   fMediumMagboltz->SetPressure(pressure); 
   fMediumMagboltz->EnableDebugging(); 

@@ -108,13 +108,13 @@ void GarfieldVUVPhotonModel::GenerateVUVPhotons(const G4FastTrack& fastTrack, G4
 	  newExcHit->SetTime((*garfExcHitsCol)[i]->GetTime());
 	  fGasBoxSD->InsertGarfieldExcitationHit(newExcHit);
 	  //	  fastStep.SetNumberOfSecondaryTracks(1);	//1 photon per excitation .... Must be commented when I comment below condition too.
-	  //if(i % (colHitsEntries/10) == 0){ // Need to uncomment this condition, along with one in degradmodel.cc. EC, 2-Dec-2021.
+	  if(i % (colHitsEntries/10) == 0){ // Need to uncomment this condition, along with one in degradmodel.cc. EC, 2-Dec-2021.
 	    G4DynamicParticle VUVphoton(G4OpticalPhoton::OpticalPhotonDefinition(),G4RandomDirection(), 7.2*eV);
 	    // Create photons track
 	    G4Track *newTrack=fastStep.CreateSecondaryTrack(VUVphoton, (*garfExcHitsCol)[i]->GetPos(),(*garfExcHitsCol)[i]->GetTime(),false);
 	    //	G4ProcessManager* pm= newTrack->GetDefinition()->GetProcessManager();
 	    //	G4ProcessVectorfAtRestDoItVector = pm->GetAtRestProcessVector(typeDoIt);
-	    //}						
+	    }						
 	}
 	delete garfExcHitsCol;
 }
@@ -159,7 +159,7 @@ void GarfieldVUVPhotonModel::InitialisePhysics(){
   
 }
 
-// Selection of Xenon exitations and ionizations
+// Selection of Xenon excitations and ionizations
 void userHandle(double x, double y, double z, double t, int type, int level,Garfield::Medium * m)
 {
 	G4ThreeVector Pos;

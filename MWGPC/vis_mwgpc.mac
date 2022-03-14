@@ -1,4 +1,4 @@
-/MWGPC/geometry/SetGasPressure 3.0 bar
+/MWGPC/geometry/SetGasPressure 1.2 bar
 # this is number of hexes in middle row. Must be one of 1,3,5,7,9.
 /MWGPC/geometry/SetNumHexes 1
 
@@ -21,8 +21,8 @@
 #/gasModelParameters/heed/heednewtrack/addparticle pi+ 100. 1000000.
 
 #/gasModelParameters/heed/gasfile Ar_90_CH4_10.gas
-#/gasModelParameters/heed/gasfile N2_99_O2_1.gas
-/gasModelParameters/heed/gasfile N2.gas 
+/gasModelParameters/heed/gasfile N2_99_O2_1.gas
+#/gasModelParameters/heed/gasfile N2.gas 
 #/gasModelParameters/heed/gasfile /Users/chur558/mwsim/ALICE/Ne_90_CO2_10_N2_5_with_mg.gas
 /gasModelParameters/heed/ionmobilityfile IonMobility_Ar+_Ar.txt
 /gasModelParameters/heed/drift 1
@@ -34,7 +34,8 @@
 /gasModelParameters/heed/visualizefield 1
 /gasModelParameters/heed/voltageplanehv -100000
 /gasModelParameters/heed/voltageplanelow 0
-/gasModelParameters/heed/voltageanodewire 5000.
+#/gasModelParameters/heed/voltageanodewire 15000.
+/gasModelParameters/heed/voltageanodewire 6000.
 /gasModelParameters/heed/voltagecathodewire 0.
 
 
@@ -57,8 +58,8 @@
 #/random/setSeeds 0 0
 /run/initialize
 
-#/analysis/setFileName uni_60kev_99N2_102_3atm.root
-/analysis/setFileName uni_60kev_N2_3atm.root
+
+/analysis/setFileName uni_60kev_99N201O2_1p2atm_6000V.root
 #/param/InActivateModel HeedNewTrackModel
 #/param/InActivateModel HeedDeltaElectronModel
 
@@ -140,7 +141,8 @@
 
 /gps/pos/type Volume
 /gps/pos/shape Cylinder
-/gps/pos/radius 3.2 cm
+#/gps/pos/radius 3.2 cm
+/gps/pos/radius 1.5 mm
 /gps/pos/halfz 9.5 cm
 /gps/pos/centre 0. 0. 0. cm
 /gps/pos/rot1 1 0 0

@@ -32,4 +32,4 @@ for files in os.listdir(WORKING_DIRECTORY):
         infile.close()
         outfile.close()
         os.system("rm tempFile.dat")
-print "Replacing Finished"
+print ("Replacing Finished")

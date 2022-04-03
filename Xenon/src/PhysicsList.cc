@@ -164,6 +164,17 @@ void PhysicsList::SetCuts() {
     region->SetProductionCuts(cuts);
   }
 
+
+  G4Region* region2 = G4RegionStore::GetInstance()->GetRegion("GasRegionEL");
+  G4ProductionCuts* cuts2 = new G4ProductionCuts();
+  cuts2->SetProductionCut(1 * um, G4ProductionCuts::GetIndex("gamma"));
+  cuts2->SetProductionCut(1 * um, G4ProductionCuts::GetIndex("e-"));
+  cuts2->SetProductionCut(1 * um, G4ProductionCuts::GetIndex("e+"));
+  
+  if (region2) {
+    region2->SetProductionCuts(cuts);
+  }
+
   if (verboseLevel > 0) DumpCutValuesTable();
 }
 

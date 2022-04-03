@@ -23,7 +23,7 @@
 DetectorConstruction::DetectorConstruction(GasModelParameters* gmp)
     :
     fGasModelParameters(gmp),
-    checkOverlaps(0),
+    checkOverlaps(1),
     worldHalfLength(3.*m), //World volume is a cube with side length = 3m;
     wallThickness(0.05*m), //thickness of the aluminum walls
     caloThickness(1.*mm), // thickness of the silicon detectors
@@ -247,6 +247,23 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
                                                             true,                 //no boolean operation
                                                             0,                 //copy number
                                                             checkOverlaps);       // checking overlaps
+
+  //Make XenonELVolume  
+  G4VSolid* detectorSolidEL =new  G4Tubs("detectorBoxEL",0,gasboxR,0.5*gasboxH*0.05,0.,twopi);
+  
+  ////Place Detector in world
+  logicGasBoxEL = new G4LogicalVolume(detectorSolidEL,Xenon,"detectorLogicalEL");
+  
+  G4ThreeVector positionEL3 = G4ThreeVector(0.,gasboxH+0.5*gasboxH*0.05,0.*mm);
+  G4Transform3D transformEL3 = G4Transform3D(rotm,positionEL3);
+  
+  G4VPhysicalVolume* detectorPhysicalEL=    new G4PVPlacement(transformEL3,             //rotation and position
+                                                            logicGasBoxEL,            //its logical volume
+                                                            "detectorPhysicalEL",             //its name
+                                                            worldLogical,             //its mother  volume
+                                                            true,                 //no boolean operation
+                                                            0,                 //copy number
+                                                            checkOverlaps);       // checking overlaps
   
   
   //Macor
@@ -276,7 +293,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
   
   
   //Make pmtLogical mother and photocathode daughter
-  G4ThreeVector positionPMT = G4ThreeVector(0.,pmtHalfLength+2*gasboxH*0.5,0.*mm);
+  G4ThreeVector positionPMT = G4ThreeVector(0.,pmtHalfLength+2*gasboxH*0.5+2*gasboxH*0.05,0.*mm);
   
   
   G4Transform3D transformPMT = G4Transform3D(rotm,positionPMT);
@@ -306,6 +323,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
 //  collimatorLogical->SetVisAttributes(red);
 //  collimatorLogical2->SetVisAttributes(green);
   logicGasBox->SetVisAttributes(blue);
+  logicGasBoxEL->SetVisAttributes(red);
   pmtLogical->SetVisAttributes(yellow);
   windowLogical->SetVisAttributes(purple);
 
@@ -313,6 +331,8 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
   //Construct a G4Region, connected to the logical volume in which you want to use the G4FastSimulationModel
   G4Region* regionGas = new G4Region("GasRegion");
   regionGas->AddRootLogicalVolume(logicGasBox);
+  G4Region* regionGasEL = new G4Region("GasRegionEL");
+  regionGasEL->AddRootLogicalVolume(logicGasBoxEL);
     
   return physiWorld;
 
@@ -321,15 +341,20 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
 void DetectorConstruction::ConstructSDandField(){
   G4SDManager* SDManager = G4SDManager::GetSDMpointer();
   G4String GasBoxSDname = "interface/GasBoxSD";
+  G4String GasBoxSDELname = "interface/GasBoxSDEL";
   GasBoxSD* myGasBoxSD = new GasBoxSD(GasBoxSDname);
+  GasBoxSD* myGasBoxSDEL = new GasBoxSD(GasBoxSDELname);
   SDManager->SetVerboseLevel(1);
   SDManager->AddNewDetector(myGasBoxSD);
+  SDManager->AddNewDetector(myGasBoxSDEL);
   SetSensitiveDetector(logicGasBox,myGasBoxSD);
+  SetSensitiveDetector(logicGasBoxEL,myGasBoxSDEL);
   
   //These commands generate the four gas models and connect it to the GasRegion
   G4Region* region = G4RegionStore::GetInstance()->GetRegion("GasRegion");
+  G4Region* regionEL = G4RegionStore::GetInstance()->GetRegion("GasRegionEL");
   new DegradModel(fGasModelParameters,"DegradModel",region,this,myGasBoxSD);
-  new GarfieldVUVPhotonModel(fGasModelParameters,"GarfieldVUVPhotonModel",region,this,myGasBoxSD);
+  new GarfieldVUVPhotonModel(fGasModelParameters,"GarfieldVUVPhotonModel",regionEL,this,myGasBoxSDEL);
 
 }
 

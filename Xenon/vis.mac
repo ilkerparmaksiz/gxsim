@@ -21,7 +21,7 @@
 ####################################
 ############ Verbosities ###########
 ####################################
-/tracking/verbose 0
+/tracking/verbose 2
 /run/verbose 1
 /event/verbose 1
 /vis/verbose 0
@@ -56,6 +56,7 @@
 #/vis/geometry/set/forceWireframe collimatorLogical2 -1 1
 /vis/geometry/set/forceWireframe windowLogical -1 1
 /vis/geometry/set/forceWireframe detectorLogical -1 1
+/vis/geometry/set/forceWireframe detectorLogicalEL -1 1
 #/vis/geometry/set/forceWireframe macorLogical -1 1
 /vis/geometry/set/forceWireframe pmtLogical -1 1
 /tracking/storeTrajectory 1

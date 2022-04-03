@@ -27,12 +27,18 @@ GasBoxSD::~GasBoxSD(){}
 
 
 void GasBoxSD::Initialize(G4HCofThisEvent * HCE){
+  std::cout << "GasBoxSD 0" << std::endl;
     fXenonHitsCollection = new XenonHitsCollection(SensitiveDetectorName, collectionName[0]);
+      std::cout << "GasBoxSD 1" << std::endl;
     fGarfieldExcitationHitsCollection = new GarfieldExcitationHitsCollection(SensitiveDetectorName, collectionName[1]);
+      std::cout << "GasBoxSD 2" << std::endl;
     if(XHCID==-1){
         XHCID = G4SDManager::GetSDMpointer()->GetCollectionID(collectionName[0]);
+	  std::cout << "GasBoxSD 3" << std::endl;
         GEHCID = G4SDManager::GetSDMpointer()->GetCollectionID(collectionName[1]);
+	  std::cout << "GasBoxSD 4" << std::endl;
     }
+      std::cout << "GasBoxSD 5" << std::endl;
     HCE->AddHitsCollection(XHCID,fXenonHitsCollection);
     HCE->AddHitsCollection(GEHCID,fGarfieldExcitationHitsCollection);
 
@@ -57,14 +63,14 @@ G4bool GasBoxSD::ProcessHits(G4Step* aStep, G4TouchableHistory* hist){
 void GasBoxSD::EndOfEvent (G4HCofThisEvent * hce){
     auto HC = static_cast<XenonHitsCollection*>(hce->GetHC(XHCID));
     int entries = HC->entries();
-    G4cout << "Number of Electrons: " << entries << G4endl;
+    G4cout << "Number of XHC Electrons: " << entries << G4endl;
     for(int i=0;i<entries;i++){
         auto hit = (*HC)[i];
         G4cout << hit->GetPos() << " " << hit->GetTime() << G4endl;
     }
     auto HC1 = static_cast<GarfieldExcitationHitsCollection*>(hce->GetHC(GEHCID));
     int entries1 = HC1->entries();
-    G4cout << "Number of Electrons: " << entries << G4endl;
+    G4cout << "Number of GEHC Electrons: " << entries << G4endl;
     for(int i=0;i<entries1;i++){
         auto hit = (*HC1)[i];
         G4cout << hit->GetPos() << " " << hit->GetTime() << G4endl;

@@ -73,6 +73,7 @@ class DetectorConstruction : public G4VUserDetectorConstruction {
  private:
   DetectorMessenger* detectorMessenger;
   G4LogicalVolume* logicGasBox;
+  G4LogicalVolume* logicGasBoxEL;
   G4LogicalVolume* logicCalo;
   GasModelParameters* fGasModelParameters;
   G4bool checkOverlaps; // Check overlaps in the detector geometry if true

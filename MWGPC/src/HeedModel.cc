@@ -177,29 +177,6 @@ void HeedModel::buildBox(){
   // pull out the density to see if our pressure-setting in .mac file is in fact effected down in Garfield. EC, 28-Oct-2021.
   double ggeodens = geo->GetMedium(0.,0.,0.)->GetMassDensity();
   std::cout << "HeedModel::buildBox(): Garfield mass density [g/cm3] is: " << ggeodens << std::endl;
-}
-
-//Construction of the electric field (see Garfield++ documentation)
-void HeedModel::BuildCompField(){
-    // Switch between IROC and OROC.
-    // y-axis gap between rows of wires [cm]
-  const double gap = 0.2;
-    
-    // y coordinates of the wires [cm]
-
-    const double yc = 2. * gap;       // cathode
-    const double yg = 2. * gap + 0.3; // gate
-    // Periodicity (wire spacing)
-    const double period = 0.25;
-    const int nRep = 2;
-    int nRepC = 10; // randomly chosen number for each side of hex, EC    
-    int nRepG = 40; // randomly chosen number for guard ring, EC
-
-    // For 1 Hex I want no cathode/guard wires, just the tube. EC, 14-Oct-2021
-    if (detCon->GetNumHexes()==1) {
-	nRepC = 0;
-	nRepG = 0;
-      }
 
     
     const double dc = period;

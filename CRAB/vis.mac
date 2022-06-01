@@ -4,7 +4,7 @@
 # Lower the threshold to get GarfieldVUVModel to grab up all ionization e's.  EC, 20-Apr-2022
 /gasModelParameters/degrad/thermalenergy 1.3 eV ## 150 gives almost same answer as 450, and 2x nexcitation as with 30. ## NEST e's are 1.13 eV
 
-/run/numberOfThreads 1
+/run/numberOfThreads 4
 /control/cout/ignoreThreadsExcept 0
 #/control/cout/setCoutFile output.dmp
 

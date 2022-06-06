@@ -51,8 +51,8 @@ G4bool GarfieldVUVPhotonModel::IsApplicable(const G4ParticleDefinition& particle
 G4bool GarfieldVUVPhotonModel::ModelTrigger(const G4FastTrack& fastTrack){
   G4double ekin = fastTrack.GetPrimaryTrack()->GetKineticEnergy();
   //  std::cout << "GarfieldVUVPhotonModel::ModelTrigger() thermalE, ekin is " << thermalE << ",  "<< ekin << std::endl;
-  counter[0]++;
-  G4cout << "GarfieldVUV: candidate NEST thermales: " << counter[0] << G4endl;
+  //  counter[0]++; //maybe not thread safe.
+  //  G4cout << "GarfieldVUV: candidate NEST thermales: " << counter[0] << G4endl;
   if (ekin<thermalE) 
 		return true;
   return false;
@@ -81,10 +81,12 @@ void GarfieldVUVPhotonModel::DoIt(const G4FastTrack& fastTrack, G4FastStep& fast
      garfPos = fastTrack.GetPrimaryTrack()->GetVertexPosition();
      garfTime = fastTrack.GetPrimaryTrack()->GetGlobalTime();
      //G4cout<<"GLOBAL TIME "<<G4BestUnit(garfTime,"Time")<<" POSITION "<<G4BestUnit(garfPos,"Length")<<G4endl;
-     counter[1]++;
+     counter[1]++; // maybe not threadsafe
      if (!(counter[1]%100)) G4cout << "GarfieldVUV: actual NEST thermales: " << counter[1] << G4endl;
-     //     if (!(fastTrack.GetPrimaryTrack()->GetTrackID()/ 200 )) //  only drift every Nth thermale-.
+
+     //     if (!(counter[1]%100)) 
        GenerateVUVPhotons(fastTrack,fastStep,garfPos,garfTime);
+
     
 
 }
@@ -162,6 +164,14 @@ void GarfieldVUVPhotonModel::GenerateVUVPhotons(const G4FastTrack& fastTrack, G4
 	    //	G4ProcessVectorfAtRestDoItVector = pm->GetAtRestProcessVector(typeDoIt);
 	  }
 	}
+
+	const G4Track* pG4trk = fastTrack.GetPrimaryTrack();
+	G4int pntid = pG4trk->GetParentID();
+	G4int tid = pG4trk->GetTrackID();
+	  {
+	    std::cout << "GarfieldVUVPhotonModel::Run() last track. clear signal" << std::endl;
+	    fSensor->ClearSignal(); // prepare for next event.  
+	  }
 	
 	delete garfExcHitsCol;
 
@@ -270,7 +280,8 @@ void GarfieldVUVPhotonModel::InitialisePhysics(){
 	//std::cout << "E field at 0.1,0.5,0.1 is " << ef[0]<<","<<ef[1]<<","<<ef[2] << std::endl;
 
 	//	fSensor->AddElectrode(comp,"s2");
-	
+
+
 	
 }
 

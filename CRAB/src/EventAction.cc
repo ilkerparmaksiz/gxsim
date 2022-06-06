@@ -24,13 +24,16 @@ EventAction::~EventAction() {
 
 
 void EventAction::BeginOfEventAction(const G4Event *ev) {
+  G4cout << " EventAction::BeginOfEventAction()  0 " << G4endl;
     DegradModel* dm = (DegradModel*)(G4GlobalFastSimulationManager::GetInstance()->GetFastSimulationModel("DegradModel"));
     if(dm)
         dm->Reset();
+    G4cout << " EventAction::BeginOfEventAction()  1 " << G4endl;
 }
 
 void EventAction::EndOfEventAction(const G4Event *evt) {
 
+     G4cout << " EventAction::EndOfEventAction()  " << G4endl;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

@@ -204,6 +204,7 @@ void PhysListEmStandard::ConstructProcess() {
   std::cout  << "PhysicsListEMStandard::ConstructProcess() pit is "  << particleIteratorP << std::endl;
 
   gasNESTdet* gndet = new gasNESTdet();
+  //  std::shared_ptr<gasNESTdet> gndet(new gasNESTdet());
   NEST::NESTcalc* calcNEST = new NEST::NESTcalc(gndet);  
 
   while( (*particleIteratorP)() ){

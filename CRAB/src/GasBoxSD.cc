@@ -58,18 +58,21 @@ G4bool GasBoxSD::ProcessHits(G4Step* aStep, G4TouchableHistory* hist){
 }
 
 void GasBoxSD::EndOfEvent (G4HCofThisEvent * hce){
-    auto HC = static_cast<XenonHitsCollection*>(hce->GetHC(XHCID));
+  
+  auto HC = static_cast<XenonHitsCollection*>(hce->GetHC(XHCID));
     int entries = HC->entries();
     G4cout << "Number of Electrons: " << entries << G4endl;
-    /*
+  /*
     for(int i=0;i<entries;i++){
         auto hit = (*HC)[i];
         G4cout << hit->GetPos() << " " << hit->GetTime() << G4endl;
     }
     */
+  /*
     auto HC1 = static_cast<GarfieldExcitationHitsCollection*>(hce->GetHC(GEHCID));
     int entries1 = HC1->entries();
     G4cout << "GasBoxSD::EndOfEvent (): Number of De-excitations: " << entries1 << G4endl;
+  */
     /*
     for(int i=0;i<entries1;i++){
         auto hit = (*HC1)[i];

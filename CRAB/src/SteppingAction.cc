@@ -61,7 +61,7 @@ void SteppingAction::UserSteppingAction(const G4Step *aStep) {
     {
       eVname = eVolume->GetName();
 
-      if (lVolume->GetName().find("pmt")!=std::string::npos)
+      if (lVolume->GetName().find("pmt")!=std::string::npos) // PMT
 	//      if (/*eVname=="detectorLogical" && */ lVolume->GetName()=="pmtPhysical")
       	{
 	  //	  std::cout << "SteppingAction: Stepping from  " << lVolume->GetName() <<  " into " << eVname << " Killing OpticalPhoton." << std::endl;
@@ -78,8 +78,8 @@ void SteppingAction::UserSteppingAction(const G4Step *aStep) {
 	}
     }
 
-  id = 1;
-  if (tpos[1]/cm <9.  && track->GetCurrentStepNumber()==1) // 9-> 2*det->HalfZ
+  id = 1;  // S1
+  if ( track->GetParentID()==1) // 9-> 2*det->HalfZ
     {
       //      std::cout << "Stepping bulk, num, z is " << track->GetCurrentStepNumber() << ", "<< tpos[1]/cm << std::endl;
 	  analysisManager->FillNtupleDColumn(id,0, event);
@@ -91,8 +91,8 @@ void SteppingAction::UserSteppingAction(const G4Step *aStep) {
 	  analysisManager->AddNtupleRow(id);
     }
 
-  id = 2;
-  if (tpos[1]/cm >9. && track->GetCurrentStepNumber()==1) // 9-> 2*det->HalfZ
+  id = 2; // S2
+  if ( track->GetParentID()!=1) // 9-> 2*det->HalfZ
     {
       //          std::cout << "Stepping LEM, num, z is " << track->GetCurrentStepNumber() << ", "<< tpos[1]/cm << std::endl;
 	  analysisManager->FillNtupleDColumn(id,0, event);

@@ -12,7 +12,7 @@ MyUserActionInitialization::MyUserActionInitialization(){}
 MyUserActionInitialization::~MyUserActionInitialization(){}
 
 void MyUserActionInitialization::Build() const {
-	SetUserAction(new NESTStackingAction());
+
         PrimaryGeneratorAction* primary = new PrimaryGeneratorAction();
 	SetUserAction(primary);
 	SteppingAction* stepAct = new SteppingAction();
@@ -22,7 +22,7 @@ void MyUserActionInitialization::Build() const {
 	SetUserAction(evt);
 	SetUserAction(new RunAction());
 
-
+	SetUserAction(new NESTStackingAction());
 }
 
 void MyUserActionInitialization::BuildForMaster() const {

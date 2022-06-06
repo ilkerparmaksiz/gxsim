@@ -15,15 +15,26 @@
 #include "G4Geantino.hh"
 
 PrimaryGeneratorAction::PrimaryGeneratorAction(){
-    particleGun = new G4GeneralParticleSource();
+    fparticleGun = new G4GeneralParticleSource();
 }
 
 PrimaryGeneratorAction::~PrimaryGeneratorAction() {
-    delete particleGun;
+    delete fparticleGun;
     G4cout << "Deleting PrimaryGeneratorAction" << G4endl;
 }
 
 void PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent) {
-    particleGun->GeneratePrimaryVertex(anEvent);
+
+  std::vector<double> xyzbounds { 
+      fparticleGun->GetCurrentSource()->GetPosDist()->GetHalfX(),
+      fparticleGun->GetCurrentSource()->GetPosDist()->GetHalfY(),
+      fparticleGun->GetCurrentSource()->GetPosDist()->GetHalfZ()};
+
+  std::cout << "GeneratePrimaries() particle requested is " << fparticleGun->GetParticleDefinition() << std::endl;
+  std::cout << "GeneratePrimaries() vtx bounds:  " << xyzbounds[0] << ", " << xyzbounds[1] << ", " << xyzbounds[2] << std::endl;
+
+
+  fparticleGun->GeneratePrimaryVertex(anEvent);
+
 }
 

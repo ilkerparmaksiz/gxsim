@@ -69,7 +69,6 @@ void RunAction::BeginOfRunAction(const G4Run* aRun) {
   analysisManager->CreateNtupleDColumn("X");         //column 4
   analysisManager->CreateNtupleDColumn("Y");         //column 5
   analysisManager->CreateNtupleDColumn("Z");         //column 6
-  analysisManager->CreateNtupleDColumn("step");         //column 7
   analysisManager->FinishNtuple();
 
   analysisManager->SetNtupleActivation(true);

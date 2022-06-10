@@ -13,6 +13,7 @@
 #include "G4VPhysicalVolume.hh"
 #include "G4GlobalFastSimulationManager.hh"
 #include "DegradModel.hh"
+#include "GarfieldVUVPhotonModel.hh"
 
 EventAction::EventAction() {
   
@@ -33,7 +34,12 @@ void EventAction::BeginOfEventAction(const G4Event *ev) {
 
 void EventAction::EndOfEventAction(const G4Event *evt) {
 
-     G4cout << " EventAction::EndOfEventAction()  " << G4endl;
+    GarfieldVUVPhotonModel* gvm = (GarfieldVUVPhotonModel*)(G4GlobalFastSimulationManager::GetInstance()->GetFastSimulationModel("GarfieldVUVPhotonModel"));
+    if(gvm)
+      gvm->Reset(); // zero out the sensor: meaning reset the nexcitations, which is cumulative.
+
+  G4cout << " EventAction::EndOfEventAction()  " << G4endl;
+
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

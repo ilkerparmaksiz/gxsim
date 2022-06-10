@@ -27,6 +27,8 @@
 #include "DetectorConstruction.hh"
 #include "GasBoxSD.hh"
 #include "G4ProcessManager.hh"
+#include "G4EventManager.hh"
+#include "Analysis.hh"
 
 #include "G4AutoLock.hh"
 namespace{G4Mutex aMutex = G4MUTEX_INITIALIZER;}
@@ -41,7 +43,7 @@ GarfieldVUVPhotonModel::GarfieldVUVPhotonModel(GasModelParameters* gmp, G4String
 
 G4bool GarfieldVUVPhotonModel::IsApplicable(const G4ParticleDefinition& particleType) {
   //  std::cout << "GarfieldVUVPhotonModel::IsApplicable() particleType is " << particleType.GetParticleName() << std::endl;
-  if (particleType.GetParticleName()=="thermalelectron")// || particleType.GetParticleName()=="e-")
+  if (particleType.GetParticleName()=="thermalelectron") // || particleType.GetParticleName()=="opticalphoton")
     return true;
   return false;
 		
@@ -53,8 +55,10 @@ G4bool GarfieldVUVPhotonModel::ModelTrigger(const G4FastTrack& fastTrack){
   //  std::cout << "GarfieldVUVPhotonModel::ModelTrigger() thermalE, ekin is " << thermalE << ",  "<< ekin << std::endl;
   //  counter[0]++; //maybe not thread safe.
   //  G4cout << "GarfieldVUV: candidate NEST thermales: " << counter[0] << G4endl;
-  if (ekin<thermalE) 
-		return true;
+  S1S2Fill(fastTrack);
+  G4String particleName = fastTrack.GetPrimaryTrack()->GetParticleDefinition()->GetParticleName();
+  if (ekin<thermalE && particleName=="thermalelectron")
+    return true;
   return false;
 
 } 
@@ -84,10 +88,9 @@ void GarfieldVUVPhotonModel::DoIt(const G4FastTrack& fastTrack, G4FastStep& fast
      counter[1]++; // maybe not threadsafe
      if (!(counter[1]%100)) G4cout << "GarfieldVUV: actual NEST thermales: " << counter[1] << G4endl;
 
-     //     if (!(counter[1]%100)) 
-       GenerateVUVPhotons(fastTrack,fastStep,garfPos,garfTime);
 
-    
+     //     if (!(counter[1]%10)) 
+       GenerateVUVPhotons(fastTrack,fastStep,garfPos,garfTime);
 
 }
 
@@ -168,10 +171,6 @@ void GarfieldVUVPhotonModel::GenerateVUVPhotons(const G4FastTrack& fastTrack, G4
 	const G4Track* pG4trk = fastTrack.GetPrimaryTrack();
 	G4int pntid = pG4trk->GetParentID();
 	G4int tid = pG4trk->GetTrackID();
-	  {
-	    std::cout << "GarfieldVUVPhotonModel::Run() last track. clear signal" << std::endl;
-	    fSensor->ClearSignal(); // prepare for next event.  
-	  }
 	
 	delete garfExcHitsCol;
 
@@ -185,7 +184,7 @@ void ePiecewise (const double x, const double y, const double z,
   G4double dethz = 10.0;  
   ex = ez = 0.;
   if (y<(dethz - 0.5/*1.0*/))
-    ey = -400.;
+    ey = -1000.;
   else {
     ey = -3000.0;
     //    std::cout<<"ePiecewise: y, dethz, ey are [cm]: " << y << ", " << dethz << ", " << ey << std::endl;
@@ -306,3 +305,35 @@ void userHandle(double x, double y, double z, double t, int type, int level,Garf
 	
 	
 }// end userhandle	
+
+
+void GarfieldVUVPhotonModel::S1S2Fill(const G4FastTrack& ftrk)
+{
+
+  
+  const G4Track* track = ftrk.GetPrimaryTrack();
+  G4int pntID = track->GetParentID();
+  G4int pID = track->GetParticleDefinition()->GetPDGEncoding();
+  G4ThreeVector tpos = track->GetVertexPosition();
+  G4double time = track->GetGlobalTime();
+  G4int id;
+
+  
+  G4AnalysisManager* analysisManager = G4AnalysisManager::Instance();
+  G4int  event = G4EventManager::GetEventManager()->GetConstCurrentEvent()->GetEventID();
+
+
+  if (time/ns<10) id = 1; // S1 e's
+    {
+	  analysisManager->FillNtupleDColumn(id,0, event);
+	  analysisManager->FillNtupleDColumn(id,1, pID);
+	  analysisManager->FillNtupleDColumn(id,2, time/ns);
+	  analysisManager->FillNtupleDColumn(id,3, tpos[0]/mm);
+	  analysisManager->FillNtupleDColumn(id,4, tpos[1]/mm);
+	  analysisManager->FillNtupleDColumn(id,5, tpos[2]/mm);
+	  analysisManager->AddNtupleRow(id);
+    }
+
+}
+
+void GarfieldVUVPhotonModel::Reset() {fSensor->ClearSignal();}

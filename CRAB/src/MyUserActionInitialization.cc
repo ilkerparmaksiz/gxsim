@@ -6,6 +6,7 @@
 #include "G4SDManager.hh"
 #include "GasBoxSD.hh"
 #include "SteppingAction.hh"
+#include "TrackingAction.hh"
 
 MyUserActionInitialization::MyUserActionInitialization(){}
 
@@ -15,6 +16,7 @@ void MyUserActionInitialization::Build() const {
 
         PrimaryGeneratorAction* primary = new PrimaryGeneratorAction();
 	SetUserAction(primary);
+
 	SteppingAction* stepAct = new SteppingAction();
 	SetUserAction(stepAct);
 
@@ -23,6 +25,9 @@ void MyUserActionInitialization::Build() const {
 	SetUserAction(new RunAction());
 
 	SetUserAction(new NESTStackingAction());
+	TrackingAction* trackAct = new TrackingAction();
+	SetUserAction(trackAct);
+	
 }
 
 void MyUserActionInitialization::BuildForMaster() const {

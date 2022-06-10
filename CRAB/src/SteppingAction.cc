@@ -13,10 +13,6 @@
 
 
 
-SteppingAction::SteppingAction(){
-
-}
-
 
 void SteppingAction::UserSteppingAction(const G4Step *aStep) {
 
@@ -78,32 +74,7 @@ void SteppingAction::UserSteppingAction(const G4Step *aStep) {
 	}
     }
 
-  id = 1;  // S1
-  if ( track->GetParentID()==1) // 9-> 2*det->HalfZ
-    {
-      //      std::cout << "Stepping bulk, num, z is " << track->GetCurrentStepNumber() << ", "<< tpos[1]/cm << std::endl;
-	  analysisManager->FillNtupleDColumn(id,0, event);
-	  analysisManager->FillNtupleDColumn(id,1, pID);
-	  analysisManager->FillNtupleDColumn(id,2, time/ns);
-	  analysisManager->FillNtupleDColumn(id,3, tpos[0]/mm);
-	  analysisManager->FillNtupleDColumn(id,4, tpos[1]/mm);
-	  analysisManager->FillNtupleDColumn(id,5, tpos[2]/mm);
-	  analysisManager->AddNtupleRow(id);
-    }
 
-  id = 2; // S2
-  if ( track->GetParentID()!=1) // 9-> 2*det->HalfZ
-    {
-      //          std::cout << "Stepping LEM, num, z is " << track->GetCurrentStepNumber() << ", "<< tpos[1]/cm << std::endl;
-	  analysisManager->FillNtupleDColumn(id,0, event);
-	  analysisManager->FillNtupleDColumn(id,1, pID);
-	  analysisManager->FillNtupleDColumn(id,2, time/ns);
-	  analysisManager->FillNtupleDColumn(id,3, tpos[0]/mm);
-	  analysisManager->FillNtupleDColumn(id,4, tpos[1]/mm);
-	  analysisManager->FillNtupleDColumn(id,5, tpos[2]/mm);
-	  analysisManager->FillNtupleDColumn(id,6, track->GetCurrentStepNumber());
-	  analysisManager->AddNtupleRow(id);
-    }
 
 
 

@@ -45,30 +45,35 @@ void RunAction::BeginOfRunAction(const G4Run* aRun) {
   analysisManager->OpenFile();
   
   analysisManager->CreateNtuple("PMT", "PMT Hits"); 
-  analysisManager->CreateNtupleDColumn("Event");         //column 1
-  analysisManager->CreateNtupleDColumn("PID");         //column 2
-  analysisManager->CreateNtupleDColumn("Time");         //column 3
-  analysisManager->CreateNtupleDColumn("X");         //column 4
-  analysisManager->CreateNtupleDColumn("Y");         //column 5
-  analysisManager->CreateNtupleDColumn("Z");         //column 6
+  analysisManager->CreateNtupleDColumn("Event");     //column 0
+  analysisManager->CreateNtupleDColumn("PID");       //column 1
+  analysisManager->CreateNtupleDColumn("Time");      //column 2
+  analysisManager->CreateNtupleDColumn("X");         //column 3
+  analysisManager->CreateNtupleDColumn("Y");         //column 4
+  analysisManager->CreateNtupleDColumn("Z");         //column 5
+
   analysisManager->FinishNtuple();
 
   analysisManager->CreateNtuple("S1", "S1 particles"); 
-  analysisManager->CreateNtupleDColumn("Event");         //column 1
-  analysisManager->CreateNtupleDColumn("PID");         //column 2
-  analysisManager->CreateNtupleDColumn("Time");         //column 3
-  analysisManager->CreateNtupleDColumn("X");         //column 4
-  analysisManager->CreateNtupleDColumn("Y");         //column 5
-  analysisManager->CreateNtupleDColumn("Z");         //column 6
+  analysisManager->CreateNtupleDColumn("Event");    //column 0
+  analysisManager->CreateNtupleDColumn("PPID");     //column 1 Primary PPartCode
+  analysisManager->CreateNtupleDColumn("PKE");      //column 2 Primary KE
+  analysisManager->CreateNtupleDColumn("PID");      //column 3
+  analysisManager->CreateNtupleDColumn("Time");     //column 4
+  analysisManager->CreateNtupleDColumn("X");        //column 5
+  analysisManager->CreateNtupleDColumn("Y");        //column 6
+  analysisManager->CreateNtupleDColumn("Z");        //column 7
+  analysisManager->CreateNtupleSColumn("Process");  //column 8
   analysisManager->FinishNtuple();
 
   analysisManager->CreateNtuple("S2", "S2 particles"); 
-  analysisManager->CreateNtupleDColumn("Event");         //column 1
-  analysisManager->CreateNtupleDColumn("PID");         //column 2
-  analysisManager->CreateNtupleDColumn("Time");         //column 3
-  analysisManager->CreateNtupleDColumn("X");         //column 4
-  analysisManager->CreateNtupleDColumn("Y");         //column 5
-  analysisManager->CreateNtupleDColumn("Z");         //column 6
+  analysisManager->CreateNtupleDColumn("Event");    //column 0
+  analysisManager->CreateNtupleDColumn("PID");      //column 1
+  analysisManager->CreateNtupleDColumn("Time");     //column 2
+  analysisManager->CreateNtupleDColumn("X");        //column 3
+  analysisManager->CreateNtupleDColumn("Y");        //column 4
+  analysisManager->CreateNtupleDColumn("Z");        //column 5
+  analysisManager->CreateNtupleSColumn("Process");  //column 6
   analysisManager->FinishNtuple();
 
   analysisManager->SetNtupleActivation(true);

@@ -86,10 +86,11 @@ void GarfieldVUVPhotonModel::DoIt(const G4FastTrack& fastTrack, G4FastStep& fast
      garfTime = fastTrack.GetPrimaryTrack()->GetGlobalTime();
      //G4cout<<"GLOBAL TIME "<<G4BestUnit(garfTime,"Time")<<" POSITION "<<G4BestUnit(garfPos,"Length")<<G4endl;
      counter[1]++; // maybe not threadsafe
-     if (!(counter[1]%100)) G4cout << "GarfieldVUV: actual NEST thermales: " << counter[1] << G4endl;
+     if (!(counter[1]%100))
+       G4cout << "GarfieldVUV: actual NEST thermales: " << counter[1] << G4endl;
 
 
-     //     if (!(counter[1]%10)) 
+     if (!(counter[1]%1000)) 
        GenerateVUVPhotons(fastTrack,fastStep,garfPos,garfTime);
 
 }
@@ -317,23 +318,35 @@ void GarfieldVUVPhotonModel::S1S2Fill(const G4FastTrack& ftrk)
   G4ThreeVector tpos = track->GetVertexPosition();
   G4double time = track->GetGlobalTime();
   G4int id;
+  std::string startp("null");
+  const G4VProcess* sprocess   = track->GetCreatorProcess();
+  if (sprocess)
+    startp = sprocess->GetProcessName();
 
   
   G4AnalysisManager* analysisManager = G4AnalysisManager::Instance();
   G4int  event = G4EventManager::GetEventManager()->GetConstCurrentEvent()->GetEventID();
 
-
-  if (time/ns<10) id = 1; // S1 e's
+  if (time/ns<10) id = 1; // S1 thermale's
     {
 	  analysisManager->FillNtupleDColumn(id,0, event);
-	  analysisManager->FillNtupleDColumn(id,1, pID);
-	  analysisManager->FillNtupleDColumn(id,2, time/ns);
-	  analysisManager->FillNtupleDColumn(id,3, tpos[0]/mm);
-	  analysisManager->FillNtupleDColumn(id,4, tpos[1]/mm);
-	  analysisManager->FillNtupleDColumn(id,5, tpos[2]/mm);
+	  analysisManager->FillNtupleDColumn(id,1, G4EventManager::GetEventManager()->GetConstCurrentEvent()->GetPrimaryVertex()->GetPrimary(0)->GetPDGcode());
+	  analysisManager->FillNtupleDColumn(id,2, G4EventManager::GetEventManager()->GetConstCurrentEvent()->GetPrimaryVertex()->GetPrimary(0)->GetKineticEnergy());
+	  analysisManager->FillNtupleDColumn(id,3, pID);
+	  analysisManager->FillNtupleDColumn(id,4, time/ns);
+	  analysisManager->FillNtupleDColumn(id,5, tpos[0]/mm);
+	  analysisManager->FillNtupleDColumn(id,6, tpos[1]/mm);
+	  analysisManager->FillNtupleDColumn(id,7, tpos[2]/mm);
+	  analysisManager->FillNtupleSColumn(id,8, startp);
 	  analysisManager->AddNtupleRow(id);
+	  if (pID!=11)
+	    std::cout << "GVUV::FillS1S2: non-electron pID,name is: " << pID << ", " << track->GetParticleDefinition()->GetParticleName() <<  std::endl;
     }
 
 }
 
-void GarfieldVUVPhotonModel::Reset() {fSensor->ClearSignal();}
+void GarfieldVUVPhotonModel::Reset()
+{
+  fSensor->ClearSignal();
+  counter[1] = 0;
+}

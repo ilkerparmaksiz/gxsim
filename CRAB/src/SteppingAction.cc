@@ -40,6 +40,7 @@ void SteppingAction::UserSteppingAction(const G4Step *aStep) {
 
   G4int id(0);
 
+
   if (sprocess)
       startp = sprocess->GetProcessName();
   if (tprocess)
@@ -53,6 +54,8 @@ void SteppingAction::UserSteppingAction(const G4Step *aStep) {
   G4TouchableHandle touch = endPoint->GetTouchableHandle();
   G4VPhysicalVolume* eVolume = touch->GetVolume();
   G4String eVname("null");
+
+  
   if (eVolume)
     {
       eVname = eVolume->GetName();
@@ -69,6 +72,10 @@ void SteppingAction::UserSteppingAction(const G4Step *aStep) {
 	  analysisManager->FillNtupleDColumn(id,3, pos[0]/mm);
 	  analysisManager->FillNtupleDColumn(id,4, pos[1]/mm);
 	  analysisManager->FillNtupleDColumn(id,5, pos[2]/mm);
+	  if (sprocess)
+	    startp = sprocess->GetProcessName();
+	  //	  analysisManager->FillNtupleSColumn(id,6, startp);
+
 	  analysisManager->AddNtupleRow(id);
 
 	}

@@ -90,7 +90,7 @@ void GarfieldVUVPhotonModel::DoIt(const G4FastTrack& fastTrack, G4FastStep& fast
        G4cout << "GarfieldVUV: actual NEST thermales: " << counter[1] << G4endl;
 
 
-     if (!(counter[1]%1000)) 
+     //     if (!(counter[1]%1000)) 
        GenerateVUVPhotons(fastTrack,fastStep,garfPos,garfTime);
 
 }

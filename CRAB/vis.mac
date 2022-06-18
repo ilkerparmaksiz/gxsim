@@ -1,0 +1,81 @@
+/Xenon/geometry/SetGasPressure 1. bar
+
+#/gasModelParameters/degrad/thermalenergy 10. eV
+# Lower the threshold to get GarfieldVUVModel to grab up all ionization e's.  EC, 20-Apr-2022
+/gasModelParameters/degrad/thermalenergy 1.3 eV ## 150 gives almost same answer as 450, and 2x nexcitation as with 30. ## NEST e's are 1.13 eV
+
+#/run/numberOfThreads 1 # Currently hard-wired in CRAB.cc, cuz not evident thisis doing anything.
+#/control/cout/ignoreThreadsExcept 0
+#/control/cout/setCoutFile output.dmp
+
+#/run/initialize
+/Xenon/phys/setLowLimitE 50. eV
+/Xenon/phys/InitializePhysics  local # emlivermore #EmStandardPhysics_option4  ## must be local to effect NEST physics
+/Xenon/phys/AddParametrisation
+##/process/em/AddPAIRegion all GasRegion PAIphoton
+
+##/process/optical/processActivation Scintillation false ### not with NEST. EC, 6-May-2022.
+
+#/random/setSeeds 0 0
+/run/initialize
+
+#/param/InActivateModel DegradModel
+#/param/InActivateModel GarfieldVUVPhotonModel
+
+/analysis/setFileName test
+
+####################################
+############ Verbosities ###########
+####################################
+/tracking/verbose 0
+/run/verbose 1
+/event/verbose 0
+/vis/verbose 0
+####################################
+########### Visualization ##########
+####################################
+#/vis/open VRML2FILE
+/vis/open OGL 600x600-0+0
+#/vis/open OGLSX
+# Draw geometry:
+/vis/drawVolume
+/vis/scene/add/trajectories smooth
+/vis/scene/add/hits
+
+/vis/viewer/set/lightsThetaPhi 90. 0.
+#/vis/viewer/set/viewpointThetaPhi 150. 90.
+/vis/viewer/set/viewpointThetaPhi 180. 90.
+/vis/viewer/set/style surface
+/vis/viewer/set/hiddenEdge true
+# Draw smooth trajectories at end of event.
+# Gamma-rays represented in red.
+#/vis/modeling/trajectories/create/drawByParticleID
+#/vis/modeling/trajectories/drawByParticleID-0/set e- green
+#/vis/modeling/trajectories/drawByParticleID-0/verbose 1
+/vis/modeling/trajectories/create/drawByCharge
+/vis/modeling/trajectories/drawByCharge-0/set 0 green
+#/vis/modeling/trajectories/drawByCharge-0/verbose 1
+#/vis/modeling/trajectories/drawByCharge-0/default/setDrawStepPts true
+#/vis/modeling/trajectories/drawByCharge-0/default/setStepPtsSize 6
+
+/vis/scene/endOfEventAction accumulate 1
+#/vis/scene/endOfRunAction accumulate
+/vis/geometry/set/forceWireframe collimatorLogical -1 1
+/vis/geometry/set/forceWireframe collimatorLogical2 -1 1
+/vis/geometry/set/forceWireframe windowLogical -1 1
+/vis/geometry/set/forceWireframe detectorLogical -1 1
+/vis/geometry/set/forceWireframe macorLogical -1 1
+/vis/geometry/set/forceWireframe pmtLogical -1 1
+/tracking/storeTrajectory 1
+
+#/gps/position 0. -3.3 0. cm
+/gps/position 0. 0.5 0. cm
+/gps/direction 0. 1. 0 
+#/gps/particle gamma
+/gps/particle e-
+/gps/ene/type Mono
+#/gps/ene/mono 5.9 keV
+/gps/ene/mono 150 keV
+
+/run/beamOn 1
+

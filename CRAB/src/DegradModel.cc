@@ -34,7 +34,9 @@ G4bool DegradModel::IsApplicable(const G4ParticleDefinition& particleType) {
 G4bool DegradModel::ModelTrigger(const G4FastTrack& fastTrack) {
   G4int id = fastTrack.GetPrimaryTrack()->GetParentID();
     if (id == 1){
-      return true;
+      //  also require that only photoelectric effect electrons are tracked here.
+      if (fastTrack.GetPrimaryTrack()->GetCreatorProcess()->GetProcessName().find("phot") != std::string::npos)
+	return true;
     }
   return false;
 
@@ -53,8 +55,7 @@ void DegradModel::DoIt(const G4FastTrack& fastTrack, G4FastStep& fastStep) {
         G4int stdout;
         G4int SEED=54217137*G4UniformRand();
         G4String seed = G4UIcommand::ConvertToString(SEED);
-	G4String degradString="printf \"1,1,3,-1,"+seed+",5900.0,7.0,0.0\n7,0,0,0,0,0\n100.0,0.0,0.0,0.0,0.0,0.0,20.0,900.0\n3000.0,0.0,0.0,1,0\n100.0,0.5,1,1,1,1,1,1,1\n0,0,0,0,0,0\" > conditions_Degrad.txt";
-	//G4String degradString="printf \"1,1,3,-1,"+seed+",5900.0,7.0,0.0\n7,0,0,0,0,0\n100.0,0.0,0.0,0.0,0.0,0.0,20.0,900.0\n500.0,0.0,0.0,1,0\n100.0,0.5,1,1,1,1,1,1,1\n0,0,0,0,0,0\" > conditions_Degrad.txt";
+        G4String degradString="printf \"1,1,3,-1,"+seed+",5900.0,7.0,0.0\n7,0,0,0,0,0\n100.0,0.0,0.0,0.0,0.0,0.0,20.0,900.0\n500.0,0.0,0.0,1,0\n100.0,0.5,1,1,1,1,1,1,1\n0,0,0,0,0,0\" > conditions_Degrad.txt";
         G4cout << degradString << G4endl;
         stdout=system(degradString.data());
         G4cout << degradString << G4endl;
@@ -69,7 +70,7 @@ void DegradModel::DoIt(const G4FastTrack& fastTrack, G4FastStep& fastStep) {
 
         GetElectronsFromDegrad(fastStep,degradPos,degradTime);
 	// We call Degrad only once, which now that we have the x,y,z location of our primary Xray interaction, re-simulates that interaction. 
-	// Note the 5900 in the Degrad config file. The following line forces the single Degrad execution. EC, 2-Dec-2021.
+	// Note the 5900 in the Degrad config file. The above system() line forces the single Degrad execution. EC, 2-Dec-2021.
 	processOccured=true; 
     }
 
@@ -122,7 +123,7 @@ void DegradModel::GetElectronsFromDegrad(G4FastStep& fastStep,G4ThreeVector degr
                 posZDegrad=v[i+2];
                 timeDegrad=v[i+3];
                 //convert from um to mm in GEANT4
-                //also Y and Z axes are swaped in GEANT4 and Garfield++ relatively to Degrad
+                //also Y and Z axes are swapped in GEANT4 and Garfield++ relatively to Degrad
                 posX=posXDegrad*0.001+posXInitial;
                 posY=posZDegrad*0.001+posYInitial;
                 posZ=posYDegrad*0.001+posZInitial;

@@ -60,7 +60,8 @@ void GarfieldVUVPhotonModel::DoIt(const G4FastTrack& fastTrack, G4FastStep& fast
 {
 
   /* 
-     This tracks all the ionization/conversion electrons created by Degrad in its simulation of the primary gamma's photoelectric effect on Xe.
+     This takes all the tracks from the  ionization/conversion electrons created by Degrad, then tracked by G4 from Degrad's simulation 
+     of the primary gamma's photoelectric effect in Xe. 
      Each such electron is drifted in the E-field and avalanched, as appropriate. That creates excited Xe atoms. We put one ELM photon
      per excitation of 172/7.2 nm/eV onto the optical photon stack. Geant4 will track those in the normal way. 
      (I think Garfield creates these photons too, but we're throwing 'em out.)
@@ -152,6 +153,7 @@ void GarfieldVUVPhotonModel::InitialisePhysics(){
 	Garfield::ComponentConstant* componentConstant = new Garfield::ComponentConstant();
 	componentConstant->SetGeometry(geo);
 	//SetElectricField(const double ex, const double ey, const double ez);
+
 	componentConstant->SetElectricField(0.,-3000.0,0.);
 	std::cout << "GarfieldVUVPhotonModel::InitPhys(): 3" << std::endl;
 

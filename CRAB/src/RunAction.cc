@@ -56,14 +56,12 @@ void RunAction::BeginOfRunAction(const G4Run* aRun) {
 
   analysisManager->CreateNtuple("S1", "S1 particles"); 
   analysisManager->CreateNtupleDColumn("Event");    //column 0
-  analysisManager->CreateNtupleDColumn("PPID");     //column 1 Primary PPartCode
-  analysisManager->CreateNtupleDColumn("PKE");      //column 2 Primary KE
-  analysisManager->CreateNtupleDColumn("PID");      //column 3
-  analysisManager->CreateNtupleDColumn("Time");     //column 4
-  analysisManager->CreateNtupleDColumn("X");        //column 5
-  analysisManager->CreateNtupleDColumn("Y");        //column 6
-  analysisManager->CreateNtupleDColumn("Z");        //column 7
-  analysisManager->CreateNtupleSColumn("Process");  //column 8
+  analysisManager->CreateNtupleDColumn("PID");      //column 1
+  analysisManager->CreateNtupleDColumn("Time");     //column 2
+  analysisManager->CreateNtupleDColumn("X");        //column 3
+  analysisManager->CreateNtupleDColumn("Y");        //column 4
+  analysisManager->CreateNtupleDColumn("Z");        //column 5
+  analysisManager->CreateNtupleSColumn("Process");  //column 6
   analysisManager->FinishNtuple();
 
   analysisManager->CreateNtuple("S2", "S2 particles"); 
@@ -76,6 +74,13 @@ void RunAction::BeginOfRunAction(const G4Run* aRun) {
   analysisManager->CreateNtupleSColumn("Process");  //column 6
   analysisManager->FinishNtuple();
 
+  analysisManager->CreateNtuple("Event", "Event stats"); 
+  analysisManager->CreateNtupleDColumn("Event");    //column 0
+  analysisManager->CreateNtupleDColumn("PPID");     //column 1 Primary PPartCode
+  analysisManager->CreateNtupleDColumn("PKE");      //column 2 Primary KE
+  analysisManager->CreateNtupleDColumn("PEDep");     //column 3 Primary final KE
+  analysisManager->FinishNtuple();
+  
   analysisManager->SetNtupleActivation(true);
 }
 
@@ -92,4 +97,6 @@ void RunAction::EndOfRunAction(const G4Run* aRun) {
   G4cout << "Simulation finished." << G4endl << "Time: " << asctime(ptm)
          << G4endl;
   G4Random::showEngineStatus();
+
+
 }

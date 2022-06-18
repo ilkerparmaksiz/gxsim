@@ -29,6 +29,8 @@ void EventAction::BeginOfEventAction(const G4Event *ev) {
     DegradModel* dm = (DegradModel*)(G4GlobalFastSimulationManager::GetInstance()->GetFastSimulationModel("DegradModel"));
     if(dm)
         dm->Reset();
+
+    fEDepPrim = 0.0;
     G4cout << " EventAction::BeginOfEventAction()  1 " << G4endl;
 }
 
@@ -38,8 +40,33 @@ void EventAction::EndOfEventAction(const G4Event *evt) {
     if(gvm)
       gvm->Reset(); // zero out the sensor: meaning reset the nexcitations, which is cumulative.
 
-  G4cout << " EventAction::EndOfEventAction()  " << G4endl;
+    G4cout << " EventAction::EndOfEventAction()  " << G4endl;
 
+
+    G4int id(3);
+    G4double PPID = 0.; G4double PKE = 0.;
+    G4PrimaryVertex* pVtx;
+    pVtx = evt->GetPrimaryVertex();
+    if (pVtx)
+      {
+	PKE = pVtx->GetPrimary(0)->GetKineticEnergy();
+	PPID = pVtx->GetPrimary(0)->GetPDGcode();
+      }
+
+    G4AnalysisManager* analysisManager = G4AnalysisManager::Instance();
+    G4int  event = evt->GetEventID();
+    G4int row(0);
+    analysisManager->FillNtupleDColumn(id,row, event); row++;
+    analysisManager->FillNtupleDColumn(id,row, (G4double)PPID); row++;
+    analysisManager->FillNtupleDColumn(id,row, PKE); row++;
+    analysisManager->FillNtupleDColumn(id,row, fEDepPrim); row++;
+    analysisManager->AddNtupleRow(id);
+
+}
+
+void EventAction::EDepPrim(const G4double &Ed)
+{
+  fEDepPrim+=Ed;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

@@ -14,7 +14,9 @@
 
 
 
-void SteppingAction::UserSteppingAction(const G4Step *aStep) {
+void SteppingAction::UserSteppingAction(const G4Step *aStep)
+
+{
 
   G4AnalysisManager* analysisManager = G4AnalysisManager::Instance();
   G4int  event = G4EventManager::GetEventManager()->GetConstCurrentEvent()->GetEventID();
@@ -38,6 +40,7 @@ void SteppingAction::UserSteppingAction(const G4Step *aStep) {
   G4int pID       = particle->GetPDGEncoding();
   G4double time   = aStep->GetPreStepPoint()->GetGlobalTime();
 
+  
   G4int id(0);
 
 
@@ -55,6 +58,8 @@ void SteppingAction::UserSteppingAction(const G4Step *aStep) {
   G4VPhysicalVolume* eVolume = touch->GetVolume();
   G4String eVname("null");
 
+  if (pID==11 && track->GetKineticEnergy()/keV>0.100 && (lVolume->GetName().find("detector")!=std::string::npos)) // don't count the thermale's, just G4 e's
+    fEventAction->EDepPrim(aStep->GetTotalEnergyDeposit());
   
   if (eVolume)
     {
@@ -80,13 +85,11 @@ void SteppingAction::UserSteppingAction(const G4Step *aStep) {
 
 	}
     }
-
-
-
-
-
-  
   
   // if particle == thermale, opticalphoton and parent == primary and stepID==1, or trackID<=2
   // count the NEST e-s/photons into a class variable from the primary particle. Retrieve at EndEvent().
 }
+
+
+
+  

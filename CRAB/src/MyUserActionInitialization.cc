@@ -17,11 +17,12 @@ void MyUserActionInitialization::Build() const {
         PrimaryGeneratorAction* primary = new PrimaryGeneratorAction();
 	SetUserAction(primary);
 
-	SteppingAction* stepAct = new SteppingAction();
-	SetUserAction(stepAct);
-
 	EventAction* evt = new EventAction();
 	SetUserAction(evt);
+
+	SteppingAction* stepAct = new SteppingAction(evt);
+	SetUserAction(stepAct);
+
 	SetUserAction(new RunAction());
 
 	SetUserAction(new NESTStackingAction());

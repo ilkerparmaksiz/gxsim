@@ -30,11 +30,17 @@
 #include "G4EventManager.hh"
 #include "Analysis.hh"
 
+
 #include "G4AutoLock.hh"
 namespace{G4Mutex aMutex = G4MUTEX_INITIALIZER;}
 
-const static G4double torr = 1. / 760. * atmosphere;
+const static G4double torr = 1. / 760. * bar;
 const static G4double gapLEM = 0.5; //cm
+const static G4double fieldDrift = 1000.0; // V/cm
+const static G4double fieldLEM   = 10000.0; // V/cm higher than 3k (as used for 2 bar) for 10 bar!
+
+const G4double res(0.01); // high? EC, 21-June-2022.
+
 
 GarfieldVUVPhotonModel::GarfieldVUVPhotonModel(GasModelParameters* gmp, G4String modelName,G4Region* envelope,DetectorConstruction* dc,GasBoxSD* sd) :
 		G4VFastSimulationModel(modelName, envelope),detCon(dc),fGasBoxSD(sd) {
@@ -87,11 +93,11 @@ void GarfieldVUVPhotonModel::DoIt(const G4FastTrack& fastTrack, G4FastStep& fast
      garfTime = fastTrack.GetPrimaryTrack()->GetGlobalTime();
      //G4cout<<"GLOBAL TIME "<<G4BestUnit(garfTime,"Time")<<" POSITION "<<G4BestUnit(garfPos,"Length")<<G4endl;
      counter[1]++; // maybe not threadsafe
-     if (!(counter[1]%1000))
+     if (!(counter[1]%10000))
        G4cout << "GarfieldVUV: actual NEST thermales: " << counter[1] << G4endl;
 
 
-     //     if (!(counter[1]%1000)) 
+     //     if (!(counter[1]%10000)) 
        GenerateVUVPhotons(fastTrack,fastStep,garfPos,garfTime);
 
 }
@@ -135,7 +141,7 @@ void GarfieldVUVPhotonModel::GenerateVUVPhotons(const G4FastTrack& fastTrack, G4
 
 	unsigned int n = fAvalancheMC->GetNumberOfDriftLinePoints();
 	double xi,yi,zi,ti;
-	std::cout << "Drift(): avalanchetracking, n DLTs is " << n << std::endl;
+	//	std::cout << "Drift(): avalanchetracking, n DLTs is " << n << std::endl;
 
 	// pick highest yi in drift region => that is the beginning of the LEM
 	for(unsigned int i=0;i<n;i++){
@@ -149,32 +155,38 @@ void GarfieldVUVPhotonModel::GenerateVUVPhotons(const G4FastTrack& fastTrack, G4
 
 
 	e0 = 1.13;
-	std::cout << "GVUVPM: Avalanching in high field starting at: "  << xi<<"," <<yi<<","<<zi <<"," <<ti << std::endl;
-	std::cout << "GVUVPM: fMediumMagboltz: "  << fMediumMagboltz << std::endl;
+	//	std::cout << "GVUVPM: Avalanching in high field starting at: "  << xi<<"," <<yi<<","<<zi <<"," <<ti << std::endl;
+	//	std::cout << "GVUVPM: fMediumMagboltz: "  << fMediumMagboltz << std::endl;
 
-	// This call is slow AF. The biggest offender in slowing the simulation.
-	/// TEST code!!! Don't Keep it!!!!, EC 17-June-2022.
-	/// TEST code: am replacing this call with picking a fake interaction number and sites. Events that were few sec drop to msec?
-	/// The perhaps wise thing to do is to run it for the first drift e-, then use its properties for faking the rest.
+	/// fAvalanche->AvalancheElectron() is slow AF: it's the biggest offender in slowing the simulation.
+	/// I am replacing this call with picking a fake interaction number and sites. Tracks that were ~8 sec drop to 1 msec.
+	///
 	///   fAvalanche->AvalancheElectron(xi,yi,zi,ti, e0, 0., 0., 0.);
 	
 	unsigned int nElastic, nIonising, nAttachment, nInelastic, nExcitation, nSuperelastic;
 	fMediumMagboltz->GetNumberOfElectronCollisions(nElastic, nIonising, nAttachment, nInelastic, nExcitation, nSuperelastic);
-	G4cout<<"NExcitation "<<nExcitation<<G4endl; // This quantity seems to be cumulative over (at least) the event. ... EC, 2-Dec-2021.
-	G4int colHitsEntries=garfExcHitsCol->entries();
-	G4cout<<"GarfExcHits entries "<<colHitsEntries<<G4endl; // This one is not cumulative.
+	//	G4cout<<"NExcitation "<<nExcitation<<G4endl; // This quantity seems to be cumulative over (at least) the event. ... EC, 2-Dec-2021.
+	G4int colHitsEntries= 0.0; //garfExcHitsCol->entries();
+	//	G4cout<<"GarfExcHits entries "<<colHitsEntries<<G4endl; // This one is not cumulative.
 
-	colHitsEntries = 150; /// TEST code!!! Don't Keep it!!!!, EC 17-June-2022.
+		const G4double YoverP = 105.*fieldLEM/(detCon->GetGasPressure()/torr) - 116.; // yield/cm/bar, with P in Torr ... JINST 2 p05001 (2007).
+	colHitsEntries = YoverP * detCon->GetGasPressure()/bar * gapLEM; // with P in bar this time.
+
+	colHitsEntries *= (G4RandGauss::shoot(1.0,res));
+	//G4cout<<"YoverP,pressure [torr],fieldLEM, gapLEM and Number  Xe excitations: "<< YoverP << ", " << detCon->GetGasPressure()/torr << ", " << fieldLEM << ", " << gapLEM << " and " << colHitsEntries <<G4endl;
+	G4double tig4(0.);
+	const G4double vd(2.4); // mm/musec, https://arxiv.org/pdf/1902.05544.pdf. Pretty much flat at our E/p..
 	for (G4int i=0;i<colHitsEntries;i++){
 	  GarfieldExcitationHit* newExcHit=new GarfieldExcitationHit();
 	  /// fGap = 0.5 cm, 5 mm
-	  G4ThreeVector fakepos (xi*10,yi*10.+10*gapLEM*float(i)/float(colHitsEntries),zi*10.); /// TEST code!!! Don't Keep it!!!!, EC 17-June-2022.
+	  G4ThreeVector fakepos (xi*10,yi*10.+10*gapLEM*float(i)/float(colHitsEntries),zi*10.); /// ignoring diffusion in small LEM gap, EC 17-June-2022.
+	  newExcHit->SetPos(fakepos);
 	  /// newExcHit->SetPos((*garfExcHitsCol)[i]->GetPos());
 	  /// newExcHit->SetTime((*garfExcHitsCol)[i]->GetTime());
 	  /// fGasBoxSD->InsertGarfieldExcitationHit(newExcHit);
 	  //	  fastStep.SetNumberOfSecondaryTracks(1);	//1 photon per excitation .... Causes weirdness w stack. EC, 12-Apr-2022.
 	  
-	  if (i %  (colHitsEntries/colHitsEntries) == 0){ // 50. Need to uncomment this condition, along with one in degradmodel.cc. EC, 2-Dec-2021.
+	  if (i % (colHitsEntries/colHitsEntries ) == 0){ // 50. Need to uncomment this condition, along with one in degradmodel.cc. EC, 2-Dec-2021.
 	  
 	    G4DynamicParticle VUVphoton(G4OpticalPhoton::OpticalPhotonDefinition(),G4RandomDirection(), 7.2*eV);
 	    // Create photons track
@@ -182,7 +194,13 @@ void GarfieldVUVPhotonModel::GenerateVUVPhotons(const G4FastTrack& fastTrack, G4
 
 	    /// std::cout <<  "fakepos,time is " << fakepos[0] << ", " << fakepos[1] << ", " << fakepos[2] << ", " << ti << std::endl;
 	    //	    std::cout <<  "garfxchits is " << (*garfExcHitsCol)[i]->GetPos()[0] << ", " << (*garfExcHitsCol)[i]->GetPos()[1] << ", " << (*garfExcHitsCol)[i]->GetPos()[2] << ", " << (*garfExcHitsCol)[i]->GetTime() << std::endl;
-	     G4Track *newTrack=fastStep.CreateSecondaryTrack(VUVphoton, fakepos, ti ,false);
+
+	    tig4 = ti + float(i)/float(colHitsEntries)*gapLEM*10./vd*1E3; // in nsec (gapLEM is in cm). Still ignoring diffusion in small LEM.
+	    //	    std::cout << "VUV photon time [nsec]: " << tig4 << std::endl;
+	    newExcHit->SetTime(tig4);
+	    fGasBoxSD->InsertGarfieldExcitationHit(newExcHit);
+	    G4Track *newTrack=fastStep.CreateSecondaryTrack(VUVphoton, fakepos, tig4 ,false);
+	    
 
 	    //	G4ProcessManager* pm= newTrack->GetDefinition()->GetProcessManager();
 	    //	G4ProcessVectorfAtRestDoItVector = pm->GetAtRestProcessVector(typeDoIt);
@@ -205,9 +223,9 @@ void ePiecewise (const double x, const double y, const double z,
   G4double dethz = 10.0;  
   ex = ez = 0.;
   if (y<(dethz - gapLEM))
-    ey = -1000.;
+    ey = -fieldDrift;
   else {
-    ey = -3000.0;
+    ey = -fieldLEM;
     //    std::cout<<"ePiecewise: y, dethz, ey are [cm]: " << y << ", " << dethz << ", " << ey << std::endl;
   }
 
@@ -266,7 +284,7 @@ void GarfieldVUVPhotonModel::InitialisePhysics(){
 	double ggeodens = geo->GetMedium(0.,0.,0.)->GetMassDensity();
 	double ggeopress = geo->GetMedium(0.,0.,0.)->GetPressure();
 
-	std::cout << "HeedModel::buildBox(): Garfield mass density [g/cm3], pressure [Torr] is: " << ggeodens << ", " << ggeopress << std::endl;
+	std::cout << "GarfieldVUVPhotonModel::buildBox(): Garfield mass density [g/cm3], pressure [Torr] is: " << ggeodens << ", " << ggeopress << std::endl;
 
 	
 	fAvalanche = new Garfield::AvalancheMicroscopic();
@@ -337,7 +355,7 @@ void GarfieldVUVPhotonModel::S1Fill(const G4FastTrack& ftrk)
   G4int pID = track->GetParticleDefinition()->GetPDGEncoding();
   G4ThreeVector tpos = track->GetVertexPosition();
   G4double time = track->GetGlobalTime();
-  G4int id;
+  G4int id(1);
   std::string startp("null");
   const G4VProcess* sprocess   = track->GetCreatorProcess();
   if (sprocess)
@@ -347,7 +365,7 @@ void GarfieldVUVPhotonModel::S1Fill(const G4FastTrack& ftrk)
   G4AnalysisManager* analysisManager = G4AnalysisManager::Instance();
   G4int  event = G4EventManager::GetEventManager()->GetConstCurrentEvent()->GetEventID();
 
-  if (time/ns<10) id = 1; // S1 thermale's
+  if (time/ns<10) ; // S1 thermale's
     {
       // Weirdly, S1 is filled in two places. Here for the thermal e's and in TrackingAction::PreSteppingAction() for optphotons. 
 	  analysisManager->FillNtupleDColumn(id,0, event);

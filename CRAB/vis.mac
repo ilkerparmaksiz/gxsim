@@ -1,4 +1,4 @@
-/Xenon/geometry/SetGasPressure 1. bar
+/Xenon/geometry/SetGasPressure 10. bar
 
 #/gasModelParameters/degrad/thermalenergy 10. eV
 # Lower the threshold to get GarfieldVUVModel to grab up all ionization e's.  EC, 20-Apr-2022
@@ -41,7 +41,8 @@
 /vis/drawVolume
 /vis/scene/add/trajectories smooth
 /vis/scene/add/hits
-
+## needed to keep the display from clearing out many drawn objects. EC, 22-June-2022.
+/vis/ogl/set/displayListLimit 5000000 
 /vis/viewer/set/lightsThetaPhi 90. 0.
 #/vis/viewer/set/viewpointThetaPhi 150. 90.
 /vis/viewer/set/viewpointThetaPhi 180. 90.
@@ -69,13 +70,13 @@
 /tracking/storeTrajectory 1
 
 #/gps/position 0. -3.3 0. cm
-/gps/position 0. 0.5 0. cm
+/gps/position 0. 5. 0. cm
 /gps/direction 0. 1. 0 
 #/gps/particle gamma
 /gps/particle e-
 /gps/ene/type Mono
 #/gps/ene/mono 5.9 keV
-/gps/ene/mono 150 keV
+/gps/ene/mono 2000 keV
 
 /run/beamOn 1
 

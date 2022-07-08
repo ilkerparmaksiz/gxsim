@@ -43,7 +43,6 @@ void SteppingAction::UserSteppingAction(const G4Step *aStep)
   
   G4int id(0);
 
-
   if (sprocess)
       startp = sprocess->GetProcessName();
   if (tprocess)
@@ -65,7 +64,7 @@ void SteppingAction::UserSteppingAction(const G4Step *aStep)
     {
       eVname = eVolume->GetName();
 
-      if (lVolume->GetName().find("pmt")!=std::string::npos) // PMT
+      if (lVolume->GetName().find("cam")!=std::string::npos) // PMT
 	//      if (/*eVname=="detectorLogical" && */ lVolume->GetName()=="pmtPhysical")
       	{
 	  //	  std::cout << "SteppingAction: Stepping from  " << lVolume->GetName() <<  " into " << eVname << " Killing OpticalPhoton." << std::endl;

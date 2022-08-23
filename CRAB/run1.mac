@@ -22,7 +22,7 @@
 #/param/InActivateModel DegradModel
 #/param/InActivateModel GarfieldVUVPhotonModel
 
-/analysis/setFileName crab2MeV_unif
+/analysis/setFileName crab2MeV
 
 ####################################
 ############ Verbosities ###########
@@ -45,16 +45,16 @@
 #/gps/ene/mono 0.1 MeV
 
 /gps/ang/type iso
-#/gps/pos/type Point
-/gps/pos/type Volume
-/gps/pos/shape Para
+/gps/pos/type Point
+#/gps/pos/type Volume
+#/gps/pos/shape Para
 /gps/pos/centre 0. 30. 0. cm
 #/gps/position 0. 30. 0. cm
 
 
-/gps/pos/halfx 15 cm
-/gps/pos/halfz 15 cm
-/gps/pos/halfy 30 cm
+#/gps/pos/halfx 15 cm
+#/gps/pos/halfz 15 cm
+#/gps/pos/halfy 30 cm
 /gps/pos/confine "detectorLogical" 
 
 /run/initialize

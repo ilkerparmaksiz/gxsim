@@ -16,7 +16,7 @@
 
 ##/process/optical/processActivation Scintillation false ### not with NEST. EC, 6-May-2022.
 
-#/random/setSeeds 0 0
+/random/setSeeds 12 13
 /run/initialize
 
 #/param/InActivateModel DegradModel
@@ -27,6 +27,7 @@
 ####################################
 ############ Verbosities ###########
 ####################################
+##/process/optical/verbose 2
 /tracking/verbose 0
 /run/verbose 1
 /event/verbose 0
@@ -43,9 +44,9 @@
 /vis/scene/add/hits
 ## needed to keep the display from clearing out many drawn objects. EC, 22-June-2022.
 /vis/ogl/set/displayListLimit 5000000 
-/vis/viewer/set/lightsThetaPhi 90. 0.
-#/vis/viewer/set/viewpointThetaPhi 150. 90.
-/vis/viewer/set/viewpointThetaPhi 180. 90.
+#/vis/viewer/set/lightsThetaPhi 90. 0.
+/vis/viewer/set/viewpointThetaPhi 150. 90.
+#/vis/viewer/set/viewpointThetaPhi 180. 90.
 /vis/viewer/set/style surface
 /vis/viewer/set/hiddenEdge true
 # Draw smooth trajectories at end of event.
@@ -66,17 +67,39 @@
 /vis/geometry/set/forceWireframe windowLogical -1 1
 /vis/geometry/set/forceWireframe detectorLogical -1 1
 /vis/geometry/set/forceWireframe macorLogical -1 1
-/vis/geometry/set/forceWireframe pmtLogical -1 1
+/vis/geometry/set/forceWireframe lensLogical -1 1
+/vis/geometry/set/forceWireframe camLogical -1 1
 /tracking/storeTrajectory 1
 
-#/gps/position 0. -3.3 0. cm
-/gps/position 0. 5. 0. cm
-/gps/direction 0. 1. 0 
-#/gps/particle gamma
-/gps/particle e-
+
+/gps/direction 0. 1. 0
 /gps/ene/type Mono
-#/gps/ene/mono 5.9 keV
+/gps/particle e-
 /gps/ene/mono 2000 keV
+/gps/position 0. 30. 0. cm
+/run/beamOn 4
 
-/run/beamOn 1
 
+
+
+
+
+
+#/gps/particle opticalphoton
+#/gps/ene/mono 7.2 eV
+##/gps/ang/type iso
+##/gps/ang/maxtheta 3 deg
+#/gps/direction 0 -1 0
+#/gps/ang/rot1 1 0 0
+#/gps/ang/rot2 0 0 -1
+#/gps/pos/type Plane
+#/gps/pos/shape Square
+#/gps/pos/centre 7.5 59.8 0. cm 
+#/gps/pos/halfx 3 cm
+#/gps/pos/halfy 5 cm
+#/gps/pos/confine "detectorPhysical" 
+#/run/beamOn 50
+
+#/vis/viewer/panTo -0.0 -.28
+#/vis/viewer/set/viewpointThetaPhi 60. 0.
+#/vis/viewer/zoom 4

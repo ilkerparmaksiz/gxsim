@@ -22,7 +22,10 @@ void SteppingAction::UserSteppingAction(const G4Step *aStep)
   G4int  event = G4EventManager::GetEventManager()->GetConstCurrentEvent()->GetEventID();
   const G4ThreeVector pos(aStep->GetPreStepPoint()->GetPosition());
   const G4ThreeVector tpos(aStep->GetPostStepPoint()->GetPosition());
+  const G4ThreeVector sdir(aStep->GetPreStepPoint()->GetMomentumDirection());
+  const G4ThreeVector tdir(aStep->GetPostStepPoint()->GetMomentumDirection());
 
+  
   std::string startp("null");
   std::string endp("null");
 
@@ -43,6 +46,7 @@ void SteppingAction::UserSteppingAction(const G4Step *aStep)
   
   G4int id(0);
 
+  
   if (sprocess)
       startp = sprocess->GetProcessName();
   if (tprocess)
@@ -59,6 +63,9 @@ void SteppingAction::UserSteppingAction(const G4Step *aStep)
 
   if (pID==11 && track->GetKineticEnergy()/keV>0.100 && (lVolume->GetName().find("detector")!=std::string::npos)) // don't count the thermale's, just G4 e's
     fEventAction->EDepPrim(aStep->GetTotalEnergyDeposit());
+ 
+ 
+
   
   if (eVolume)
     {
@@ -76,13 +83,43 @@ void SteppingAction::UserSteppingAction(const G4Step *aStep)
 	  analysisManager->FillNtupleDColumn(id,3, pos[0]/mm);
 	  analysisManager->FillNtupleDColumn(id,4, pos[1]/mm);
 	  analysisManager->FillNtupleDColumn(id,5, pos[2]/mm);
-	  if (sprocess)
-	    startp = sprocess->GetProcessName();
 	  //	  analysisManager->FillNtupleSColumn(id,6, startp);
 
 	  analysisManager->AddNtupleRow(id);
 
 	}
+      id = 4;
+
+      if (lVolume->GetName().find("Lens")!=std::string::npos) //      
+	//      if (/*eVname=="detectorLogical" && */ lVolume->GetName()=="pmtPhysical")
+      	{
+	  //	  std::cout << "SteppingAction: Stepping from  " << lVolume->GetName() <<  " into " << eVname << " Killing OpticalPhoton." << std::endl;
+	  //std::cout << "SteppingAction: startp and endproc are " << startp << " and " << endp << std::endl;
+
+	  analysisManager->FillNtupleDColumn(id,0, event);
+	  analysisManager->FillNtupleDColumn(id,1, pID);
+	  analysisManager->FillNtupleDColumn(id,2, time/ns);
+	  analysisManager->FillNtupleDColumn(id,3, pos[0]/mm);
+	  analysisManager->FillNtupleDColumn(id,4, pos[1]/mm);
+	  analysisManager->FillNtupleDColumn(id,5, pos[2]/mm);
+	  //	  analysisManager->FillNtupleSColumn(id,6, startp);
+
+	  /*
+	  std::cout << "current, exiting Volumes" << lVolume->GetName() << ", " << eVolume->GetName() << std::endl;
+	  std::cout << "Incoming lens dir:" << sdir[0]<<"," <<sdir[1] << "," <<sdir[2] <<" exiting dir " << eVname << " at: "<< tdir[0]  <<"," <<tdir[1] << "," <<tdir[2] << std::endl;
+	  std::cout << "In/out lens pos:" << pos[0]<<"," <<pos[1] << "," <<pos[2] <<" exiting pos " << eVname << " at: "<< tpos[0]  <<"," <<tpos[1] << "," <<tpos[2] << std::endl;
+	  std::cout << "In lens energy; trackID, startp, endp, trackstatus : " << tID << ", " << aStep->GetPreStepPoint()->GetTotalEnergy() << "; " << startp << ", " << endp << ", " << track->GetTrackStatus() <<std::endl;
+	  */
+	  
+	  analysisManager->AddNtupleRow(id);
+  
+	  
+
+	}
+
+
+    
+
     }
   
   // if particle == thermale, opticalphoton and parent == primary and stepID==1, or trackID<=2

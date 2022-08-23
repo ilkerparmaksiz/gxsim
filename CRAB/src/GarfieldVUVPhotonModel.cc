@@ -11,6 +11,7 @@
 #include "G4TransportationManager.hh"
 #include "G4DynamicParticle.hh"
 #include "G4RandomDirection.hh"
+
 #include "globals.hh"
 #include "MediumMagboltz.hh"
 #include "GeometrySimple.hh"
@@ -46,6 +47,11 @@ GarfieldVUVPhotonModel::GarfieldVUVPhotonModel(GasModelParameters* gmp, G4String
 		G4VFastSimulationModel(modelName, envelope),detCon(dc),fGasBoxSD(sd) {
 	thermalE=gmp->GetThermalEnergy();
 	InitialisePhysics();
+
+	G4OpBoundaryProcess* fBoundaryProcess = new G4OpBoundaryProcess();
+	G4OpAbsorption* fAbsorptionProcess = new G4OpAbsorption();
+	G4OpWLS* fTheWLSProcess = new G4OpWLS();
+
 }
 
 G4bool GarfieldVUVPhotonModel::IsApplicable(const G4ParticleDefinition& particleType) {
@@ -97,7 +103,7 @@ void GarfieldVUVPhotonModel::DoIt(const G4FastTrack& fastTrack, G4FastStep& fast
        G4cout << "GarfieldVUV: actual NEST thermales: " << counter[1] << G4endl;
 
 
-     //     if (!(counter[1]%10000)) 
+     //     if (!(counter[1]%1000)) // uncomment! 
        GenerateVUVPhotons(fastTrack,fastStep,garfPos,garfTime);
 
 }
@@ -188,7 +194,19 @@ void GarfieldVUVPhotonModel::GenerateVUVPhotons(const G4FastTrack& fastTrack, G4
 	  
 	  if (i % (colHitsEntries/colHitsEntries ) == 0){ // 50. Need to uncomment this condition, along with one in degradmodel.cc. EC, 2-Dec-2021.
 	  
-	    G4DynamicParticle VUVphoton(G4OpticalPhoton::OpticalPhotonDefinition(),G4RandomDirection(), 7.2*eV);
+	    auto* optphot = G4OpticalPhoton::OpticalPhotonDefinition();
+	    /*
+	    G4ProcessManager* pmanager = optphot->GetProcessManager();
+	    if (pmanager) {
+	      std::cout << "FastTrack OptPhoton process list (of length) " << pmanager->GetProcessList()->size() << " for opticalphoton  is: " << std::endl;
+
+	      for (short int ii = 0; ii<(short int)(pmanager->GetProcessList()->size());++ii)
+		{
+		  std::cout << (*pmanager->GetProcessList())[ii]->GetProcessName() << std::endl;
+		}
+	    }
+	    */
+	    G4DynamicParticle VUVphoton(optphot,G4RandomDirection(), 7.2*eV);
 	    // Create photons track
 	    ///	 G4Track *newTrack=fastStep.CreateSecondaryTrack(VUVphoton, (*garfExcHitsCol)[i]->GetPos(),(*garfExcHitsCol)[i]->GetTime(),false);
 
@@ -200,8 +218,7 @@ void GarfieldVUVPhotonModel::GenerateVUVPhotons(const G4FastTrack& fastTrack, G4
 	    newExcHit->SetTime(tig4);
 	    fGasBoxSD->InsertGarfieldExcitationHit(newExcHit);
 	    G4Track *newTrack=fastStep.CreateSecondaryTrack(VUVphoton, fakepos, tig4 ,false);
-	    
-
+	    newTrack->SetPolarization(G4ThreeVector(0.,0.,1.0)); // Needs some pol'n, else we will only ever reflect at an OpBoundary. EC, 8-Aug-2022.
 	    //	G4ProcessManager* pm= newTrack->GetDefinition()->GetProcessManager();
 	    //	G4ProcessVectorfAtRestDoItVector = pm->GetAtRestProcessVector(typeDoIt);
 	  }

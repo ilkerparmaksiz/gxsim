@@ -30,11 +30,14 @@ void PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent) {
       fparticleGun->GetCurrentSource()->GetPosDist()->GetHalfY(),
       fparticleGun->GetCurrentSource()->GetPosDist()->GetHalfZ()};
 
-  std::cout << "GeneratePrimaries() particle requested is " << fparticleGun->GetParticleDefinition() << std::endl;
+  std::cout << "GeneratePrimaries() particle requested is " << fparticleGun->GetParticleDefinition()->GetParticleName() << std::endl;
   std::cout << "GeneratePrimaries() vtx bounds:  " << xyzbounds[0] << ", " << xyzbounds[1] << ", " << xyzbounds[2] << std::endl;
 
 
   fparticleGun->GeneratePrimaryVertex(anEvent);
+
+  std::cout << "Primary vtx: " << std::endl;
+  //  anEvent->GetPrimaryVertex(0)->Print() ;
 
 }
 

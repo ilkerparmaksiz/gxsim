@@ -4,6 +4,7 @@
 #include "G4RotationMatrix.hh"
 #include "G4UnitsTable.hh"
 #include "G4LogicalBorderSurface.hh"
+#include "G4LogicalSkinSurface.hh"
 #include "G4OpticalSurface.hh"
 #include "G4Trd.hh"
 #include "G4Threading.hh"
@@ -23,7 +24,7 @@
 DetectorConstruction::DetectorConstruction(GasModelParameters* gmp)
     :
     fGasModelParameters(gmp),
-    checkOverlaps(0),
+    checkOverlaps(1),
     worldHalfLength(3.*m), //World volume is a cube with side length = 3m;
     wallThickness(0.05*m), //thickness of the aluminum walls
     caloThickness(1.*mm), // thickness of the silicon detectors
@@ -108,8 +109,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
   G4double photonEnergyMgF2[nEntriesMgF2Index]={6.19*eV,6.44*eV,6.70*eV,6.97*eV,7.26*eV,7.55*eV,7.86*eV,8.18*eV,8.51*eV};
   
 
-  G4double MgF2Rindex[nEntriesMgF2Index]={1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0};
-  
+  G4double MgF2Rindex[nEntriesMgF2Index]={1.423,1.428,1.434,1.440,1.447,1.455,1.465,1.476,1.489};
   G4double MgF2Reflectivity[nEntriesMgF2Index]={0.,0.,0.,0.,0.,0.,0.,0.,0.};
   G4double MgF2Efficiency[nEntriesMgF2Index]={1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0};
   
@@ -118,6 +118,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
   mptGlass->AddProperty("RINDEX",photonEnergyMgF2,MgF2Rindex,nEntriesMgF2Index);
   mptGlass-> AddProperty("REFLECTIVITY",photonEnergyMgF2,MgF2Reflectivity,nEntriesMgF2Index);
   mptGlass-> AddProperty("EFFICIENCY",photonEnergyMgF2,MgF2Efficiency,nEntriesMgF2Index);
+
   glass->SetMaterialPropertiesTable(mptGlass);
   
   
@@ -168,7 +169,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
                       false,0,checkOverlaps);
   
   
-  // colimator Tube
+  // collimator Tube
   G4VSolid* collimatorSolid = new G4Tubs("collimatorTube",rIntColimator,rExtColimator,halfColimatorLength,0.,twopi);
   G4LogicalVolume* collimatorLogical = new G4LogicalVolume(collimatorSolid,lead,"collimatorLogical");
   
@@ -176,6 +177,10 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
   
   G4RotationMatrix rotm  = G4RotationMatrix();
   rotm.rotateX(90*deg);
+  rotm.rotateY(0*deg);
+  rotm.rotateZ(0*deg);
+  G4RotationMatrix rotnull  = G4RotationMatrix();
+  rotm.rotateX(0*deg);
   rotm.rotateY(0*deg);
   rotm.rotateZ(0*deg);
   
@@ -189,27 +194,6 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
                                                             false,0,checkOverlaps);
   */
   
-  
-  
-  
-  // colimator Window
-  G4VSolid* collimatorSolid2 = new G4Tubs("collimatorWindow",rIntColimator2,rExtColimator,halfColimatorLength,0.,twopi);
-  G4LogicalVolume* collimatorLogical2 = new G4LogicalVolume(collimatorSolid2,steel304,"collimatorLogical2");
-  G4ThreeVector position2 = G4ThreeVector(0.,-halfColimatorLength,0.*mm);  
-  G4Transform3D transform2 = G4Transform3D(rotm,position2);
-  new G4PVPlacement(transform2,collimatorLogical2,"collimatorPhysical2",worldLogical,
-                                                             false,0,checkOverlaps);
-  
-  //Radiation window in kapton
-  
-  // colimator Window
-  G4VSolid* window = new G4Tubs("Window",0,rIntColimator2,windowHalfLength,0.,twopi);
-  
-  G4LogicalVolume* windowLogical = new G4LogicalVolume(window,kapton,"windowLogical");
-  G4ThreeVector position5 = G4ThreeVector(0.,-windowHalfLength,0.*mm);  
-  G4Transform3D transform5 = G4Transform3D(rotm,position5);
-  new G4PVPlacement(transform5,windowLogical,"windowPhysical",worldLogical,
-                                                        false,0,checkOverlaps);
   
   //Make XenonVolume
   
@@ -255,33 +239,74 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
   
   
   //Make camLogical mother and photocathode daughter
-  G4ThreeVector positionCAM = G4ThreeVector(gasboxR/2.0,camHalfLength,0.*mm); // just inside the volume
-  G4Transform3D transformCAM = G4Transform3D(rotm,positionCAM);
-  G4VPhysicalVolume* camPhysical= new G4PVPlacement(transformCAM,camLogical,"camPhysical",worldLogical,
+  G4ThreeVector positionCAM = G4ThreeVector(gasboxR/2.0,0.*mm,+gasboxH*0.5-0.5*camHalfLength); // just inside the volume
+  G4Transform3D transformCAM = G4Transform3D(rotnull,positionCAM);
+  G4VPhysicalVolume* camPhysical= new G4PVPlacement(transformCAM,camLogical,"camPhysical",logicGasBox,
                                                     false,0,checkOverlaps);  
   
+  
+  // lensTube
+  const G4double lensTubeLength(10.0*cm);
+  const G4double tubeThickness(1.0*mm);
+  G4VSolid* lensTube = new G4Tubs("lensTube",camRadius-tubeThickness,camRadius,lensTubeLength/2.,0.,twopi);
+  G4LogicalVolume* lensTubeLogical = new G4LogicalVolume(lensTube,steel304,"lensTube");
+  G4ThreeVector positionLT = G4ThreeVector(gasboxR/2.0,0.0,+gasboxH*0.5-lensTubeLength/2.-camHalfLength*2);  
+  G4Transform3D transformLT = G4Transform3D(rotnull,positionLT);
+  //  G4VPhysicalVolume* lensTubePhysical = new G4PVPlacement(transformLT,lensTubeLogical,"lensTubeLogical",logicGasBox,
+  //                                                               false,0,checkOverlaps);
+  // lens
+  const G4double lensRcurve (4*camRadius); // 
+  //  const G4double lensThickness(6.9*mm);
+  //  const G4double lensRadius (10.0*mm);
+  G4double s2(lensRcurve); // approximately
+  G4double nind(MgF2Rindex[2]); // pick an index of refrac that's typical
+  G4double s1;
+  s1 = gasboxH -0.5*camHalfLength - s2;
+  G4double f(1.2 * lensRcurve/(2.0*(nind-1)));  // 1.2 is empirical in order to force focussing of parallel rays. EC, 16-Aug-2022.
+  s2 = 1.0/(1/f-1.0/s1);
+  std::cout<<"s1,s2 [mm]: "<< s1 << ", " << s2 << std::endl;
+  
+  const G4ThreeVector posLensTubeIntersect (0.,lensRcurve*1.5,0.);
+  G4Orb* sLensTube = new G4Orb("sLensSphereTube",lensRcurve); //new G4Tubs("sLensTube",0.0,lensRadius,lensThickness*2.0,0.0,twopi);
+  G4Orb* sLensOrb = new G4Orb("sLensSphere",lensRcurve);
+  G4IntersectionSolid* sLens =  new G4IntersectionSolid("sLens",sLensTube,sLensOrb,&rotnull,posLensTubeIntersect);
+  G4LogicalVolume* lensLogical = new G4LogicalVolume(sLens,glass,"Lens");
+  G4ThreeVector positionLens = G4ThreeVector(gasboxR/2.0,0.,+gasboxH*0.5-s2-camHalfLength*2);  
+  G4Transform3D transformLens = G4Transform3D(rotm,positionLens);
+  G4VPhysicalVolume* lensPhysical = new G4PVPlacement(transformLens,lensLogical,"Lens",logicGasBox,false,0,checkOverlaps);
+
+
   //OPTICAL SURFACES
   
   //Xenon-GLASS
 
     // commenting out does not suppress reflections. EC, 12-Apr-2022.
   
-  G4OpticalSurface* opXenon_Glass = new G4OpticalSurface("XenonGlassSurface");
+  G4OpticalSurface* opXenon_Glass = new G4OpticalSurface("XenonCamSurface");
   opXenon_Glass->SetModel(glisur);                  // SetModel
   opXenon_Glass->SetType(dielectric_dielectric);   // SetType
   opXenon_Glass->SetFinish(ground);                 // SetFinish
   opXenon_Glass->SetPolish(0.0);
-  new G4LogicalBorderSurface("XenonGlassSurface",detectorPhysical,camPhysical,opXenon_Glass);
-  
+  new G4LogicalBorderSurface("XenonCamSurface",detectorPhysical,camPhysical,opXenon_Glass);
+
+  G4OpticalSurface* opXenon_Glass2 = new G4OpticalSurface("XenonLensSurface");
+  opXenon_Glass2->SetModel(glisur);                  // SetModel
+  opXenon_Glass2->SetType(dielectric_dielectric);   // SetType
+  opXenon_Glass2->SetFinish(polished);                 // SetFinish
+  opXenon_Glass2->SetPolish(0.0);
+  new G4LogicalBorderSurface("XenonLensSurface",detectorPhysical,lensPhysical,opXenon_Glass2);
+  //    new G4LogicalSkinSurface("XenonLensSurface",lensLogical,opXenon_Glass2);
+
   
   //    // visualization attributes ------------------------------------------------
   
   worldLogical->SetVisAttributes(G4VisAttributes::Invisible);
   //  collimatorLogical->SetVisAttributes(red);
-  collimatorLogical2->SetVisAttributes(green);
+  //  collimatorLogical2->SetVisAttributes(green);
   logicGasBox->SetVisAttributes(blue);
   camLogical->SetVisAttributes(yellow);
-  windowLogical->SetVisAttributes(purple);
+  lensTubeLogical->SetVisAttributes(purple);
+  lensLogical->SetVisAttributes(purple);
 
 
   //Construct a G4Region, connected to the logical volume in which you want to use the G4FastSimulationModel

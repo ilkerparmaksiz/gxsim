@@ -80,7 +80,17 @@ void RunAction::BeginOfRunAction(const G4Run* aRun) {
   analysisManager->CreateNtupleDColumn("PKE");      //column 2 Primary KE
   analysisManager->CreateNtupleDColumn("PEDep");     //column 3 Primary final KE
   analysisManager->FinishNtuple();
-  
+
+  analysisManager->CreateNtuple("Lens", "Lens Hits"); 
+  analysisManager->CreateNtupleDColumn("Event");     //column 0
+  analysisManager->CreateNtupleDColumn("PID");       //column 1
+  analysisManager->CreateNtupleDColumn("Time");      //column 2
+  analysisManager->CreateNtupleDColumn("X");         //column 3
+  analysisManager->CreateNtupleDColumn("Y");         //column 4
+  analysisManager->CreateNtupleDColumn("Z");         //column 5
+
+  analysisManager->FinishNtuple();
+
   analysisManager->SetNtupleActivation(true);
 }
 

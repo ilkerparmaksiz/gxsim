@@ -251,7 +251,7 @@ void PhysicsList::ConstructProcess()
 
   //  theNEST2ScintillationProcess->SetDetailedSecondaries(true);
   // theNEST2ScintillationProcess->SetStackElectrons(true);
-  
+OA  
 
   while( (*particleIterator)() ){
     G4ParticleDefinition* particle = particleIterator->value();

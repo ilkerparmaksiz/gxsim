@@ -120,8 +120,9 @@ void GarfieldVUVPhotonModel::GenerateVUVPhotons(const G4FastTrack& fastTrack, G4
 	    G4DynamicParticle VUVphoton(G4OpticalPhoton::OpticalPhotonDefinition(),G4RandomDirection(), 7.2*eV);
 	    // Create photons track
 	    G4Track *newTrack=fastStep.CreateSecondaryTrack(VUVphoton, (*garfExcHitsCol)[i]->GetPos(),(*garfExcHitsCol)[i]->GetTime(),false);
-	    //	G4ProcessManager* pm= newTrack->GetDefinition()->GetProcessManager();
+	    G4ProcessManager* pm= newTrack->GetDefinition()->GetProcessManager();
 	    //	G4ProcessVectorfAtRestDoItVector = pm->GetAtRestProcessVector(typeDoIt);
+	    //G4ProcessVectorfVector gpv = pm->GetAtRestProcessVector(typeGPIL);
 	    }						
 	}
 	delete garfExcHitsCol;

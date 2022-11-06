@@ -1,1 +1,9 @@
 *~
+*.root
+*.cmake
+*.txt
+Makefile
+CMakeFiles
+*.png
+*.pdf
+*.gif

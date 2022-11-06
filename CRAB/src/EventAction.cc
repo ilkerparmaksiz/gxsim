@@ -30,6 +30,14 @@ void EventAction::BeginOfEventAction(const G4Event *ev) {
     if(dm)
         dm->Reset();
 
+    G4PrimaryVertex* pVtx;
+    pVtx = ev->GetPrimaryVertex();
+    if (pVtx)
+      {
+        G4double PKE = pVtx->GetPrimary(0)->GetKineticEnergy();
+	dm->SetPrimaryKE(PKE);
+      }
+
     fEDepPrim = 0.0;
     G4cout << " EventAction::BeginOfEventAction()  1 " << G4endl;
 }

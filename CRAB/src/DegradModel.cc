@@ -16,6 +16,7 @@
 #include "XenonHit.hh"
 #include "G4VProcess.hh"
 
+#include "G4/NESTProc.hh"
 
 DegradModel::DegradModel(GasModelParameters* gmp, G4String modelName, G4Region* envelope,DetectorConstruction* dc, GasBoxSD* sd)
     : G4VFastSimulationModel(modelName, envelope),detCon(dc), fGasBoxSD(sd){
@@ -35,7 +36,9 @@ G4bool DegradModel::ModelTrigger(const G4FastTrack& fastTrack) {
   G4int id = fastTrack.GetPrimaryTrack()->GetParentID();
     if (id == 1){
       //  also require that only photoelectric effect electrons are tracked here.
-      if (fastTrack.GetPrimaryTrack()->GetCreatorProcess()->GetProcessName().find("phot") != std::string::npos)
+      if ((fastTrack.GetPrimaryTrack()->GetCreatorProcess()->GetProcessName().find("phot") != std::string::npos) ||
+	  (fastTrack.GetPrimaryTrack()->GetCreatorProcess()->GetProcessName().find("comp") != std::string::npos)
+	  )
 	return true;
     }
   return false;
@@ -44,18 +47,23 @@ G4bool DegradModel::ModelTrigger(const G4FastTrack& fastTrack) {
 
 void DegradModel::DoIt(const G4FastTrack& fastTrack, G4FastStep& fastStep) {
 
+  // Here we start by killing G4's naive little one photo-electron.
+  // Then we run degrad with a photon of desired energy. Then we read up all the electrons it produces.
     fastStep.KillPrimaryTrack();
     if(!processOccured){
         G4ThreeVector degradPos =fastTrack.GetPrimaryTrack()->GetVertexPosition();
         G4double degradTime = fastTrack.GetPrimaryTrack()->GetGlobalTime();
-        
+	G4int KE = int(fPrimPhotonKE/eV);         
         fastStep.SetPrimaryTrackPathLength(0.0);
         G4cout<<"GLOBAL TIME "<<G4BestUnit(degradTime,"Time")<<" POSITION "<<G4BestUnit(degradPos,"Length")<<G4endl;
 
         G4int stdout;
         G4int SEED=54217137*G4UniformRand();
         G4String seed = G4UIcommand::ConvertToString(SEED);
-        G4String degradString="printf \"1,1,3,-1,"+seed+",5900.0,7.0,0.0\n7,0,0,0,0,0\n100.0,0.0,0.0,0.0,0.0,0.0,20.0,900.0\n500.0,0.0,0.0,1,0\n100.0,0.5,1,1,1,1,1,1,1\n0,0,0,0,0,0\" > conditions_Degrad.txt";
+	// Note the exact precision in below arguments. The integer "gammaKE" in particular needs a ".0" tacked on.
+	// G4String degradString="printf \"1,1,3,-1,"+seed+",30000.0,7.0,0.0\n7,0,0,0,0,0\n100.0,0.0,0.0,0.0,0.0,0.0,20.0,900.0\n500.0,0.0,0.0,1,0\n100.0,0.5,1,1,1,1,1,1,1\n0,0,0,0,0,0\" > conditions_Degrad.txt";
+	G4String gammaKE(","+std::to_string(KE));
+	G4String degradString="printf \"1,1,3,-1,"+seed+gammaKE+".0,7.0,0.0\n7,0,0,0,0,0\n100.0,0.0,0.0,0.0,0.0,0.0,20.0,900.0\n500.0,0.0,0.0,1,0\n100.0,0.5,1,1,1,1,1,1,1\n0,0,0,0,0,0\" > conditions_Degrad.txt";
         G4cout << degradString << G4endl;
         stdout=system(degradString.data());
         G4cout << degradString << G4endl;
@@ -153,10 +161,11 @@ void DegradModel::GetElectronsFromDegrad(G4FastStep& fastStep,G4ThreeVector degr
                     xh->SetTime(time);
                     fGasBoxSD->InsertXenonHit(xh);
                         // Create secondary electron
-		    if(electronNumber % 50 == 0){     // comment this condition, EC, 2-Dec-2021.
-		    G4DynamicParticle electron(G4Electron::ElectronDefinition(),G4RandomDirection(), 7.0*eV);
+		    //if(electronNumber % 50 == 0){     // comment this condition, EC, 2-Dec-2021.
+		    //		    G4DynamicParticle electron(G4Electron::ElectronDefinition(),G4RandomDirection(), 7.0*eV);
+		    G4DynamicParticle electron(NEST::NESTThermalElectron::ThermalElectronDefinition(),G4RandomDirection(), 1.13*eV);
 		    G4Track *newTrack=fastStep.CreateSecondaryTrack(electron, myPoint, time,false);
-		    }
+		    //		    }
                 }
             }
             v.clear(); //Faz reset ao vector senão vai continuar a adicionar os dadosadicionar os dados

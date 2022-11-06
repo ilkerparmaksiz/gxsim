@@ -67,11 +67,13 @@ G4bool GarfieldVUVPhotonModel::ModelTrigger(const G4FastTrack& fastTrack){
   G4double ekin = fastTrack.GetPrimaryTrack()->GetKineticEnergy();
   //  std::cout << "GarfieldVUVPhotonModel::ModelTrigger() thermalE, ekin is " << thermalE << ",  "<< ekin << std::endl;
   //  counter[0]++; //maybe not thread safe.
-  //  G4cout << "GarfieldVUV: candidate NEST thermales: " << counter[0] << G4endl;
+  //  G4cout << "GarfieldVUV: candidate NEST thermales: ekin, thermalE" << ekin << ", " << thermalE  << G4endl;
   S1Fill(fastTrack);
   G4String particleName = fastTrack.GetPrimaryTrack()->GetParticleDefinition()->GetParticleName();
   if (ekin<thermalE && particleName=="thermalelectron")
-    return true;
+    {
+      return true;
+    }
   return false;
 
 } 

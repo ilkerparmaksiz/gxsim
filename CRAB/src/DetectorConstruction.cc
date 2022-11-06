@@ -64,7 +64,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
   G4NistManager* man = G4NistManager::Instance();
   man->SetVerbose(1);
   G4Material* vacuum = man->FindOrBuildMaterial("G4_Galactic");
-  const G4double torr = 1. / 760. * bar;
+  const G4double torr = 1. / 760. * atmosphere;
   std::cout << "DetectorConstruction::Construct() pressure [bar,pascals?] is " << gasPressure/bar << "," << gasPressure << std::endl;
   //  detectorMessenger->
 

@@ -1,0 +1,68 @@
+/Xenon/geometry/SetGasPressure 10. bar
+
+#/gasModelParameters/degrad/thermalenergy 10. eV
+# Lower the threshold to get GarfieldVUVModel to grab up all ionization e's.  EC, 20-Apr-2022
+/gasModelParameters/degrad/thermalenergy 1.3 eV ## 150 gives almost same answer as 450, and 2x nexcitation as with 30. ## NEST e's are 1.13 eV
+
+#/run/numberOfThreads 1 # Currently hard-wired in CRAB.cc, cuz not evident thisis doing anything.
+#/control/cout/ignoreThreadsExcept 0
+#/control/cout/setCoutFile output.dmp
+
+#/run/initialize
+/Xenon/phys/setLowLimitE 50. eV
+/Xenon/phys/InitializePhysics  local # emlivermore #EmStandardPhysics_option4  ## must be local to effect NEST physics
+/Xenon/phys/AddParametrisation
+##/process/em/AddPAIRegion all GasRegion PAIphoton
+
+##/process/optical/processActivation Scintillation false ### not with NEST. EC, 6-May-2022.
+
+/random/setSeeds 12 13
+/run/initialize
+
+#/param/InActivateModel DegradModel
+#/param/InActivateModel GarfieldVUVPhotonModel
+
+/analysis/setFileName gam_41keV
+
+####################################
+############ Verbosities ###########
+####################################
+##/process/optical/verbose 2
+/tracking/verbose 0
+/run/verbose 1
+/event/verbose 0
+/tracking/storeTrajectory 1
+
+
+
+/gps/direction -0.707 0. -0.707
+/gps/ene/type Mono
+#/gps/particle e-
+/gps/particle gamma
+/gps/ene/mono 41.5 keV
+#/gps/ene/mono 10.0 keV
+#/gps/ene/mono 1592 keV # double esc pk
+#/gps/ene/mono 2.0 MeV
+#/gps/position 5. 30. 5. cm
+
+
+#/gps/particle opticalphoton
+#/gps/ene/mono 7.2 eV
+/gps/ang/type iso
+
+#/gps/direction 0 -1 0
+#/gps/ang/rot1 1 0 0
+#/gps/ang/rot2 0 0 -1
+#/gps/pos/type Plane
+/gps/pos/shape Para
+/gps/pos/centre 0 30. 0. cm
+/gps/position 0. 30. 0. cm
+/gps/pos/halfx 10 cm
+/gps/pos/halfy 30 cm
+/gps/pos/halfz 10 cm
+/gps/pos/confine "detectorPhysical" 
+#/gps/pos/halfx 0 cm
+#/gps/pos/halfy 0 cm
+#/gps/pos/halfz 0 cm
+/run/beamOn 100
+

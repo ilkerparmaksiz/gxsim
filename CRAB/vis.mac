@@ -80,7 +80,7 @@
 /gps/ene/mono 30 keV
 #/gps/ene/mono 1592 keV # double esc pk
 #/gps/ene/mono 2.0 MeV
-/gps/position 5. 30. 5. cm
+/gps/position 0. 30. 0. cm
 /run/beamOn 4
 
 
@@ -105,5 +105,5 @@
 #/run/beamOn 50
 
 #/vis/viewer/panTo -0.0 -.28
-/vis/viewer/set/viewpointThetaPhi 60. 0.
+#/vis/viewer/set/viewpointThetaPhi 60. 0.
 #/vis/viewer/zoom 4

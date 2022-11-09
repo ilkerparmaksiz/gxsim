@@ -15,7 +15,7 @@
 #include "GasBoxSD.hh"
 #include "XenonHit.hh"
 #include "G4VProcess.hh"
-
+#include "DetectorConstruction.hh"
 #include "G4/NESTProc.hh"
 
 DegradModel::DegradModel(GasModelParameters* gmp, G4String modelName, G4Region* envelope,DetectorConstruction* dc, GasBoxSD* sd)
@@ -53,17 +53,20 @@ void DegradModel::DoIt(const G4FastTrack& fastTrack, G4FastStep& fastStep) {
     if(!processOccured){
         G4ThreeVector degradPos =fastTrack.GetPrimaryTrack()->GetVertexPosition();
         G4double degradTime = fastTrack.GetPrimaryTrack()->GetGlobalTime();
-	G4int KE = int(fPrimPhotonKE/eV);         
+	G4int KE = int(fPrimPhotonKE/eV);
+	const static G4double torr = 1. / 760. * bar;
+	G4int Press = int(detCon->GetGasPressure()/torr); 
         fastStep.SetPrimaryTrackPathLength(0.0);
         G4cout<<"GLOBAL TIME "<<G4BestUnit(degradTime,"Time")<<" POSITION "<<G4BestUnit(degradPos,"Length")<<G4endl;
 
         G4int stdout;
         G4int SEED=54217137*G4UniformRand();
         G4String seed = G4UIcommand::ConvertToString(SEED);
-	// Note the exact precision in below arguments. The integer "gammaKE" in particular needs a ".0" tacked on.
+	// Note the exact precision in below arguments. The integers gammaKE,xenonP in particular need a ".0" tacked on.
 	// G4String degradString="printf \"1,1,3,-1,"+seed+",30000.0,7.0,0.0\n7,0,0,0,0,0\n100.0,0.0,0.0,0.0,0.0,0.0,20.0,900.0\n500.0,0.0,0.0,1,0\n100.0,0.5,1,1,1,1,1,1,1\n0,0,0,0,0,0\" > conditions_Degrad.txt";
 	G4String gammaKE(","+std::to_string(KE));
-	G4String degradString="printf \"1,1,3,-1,"+seed+gammaKE+".0,7.0,0.0\n7,0,0,0,0,0\n100.0,0.0,0.0,0.0,0.0,0.0,20.0,900.0\n500.0,0.0,0.0,1,0\n100.0,0.5,1,1,1,1,1,1,1\n0,0,0,0,0,0\" > conditions_Degrad.txt";
+	G4String xenonP(","+std::to_string(Press));
+	G4String degradString="printf \"1,1,3,-1,"+seed+gammaKE+".0,7.0,0.0\n7,0,0,0,0,0\n100.0,0.0,0.0,0.0,0.0,0.0,20.0"+xenonP+".0\n500.0,0.0,0.0,1,0\n100.0,0.5,1,1,1,1,1,1,1\n0,0,0,0,0,0\" > conditions_Degrad.txt";
         G4cout << degradString << G4endl;
         stdout=system(degradString.data());
         G4cout << degradString << G4endl;
@@ -121,7 +124,8 @@ void DegradModel::GetElectronsFromDegrad(G4FastStep& fastStep,G4ThreeVector degr
         }
         if (nline ==2) //Ionizations
         {
-            while (iss >> n) //cada stream ira atribuir o valor a n
+	  fastStep.SetNumberOfSecondaryTracks(1E6); // reasonable max # of electrons created by degrad
+	  while (iss >> n) //cada stream ira atribuir o valor a n
             {
                 v.push_back(n); //o n é adicionado ao vector
             }
@@ -135,6 +139,9 @@ void DegradModel::GetElectronsFromDegrad(G4FastStep& fastStep,G4ThreeVector degr
                 posX=posXDegrad*0.001+posXInitial;
                 posY=posZDegrad*0.001+posYInitial;
                 posZ=posYDegrad*0.001+posZInitial;
+		//		std::cout << "DegradModel::DoIt(): v[i-4]" << v[i] << "," << v[i+1] << "," << v[i+2] << "," << v[i+3] << "," << v[i+4]   << std::endl;
+		//		std::cout << "DegradModel::DoIt(): xinitial, poxXDegrad [mm]" << posXInitial << ", " << posXDegrad*0.001 << std::endl;
+		
                 //convert ps to ns
                 time=timeDegrad*0.001+timeInitial;
                 
@@ -160,11 +167,13 @@ void DegradModel::GetElectronsFromDegrad(G4FastStep& fastStep,G4ThreeVector degr
                     xh->SetPos(myPoint);
                     xh->SetTime(time);
                     fGasBoxSD->InsertXenonHit(xh);
-                        // Create secondary electron
+		    // Create secondary electron
 		    //if(electronNumber % 50 == 0){     // comment this condition, EC, 2-Dec-2021.
 		    //		    G4DynamicParticle electron(G4Electron::ElectronDefinition(),G4RandomDirection(), 7.0*eV);
+
 		    G4DynamicParticle electron(NEST::NESTThermalElectron::ThermalElectronDefinition(),G4RandomDirection(), 1.13*eV);
 		    G4Track *newTrack=fastStep.CreateSecondaryTrack(electron, myPoint, time,false);
+
 		    //		    }
                 }
             }

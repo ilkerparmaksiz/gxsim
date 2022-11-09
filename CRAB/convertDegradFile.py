@@ -14,7 +14,7 @@ for files in os.listdir(WORKING_DIRECTORY):
         print (files)
         print ("replacing lines...")
         for line in infile:
-            for src, target in replacements.iteritems():
+            for src, target in replacements.items():
                 line = line.replace(src, target)
             outfile.write(line)
         infile.close()
@@ -25,7 +25,7 @@ for files in os.listdir(WORKING_DIRECTORY):
         replacements = {'\t\t': '\t'}
         for line in infile:
             while '\t\t' in line:
-                for src, target in replacements.iteritems():
+                for src, target in replacements.items():
                     line = line.replace(src, target)
             line = line[1:]  # remove o primeiro caracter de cada linha
             outfile.write(line)

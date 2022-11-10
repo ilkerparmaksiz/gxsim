@@ -1,4 +1,6 @@
- Geant4GarfieldDegradInterface
+[Eric's version of the following, with new application(s), like CRAB ....]
+
+Geant4GarfieldDegradInterface
  ========================
  
  What is it?

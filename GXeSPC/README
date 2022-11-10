@@ -1,0 +1,2 @@
+# to build with NEST need these two extra bits
+cmake -DNEST_DIR=/Users/chur558/nest/install  -DCMAKE_PREFIX_PATH=/Users/chur558/nest//install/lib/cmake/gcem -DCMAKE_BUILD_TYPE=Debug .

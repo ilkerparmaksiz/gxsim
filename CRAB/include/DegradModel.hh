@@ -30,7 +30,7 @@ class DegradModel : public G4VFastSimulationModel {
   virtual G4bool IsApplicable(const G4ParticleDefinition&);
   virtual G4bool ModelTrigger(const G4FastTrack&);
   virtual void DoIt(const G4FastTrack&, G4FastStep&);
-  inline G4bool FindParticleName(G4String s){if(s=='e-') return true; return false;};
+  inline G4bool FindParticleName(G4String s){if(s=="e-") return true; return false;};
   inline void Reset(){processOccured=false;};
   void SetPrimaryKE(G4double KE) {fPrimPhotonKE = KE;};
   

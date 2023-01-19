@@ -287,7 +287,7 @@ void GarfieldVUVPhotonModel::InitialisePhysics(){
 	G4double detectorRadius=detCon->GetGasBoxR();//cm
 	G4double detectorHalfZ=detCon->GetGasBoxH()*0.5;//cm
 
-	Garfield::SolidTube* tube = new Garfield::SolidTube(0.0, detectorHalfZ/CLHEP::cm,0.,0.0, detectorRadius/CLHEP::cm, detectorHalfZ/CLHEP::cm,0.,1.,0.);//Tube oriented in Y'axis (0.,1.,0.,)
+	Garfield::SolidTube* tube = new Garfield::SolidTube(0.0, detectorHalfZ/CLHEP::cm,0.0, detectorRadius/CLHEP::cm, detectorHalfZ/CLHEP::cm,0.,1.,0.);//Tube oriented in Y'axis (0.,1.,0.,)
 
 	// Add the solid to the geometry, together with the medium inside
 	geo->AddSolid(tube, fMediumMagboltz);
@@ -318,8 +318,8 @@ void GarfieldVUVPhotonModel::InitialisePhysics(){
 	//	fAvalancheMC->SetIons();
 	fAvalancheMC->SetTimeSteps(0.05); // nsec, per example
 	fAvalancheMC->SetDistanceSteps(2.e-2); // cm, 10x example
-	//fAvalancheMC->EnableDebugging(); // way too much information. 
-	fAvalancheMC->DisableDebugging();
+	fAvalancheMC->EnableDebugging(false); // way too much information. 
+	//fAvalancheMC->DisableDebugging();
 	fAvalancheMC->EnableAttachment();
 	//    fAvalancheMC->DisableAttachment();
 

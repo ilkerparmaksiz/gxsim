@@ -17,7 +17,6 @@ endif()
 
 
 
-
 #----------------------------------------------------------------------------
 # Setup include directory for this project
 #
@@ -44,111 +43,15 @@ include_directories($ENV{GARFIELD_HOME}/Include/Garfield)
 include_directories($ENV{GARFIELD_HOME}/Heed)
 # Add additional libraries needed for GARFIELD++
 #link_directories($ENV{GARFIELD_LIB})
-link_directories($ENV{GARFIELD_HOME}/build/lib)
-link_directories(/usr/local/gfortran/lib)
-link_directories(/Users/chur558/geant4.10.07.02-install/lib)
+link_directories($ENV{GARFIELD_HOME}/build)
+link_directories(/opt/homebrew/Cellar/gcc/12.2.0/lib/gcc/12/)
+link_directories($ENV{G4INSTALL}/lib)
+link_directories(/opt/homebrew/lib/)
 
 # NEST
 find_package(NEST REQUIRED)
 include_directories($ENV{NEST_INCLUDE_DIRS}  $ENV{NEST_INCLUDE_DIRS}/.. $ENV{NEST_INCLUDE_DIRS}/../Detectors )
 link_directories($ENV{NEST_INCLUDE_DIRS}/../../lib)
-#----------------------------------------------------------------------------
-# Setup the project
-cmake_minimum_required(VERSION 2.6 FATAL_ERROR)
-project(CRAB)
-
-#----------------------------------------------------------------------------
-# Find Geant4 package, activating all available UI and Vis drivers by default
-# You can set WITH_GEANT4_UIVIS to OFF via the command line or ccmake/cmake-gui
-# to build a batch mode only executable
-#
-option(WITH_GEANT4_UIVIS "Build example with Geant4 UI and Vis drivers" ON)
-if(WITH_GEANT4_UIVIS)
-  find_package(Geant4 REQUIRED ui_all vis_all)
-else()
-  find_package(Geant4 REQUIRED)
-endif()
-
-
-
-
-#----------------------------------------------------------------------------
-# Setup include directory for this project
-#
-
-include_directories ("./include")
-include(${Geant4_USE_FILE})
-list(APPEND CMAKE_PREFIX_PATH $ENV{ROOTSYS})
-#----------------------------------------------------------------------------
-# Find ROOT (required package)
-#
-find_package(ROOT QUIET REQUIRED COMPONENTS RIO Net)
-if(NOT ROOT_FOUND)
-  message(STATUS "CRAB: ROOT package not found. --> Xenon disabled")  
-  return()
-endif()
-include(${ROOT_USE_FILE})
-
-
-# Setup Geant4 include directories and compile definitions
-include_directories($ENV{PROJECT_SOURCE_DIR}/include)
-
-# Setup GARFIELD++ include directories
-include_directories($ENV{GARFIELD_HOME}/Include/Garfield)
-include_directories($ENV{GARFIELD_HOME}/Heed)
-# Add additional libraries needed for GARFIELD++
-#link_directories($ENV{GARFIELD_LIB})
-link_directories($ENV{GARFIELD_HOME}/build/lib)
-link_directories(/usr/local/gfortran/lib)
-
-#----------------------------------------------------------------------------
-# Setup the project
-cmake_minimum_required(VERSION 2.6 FATAL_ERROR)
-project(CRAB)
-
-#----------------------------------------------------------------------------
-# Find Geant4 package, activating all available UI and Vis drivers by default
-# You can set WITH_GEANT4_UIVIS to OFF via the command line or ccmake/cmake-gui
-# to build a batch mode only executable
-#
-option(WITH_GEANT4_UIVIS "Build example with Geant4 UI and Vis drivers" ON)
-if(WITH_GEANT4_UIVIS)
-  find_package(Geant4 REQUIRED ui_all vis_all)
-else()
-  find_package(Geant4 REQUIRED)
-endif()
-
-
-
-
-#----------------------------------------------------------------------------
-# Setup include directory for this project
-#
-
-include_directories ("./include")
-include(${Geant4_USE_FILE})
-list(APPEND CMAKE_PREFIX_PATH $ENV{ROOTSYS})
-#----------------------------------------------------------------------------
-# Find ROOT (required package)
-#
-find_package(ROOT QUIET REQUIRED COMPONENTS RIO Net)
-if(NOT ROOT_FOUND)
-  message(STATUS "CRAB: ROOT package not found. --> Xenon disabled")  
-  return()
-endif()
-include(${ROOT_USE_FILE})
-
-
-# Setup Geant4 include directories and compile definitions
-include_directories($ENV{PROJECT_SOURCE_DIR}/include)
-
-# Setup GARFIELD++ include directories
-include_directories($ENV{GARFIELD_HOME}/Include/Garfield)
-include_directories($ENV{GARFIELD_HOME}/Heed)
-# Add additional libraries needed for GARFIELD++
-#link_directories($ENV{GARFIELD_LIB})
-link_directories($ENV{GARFIELD_HOME}/build/lib)
-link_directories(/usr/local/gfortran/lib)
 
 
 message(STATUS "include dir: $ENV{NEST_INCLUDE_DIRS} $ENV{NEST_INCLUDE_DIRS}/..")
@@ -187,6 +90,7 @@ target_link_libraries(CRAB -lGarfield -lgfortran ${ROOT_LIBRARIES} libNESTCore.a
 #
 
 set(CRAB_SCRIPTS
+  Xenon.gas
   vis.mac
   run1.mac
   convertDegradFile.py

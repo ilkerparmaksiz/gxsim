@@ -6,7 +6,7 @@ project(mwsim)
 add_subdirectory(Xenon)
 add_subdirectory(CRAB)
 #add_subdirectory(ALICE)
-add_subdirectory(MWGPC)
+#add_subdirectory(MWGPC)
 
-add_custom_target(Interface DEPENDS Xenon MWGPC CRAB)
+add_custom_target(Interface DEPENDS Xenon CRAB)
 

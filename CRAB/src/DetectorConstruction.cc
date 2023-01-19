@@ -300,7 +300,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
   
   //    // visualization attributes ------------------------------------------------
   
-  worldLogical->SetVisAttributes(G4VisAttributes::Invisible);
+  worldLogical->SetVisAttributes(G4VisAttributes::GetInvisible());
   //  collimatorLogical->SetVisAttributes(red);
   //  collimatorLogical2->SetVisAttributes(green);
   logicGasBox->SetVisAttributes(blue);

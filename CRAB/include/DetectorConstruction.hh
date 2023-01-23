@@ -28,6 +28,9 @@
 #include "G4Orb.hh"
 #include "GasModelParameters.hh"
 
+#include "OpticalMaterialProperties.hh"
+#include "MaterialsList.hh"
+#include "PmtR7378A.hh"
 
 
 class G4VSolid;
@@ -49,42 +52,68 @@ class DetectorConstruction : public G4VUserDetectorConstruction {
   virtual G4VPhysicalVolume* Construct();
   virtual void ConstructSDandField();
 
+  virtual void AssignVisuals();
+
   //Setters for the dimensions and environment variables of the setup
   inline void CheckOverlaps(G4bool co){checkOverlaps=co;};
-  inline void SetWorldHalfLength(G4double d){worldHalfLength=d;};
-  inline void SetGasBoxR(G4double d){gasboxR=d;};
-  inline void SetGasBoxH(G4double d){gasboxH=d;};
-  inline void SetWallThickness(G4double d){wallThickness=d;};
-  inline void SetCaloThickness(G4double d){caloThickness=d;};
   inline void SetGasPressure(G4double d){gasPressure=d;};
   inline void SetTemperature(G4double d){temperature=d;};
-  //Getters for the dimensions and environment variables of the setup
-  inline G4double GetWorldHalfLength(){return worldHalfLength;};
-  inline G4double GetGasBoxR(){return gasboxR;};
-  inline G4double GetGasBoxH(){return gasboxH;};
-  inline G4double GetWallThickness(){return wallThickness;};
-  inline G4double GetCaloThickness(){return caloThickness;};
+  
+  inline G4double GetGasBoxR(){return chamber_diam/2.0;};
+  inline G4double GetGasBoxH(){return chamber_length;};
   inline G4double GetGasPressure(){return gasPressure;};
   inline G4double GetTemperature(){return temperature;};
-  inline G4double GetNeonPercentage(){return neonPercentage;};
-  inline G4double GetCO2Percentage(){return co2Percentage;};
+  
+  
+  
+
     
   
  private:
   DetectorMessenger* detectorMessenger;
-  G4LogicalVolume* logicGasBox;
-  G4LogicalVolume* logicCalo;
   GasModelParameters* fGasModelParameters;
   G4bool checkOverlaps; // Check overlaps in the detector geometry if true
-  G4double worldHalfLength; //World volume is a cube with side length = 2m;
-  G4double gasboxR; // radius of tube filled with gas
-  G4double gasboxH; // length of the tube
-  G4double wallThickness; //thickness of the aluminum walls
-  G4double caloThickness; // thickness of the silicon detector
   G4double gasPressure; // pressure in the gas
   G4double temperature; // temperature of the gas
-  G4double addmixturePercentage;
-  G4double neonPercentage;
-  G4double co2Percentage;
+
+  G4double Lab_size;
+  G4double chamber_diam   ;
+  G4double chamber_length ;
+  G4double chamber_thickn ;
+  G4double SourceEn_offset ;
+  G4double SourceEn_diam   ;
+  G4double SourceEn_length ;
+  G4double SourceEn_thickn ;
+  G4double SourceEn_holedia ;
+  G4double gas_pressure_;
+  G4ThreeVector vtx_;
+  G4double Active_diam;
+  G4double Active_length;
+  G4double sc_yield_;
+  G4double e_lifetime_;
+  G4double ElGap_;
+  G4double PMT1_Pos_;
+  G4double PMT3_Pos_;
+  G4ThreeVector vertex;
+  pmt::PmtR7378A *pmt1_;
+  pmt::PmtR7378A *pmt2_;
+
+  G4double MgF2_window_thickness_;
+  G4double MgF2_window_diam_;
+  G4double pmt_hole_length_ ;
+  G4double wndw_ring_stand_out_;
+  G4double pedot_coating_thickness_;
+  G4double optical_pad_thickness_;
+  G4double pmt_base_diam_;
+  G4double pmt_base_thickness_;
+  G4bool  HideCollimator_;
+
+  G4bool HideSourceHolder_;
+  G4double max_step_size_;
+  G4double ELyield_;
+
+  G4LogicalVolume* gas_logic;
+
+
 };
 #endif

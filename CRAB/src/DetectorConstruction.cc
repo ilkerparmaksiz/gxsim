@@ -5,6 +5,7 @@
 #include "G4UnitsTable.hh"
 #include "G4LogicalBorderSurface.hh"
 #include "G4LogicalSkinSurface.hh"
+#include "G4LogicalVolumeStore.hh"
 #include "G4OpticalSurface.hh"
 #include "G4Trd.hh"
 #include "G4Threading.hh"
@@ -20,18 +21,46 @@
 #include "GarfieldVUVPhotonModel.hh"
 #include "G4SDManager.hh"
 
+#include "Visibilities.hh"
+
+
+
 
 DetectorConstruction::DetectorConstruction(GasModelParameters* gmp)
     :
     fGasModelParameters(gmp),
     checkOverlaps(1),
-    worldHalfLength(3.*m), //World volume is a cube with side length = 3m;
-    wallThickness(0.05*m), //thickness of the aluminum walls
-    caloThickness(1.*mm), // thickness of the silicon detectors
     gasPressure(1.*bar), // Pressure inside the gas
     temperature(273.15*kelvin), // temperature
-    neonPercentage(85.72), // mixture settings
-    co2Percentage(9.52)
+    Lab_size(3. *m),
+    chamber_diam   (15. * cm),
+    chamber_length (43.18 * cm),
+    chamber_thickn (2. * mm),
+    SourceEn_offset (5.2 *cm),
+    SourceEn_diam   (1. * cm),
+    SourceEn_length (1 * cm),
+    SourceEn_thickn (2. * mm),
+    SourceEn_holedia (2. * mm),
+    gas_pressure_(10. * bar),
+    vtx_(0,0,0),
+    Active_diam(8.5 * cm),
+    sc_yield_(25510./MeV),
+    e_lifetime_(1000. * ms),
+    pmt_hole_length_ (18.434 * cm),
+    MgF2_window_thickness_ (6. * mm),
+    MgF2_window_diam_ (10 * mm),
+    wndw_ring_stand_out_ (1.5 * mm), //how much the ring around sapph windows stands out of them
+    pedot_coating_thickness_ (200. * nanometer), // copied from NEW
+    optical_pad_thickness_ (1. * mm), // copied from NEW
+    pmt_base_diam_ (47. * mm),
+    pmt_base_thickness_ (5. * mm),
+    HideSourceHolder_(true),
+    max_step_size_(1.*mm),
+    ElGap_(7*mm),
+    ELyield_(970/cm),
+    PMT1_Pos_(2.32*cm),
+    PMT3_Pos_(3.52*cm),
+    HideCollimator_(true)
 {
   detectorMessenger = new DetectorMessenger(this);
 }
@@ -52,268 +81,281 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
   G4VisAttributes* yellow = new G4VisAttributes(G4Colour(1.0, 1.0, 0.));
   G4VisAttributes* purple = new G4VisAttributes(G4Colour(1.0, 0., 1.0));
 
-  /*First: build materials
-    World: vacuum
-    Walls: Aluminum
-    Gas: mixture of Helium and Isobutane or Ar and CO2
-    Calorimeter: Silicon 
-  */
-  
-    
-  //World material: vacuum
-  G4NistManager* man = G4NistManager::Instance();
-  man->SetVerbose(1);
-  G4Material* vacuum = man->FindOrBuildMaterial("G4_Galactic");
-  const G4double torr = 1. / 760. * atmosphere;
-  std::cout << "DetectorConstruction::Construct() pressure [bar,pascals?] is " << gasPressure/bar << "," << gasPressure << std::endl;
-  //  detectorMessenger->
+  //Materials
+  G4Material *gxe    = materials::GXe(gas_pressure_,68);
+  G4Material *MgF2   = materials::MgF2();
+  G4Material *Steel  = materials::Steel();
+  G4Material *vacuum = G4NistManager::Instance()->FindOrBuildMaterial("G4_Galactic");
 
-  //Gas material: mixture of HeIso or ArCO2
-  G4double nMoles = gasPressure/torr / (8.314 * joule / mole * temperature);
-  G4Material* mixture=NULL;
-  G4VPhysicalVolume* physiWorld = NULL;
+  // Optical Properties Assigned here
+  MgF2->SetMaterialPropertiesTable(opticalprops::MgF2());
+  vacuum->SetMaterialPropertiesTable(opticalprops::Vacuum());
+  gxe->SetMaterialPropertiesTable(opticalprops::GXe(gas_pressure_, 68,sc_yield_,e_lifetime_));
+  //Steel->SetMaterialPropertiesTable(opticalprops::STEEL());
   
-  G4Material* air = man->FindOrBuildMaterial("G4_AIR");
-  G4Material* lead = man->FindOrBuildMaterial("G4_Pb");
-  //  const static G4double Torr = gasPressure/torr* 1. / 760. * atmosphere;
-  G4Material* Xenon = man->ConstructNewGasMaterial ("XenonGas", "G4_Xe", 296.*kelvin, gasPressure, false);
-  G4Material* glass= man->FindOrBuildMaterial("G4_MAGNESIUM_FLUORIDE");
-  G4Material* kapton=man->FindOrBuildMaterial("G4_KAPTON");
-  G4Material* fSteel = new G4Material("StainlessSteel", 7.80 * g/cm3, 3);
-  G4Element* elFe = man->FindOrBuildElement("Fe");
-  G4Element* elNi = man->FindOrBuildElement("Ni");
-  G4Element* elCr = man->FindOrBuildElement("Cr");
-  fSteel->AddElement(elFe, 70 * perCent);
-  fSteel->AddElement(elCr, 18 * perCent);
-  fSteel->AddElement(elNi, 12 * perCent);
-  G4Element* elAl = man->FindOrBuildElement("Al");
-  G4Element* elO = man->FindOrBuildElement("O");
-  G4Material* fMacor=new G4Material("ceramic", 2.52 * g/cm3, 2);
-  fMacor->AddElement(elAl,2);
-  fMacor->AddElement(elO,3);
-  
-  G4Material* steel304=man->FindOrBuildMaterial("StainlessSteel");
-  G4Material* ceramic=man->FindOrBuildMaterial("ceramic");  //MACOR
-
-  const G4int nEntriesXenonIndex = 11;
-  G4double photonEnergyXenonIndex[nEntriesXenonIndex]={6.25*eV,6.41*eV,6.58*eV,6.75*eV,6.93*eV,7.12*eV,7.32*eV,7.54*eV,7.77*eV,8.01*eV,8.27*eV};
-  
-  G4double XenonRindex[nEntriesXenonIndex]={1.00,1.00,1.00,1.00,1.00,1.00,1.00,1.00,1.00,1.00,1.00};
-  
-  G4MaterialPropertiesTable* mptXenon= new G4MaterialPropertiesTable();
-  mptXenon->AddProperty("RINDEX",photonEnergyXenonIndex,XenonRindex,nEntriesXenonIndex);
-  Xenon->SetMaterialPropertiesTable(mptXenon);
-  
-  //CAM GLASS Refractive index
-  const G4int nEntriesMgF2Index = 9;
-  G4double photonEnergyMgF2[nEntriesMgF2Index]={6.19*eV,6.44*eV,6.70*eV,6.97*eV,7.26*eV,7.55*eV,7.86*eV,8.18*eV,8.51*eV};
-  
-
-  G4double MgF2Rindex[nEntriesMgF2Index]={1.423,1.428,1.434,1.440,1.447,1.455,1.465,1.476,1.489};
-  G4double MgF2Reflectivity[nEntriesMgF2Index]={0.,0.,0.,0.,0.,0.,0.,0.,0.};
-  G4double MgF2Efficiency[nEntriesMgF2Index]={1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0};
-  
-  
-  G4MaterialPropertiesTable* mptGlass= new G4MaterialPropertiesTable();
-  mptGlass->AddProperty("RINDEX",photonEnergyMgF2,MgF2Rindex,nEntriesMgF2Index);
-  mptGlass-> AddProperty("REFLECTIVITY",photonEnergyMgF2,MgF2Reflectivity,nEntriesMgF2Index);
-  mptGlass-> AddProperty("EFFICIENCY",photonEnergyMgF2,MgF2Efficiency,nEntriesMgF2Index);
-
-  glass->SetMaterialPropertiesTable(mptGlass);
-  
-  
-  
-  //--------------------------------------------------
-  // CAM PHOTOCATHODE
-  //--------------------------------------------------
-  
-  
-  G4double photonEnergyCAM[]={6.26*eV,6.31*eV,6.38*eV,6.42*eV,6.45*eV,6.49*eV,6.52*eV,6.55*eV,6.59*eV,6.61*eV,6.66*eV,6.70*eV,6.75*eV,6.81*eV,6.85*eV,6.89*eV,6.95*eV,6.98*eV,7.02*eV,7.08*eV,7.15*eV,7.21*eV,7.30*eV,7.37*eV,7.43*eV,7.50*eV,7.56*eV,7.60*eV,7.68*eV,7.73*eV,7.77*eV,7.86*eV,7.95*eV,8.04*eV,8.10*eV,8.14*eV};
-  
-  
-  
-  
-  G4double photocath_EFF[]=
-  {3.96,5.20,6.63,7.96,8.99,9.85,10.46,11.46,12.18,12.94,14.17,14.61,16.00,17.01,18.07,18.63,19.79,20.40,21.68,21.68,23.04,23.04,23.75,25.24,26.01,26.01,27.64,28.49,29.37,29.37,30.28,32.17,33.17,35.24,36.33,37.45}; //Enables 'detection' of photons
-  
-  assert(sizeof(photocath_EFF) == sizeof(photonEnergyCAM));
-  
-  
-  G4double reflectivityPhotocathode[] =
-  { 0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0};
-  
-  assert(sizeof(reflectivityPhotocathode) == sizeof(photonEnergyCAM));
-  
-  
-
-  gasboxR = 15.*cm;
-  gasboxH = 60.*cm;
-
-  G4double halfColimatorLength=0.2*cm;
-  G4double rIntColimator=1.0*mm;
-  G4double rIntColimator2=3.75*mm;
-  G4double rExtColimator=5.*cm;
-  //detectorHalfZ=5*cm;
-  G4double camHalfLength=0.25*cm;
-  G4double camRadius=2.4*cm;
-  G4double distColimattorToDetector=2.5*cm;
-  G4double macorHalfY=1.3*cm/2;
-  G4double windowHalfLength=25.*um;
-  
-  // geometries --------------------------------------------------------------
-  // experimental hall (world volume)
-  G4VSolid* worldSolid
-  = new G4Box("worldBox",500.*cm,400.*cm,500.*cm);
-  G4LogicalVolume* worldLogical  = new G4LogicalVolume(worldSolid,air,"worldLogical");
-  physiWorld = new G4PVPlacement(0,G4ThreeVector(),worldLogical,"worldPhysical",0,
-                      false,0,checkOverlaps);
-  
-  
-  // collimator Tube
-  G4VSolid* collimatorSolid = new G4Tubs("collimatorTube",rIntColimator,rExtColimator,halfColimatorLength,0.,twopi);
-  G4LogicalVolume* collimatorLogical = new G4LogicalVolume(collimatorSolid,lead,"collimatorLogical");
-  
-  
-  
-  G4RotationMatrix rotm  = G4RotationMatrix();
-  rotm.rotateX(90*deg);
-  rotm.rotateY(0*deg);
-  rotm.rotateZ(0*deg);
-  G4RotationMatrix rotnull  = G4RotationMatrix();
-  rotm.rotateX(0*deg);
-  rotm.rotateY(0*deg);
-  rotm.rotateZ(0*deg);
-  
-  G4ThreeVector position = G4ThreeVector(0.,-halfColimatorLength-distColimattorToDetector,0.*mm);
-  
-  G4Transform3D transform = G4Transform3D(rotm,position);
-  
-  
-  /* 
-  new G4PVPlacement(transform,collimatorLogical,"collimatorPhysical",worldLogical,
-                                                            false,0,checkOverlaps);
-  */
-  
-  
-  //Make XenonVolume
-  
-  G4VSolid* detectorSolid=new  G4Tubs("detectorBox",0,gasboxR,gasboxH*0.5,0.,twopi);
-  
-  ////Place Detector in world
-  logicGasBox = new G4LogicalVolume(detectorSolid,Xenon,"detectorLogical");
-  
-  G4ThreeVector position3 = G4ThreeVector(0.,gasboxH*0.5,0.*mm);
-  G4Transform3D transform3 = G4Transform3D(rotm,position3);
-  
-  G4VPhysicalVolume* detectorPhysical=    new G4PVPlacement(transform3,             //rotation and position
-                                                            logicGasBox,            //its logical volume
-                                                            "detectorPhysical",             //its name
-                                                            worldLogical,             //its mother  volume
-                                                            true,                 //no boolean operation
-                                                            0,                 //copy number
-                                                            checkOverlaps);       // checking overlaps
-  
-  
-  //Macor
-  
-  
-  G4VSolid* macorSolid=new  G4Tubs("macorTube",gasboxR,gasboxR+rExtColimator,macorHalfY,0.,twopi);
-  
-  ////Place macor in world
-  G4LogicalVolume* macorLogical = new G4LogicalVolume(macorSolid,ceramic,"macorLogical");
-  
-  G4ThreeVector position4 = G4ThreeVector(0.,macorHalfY,0.*mm);
-  G4Transform3D transform4 = G4Transform3D(rotm,position4);
-  /*
-  new G4PVPlacement(transform4,             //rotation and position
-                    macorLogical,            //its logical volume
-                    "macorPhysical",             //its name
-                    worldLogical,             //its mother  volume
-                    true,                 //no boolean operation
-                    0,                 //copy number
-                    checkOverlaps);       // checking overlaps
-  */
-  //CAM
-  G4VSolid* camSolid = new G4Tubs("camWindow",0.,camRadius,camHalfLength,0.,twopi);
-  G4LogicalVolume* camLogical = new G4LogicalVolume(camSolid,glass,"camLogical");
-  
-  
-  //Make camLogical mother and photocathode daughter
-  G4ThreeVector positionCAM = G4ThreeVector(gasboxR/2.0,0.*mm,+gasboxH*0.5-0.5*camHalfLength); // just inside the volume
-  G4Transform3D transformCAM = G4Transform3D(rotnull,positionCAM);
-  G4VPhysicalVolume* camPhysical= new G4PVPlacement(transformCAM,camLogical,"camPhysical",logicGasBox,
-                                                    false,0,checkOverlaps);  
-  
-  
-  // lensTube
-  const G4double lensTubeLength(10.0*cm);
-  const G4double tubeThickness(1.0*mm);
-  G4VSolid* lensTube = new G4Tubs("lensTube",camRadius-tubeThickness,camRadius,lensTubeLength/2.,0.,twopi);
-  G4LogicalVolume* lensTubeLogical = new G4LogicalVolume(lensTube,steel304,"lensTube");
-  G4ThreeVector positionLT = G4ThreeVector(gasboxR/2.0,0.0,+gasboxH*0.5-lensTubeLength/2.-camHalfLength*2);  
-  G4Transform3D transformLT = G4Transform3D(rotnull,positionLT);
-  //  G4VPhysicalVolume* lensTubePhysical = new G4PVPlacement(transformLT,lensTubeLogical,"lensTubeLogical",logicGasBox,
-  //                                                               false,0,checkOverlaps);
-  // lens
-  const G4double lensRcurve (4*camRadius); // 
-  //  const G4double lensThickness(6.9*mm);
-  //  const G4double lensRadius (10.0*mm);
-  G4double s2(lensRcurve); // approximately
-  G4double nind(MgF2Rindex[2]); // pick an index of refrac that's typical
-  G4double s1;
-  s1 = gasboxH -0.5*camHalfLength - s2;
-  G4double f(1.2 * lensRcurve/(2.0*(nind-1)));  // 1.2 is empirical in order to force focussing of parallel rays. EC, 16-Aug-2022.
-  s2 = 1.0/(1/f-1.0/s1);
-  std::cout<<"s1,s2 [mm]: "<< s1 << ", " << s2 << std::endl;
-  
-  const G4ThreeVector posLensTubeIntersect (0.,lensRcurve*1.5,0.);
-  G4Orb* sLensTube = new G4Orb("sLensSphereTube",lensRcurve); //new G4Tubs("sLensTube",0.0,lensRadius,lensThickness*2.0,0.0,twopi);
-  G4Orb* sLensOrb = new G4Orb("sLensSphere",lensRcurve);
-  G4IntersectionSolid* sLens =  new G4IntersectionSolid("sLens",sLensTube,sLensOrb,&rotnull,posLensTubeIntersect);
-  G4LogicalVolume* lensLogical = new G4LogicalVolume(sLens,glass,"Lens");
-  G4ThreeVector positionLens = G4ThreeVector(gasboxR/2.0,0.,+gasboxH*0.5-s2-camHalfLength*2);  
-  G4Transform3D transformLens = G4Transform3D(rotm,positionLens);
-  G4VPhysicalVolume* lensPhysical = new G4PVPlacement(transformLens,lensLogical,"Lens",logicGasBox,false,0,checkOverlaps);
+  // Constructing Lab Space
+  G4String lab_name="LAB";
+  G4Box * lab_solid_volume = new G4Box(lab_name,Lab_size/2,Lab_size/2,Lab_size/2);
+  G4LogicalVolume * lab_logic_volume = new G4LogicalVolume(lab_solid_volume,G4NistManager::Instance()->FindOrBuildMaterial("G4_AIR"),lab_name) ;
 
 
-  //OPTICAL SURFACES
-  
-  //Xenon-GLASS
+  // lab_logic_volume->SetVisAttributes(G4VisAttributes::Invisible);
 
-    // commenting out does not suppress reflections. EC, 12-Apr-2022.
-  
-  G4OpticalSurface* opXenon_Glass = new G4OpticalSurface("XenonCamSurface");
-  opXenon_Glass->SetModel(glisur);                  // SetModel
-  opXenon_Glass->SetType(dielectric_dielectric);   // SetType
-  opXenon_Glass->SetFinish(ground);                 // SetFinish
-  opXenon_Glass->SetPolish(0.0);
-  new G4LogicalBorderSurface("XenonCamSurface",detectorPhysical,camPhysical,opXenon_Glass);
+  // Krish -- Edited to here
 
-  G4OpticalSurface* opXenon_Glass2 = new G4OpticalSurface("XenonLensSurface");
-  opXenon_Glass2->SetModel(glisur);                  // SetModel
-  opXenon_Glass2->SetType(dielectric_dielectric);   // SetType
-  opXenon_Glass2->SetFinish(polished);                 // SetFinish
-  opXenon_Glass2->SetPolish(0.0);
-  new G4LogicalBorderSurface("XenonLensSurface",detectorPhysical,lensPhysical,opXenon_Glass2);
-  //    new G4LogicalSkinSurface("XenonLensSurface",lensLogical,opXenon_Glass2);
+  // Creating the Steel Cylinder that we need
 
+  /// First Creating the Ends of the Cylinder with Proper Holes
+  G4Tubs* chamber_flange_solid = new G4Tubs("CHAMBER_FLANGE", MgF2_window_diam_/2, (chamber_diam/2. + chamber_thickn),( chamber_thickn), 0.,twopi);
+  G4LogicalVolume* chamber_flange_logic =new G4LogicalVolume(chamber_flange_solid,materials::Steel(), "CHAMBER_FLANGE");
+
+  // Now Creating The Chamber with Without Ends
+  G4Tubs* chamber_solid =new G4Tubs("CHAMBER", chamber_diam/2., (chamber_diam/2. + chamber_thickn),(chamber_length/2. + chamber_thickn), 0.,twopi);
+  G4LogicalVolume* chamber_logic =new G4LogicalVolume(chamber_solid,materials::Steel(), "CHAMBER"); //
+
+
+
+  /// MgF2 window ///
+  G4Tubs* MgF2_window_solid = new G4Tubs("MgF2_WINDOW", 0., MgF2_window_diam_/2.,
+                                              (MgF2_window_thickness_ )/2., 0., twopi);
+  G4LogicalVolume* MgF2_window_logic= new G4LogicalVolume(MgF2_window_solid, MgF2, "MgF2_WINDOW");
+
+
+
+  //////////////////////////////////////////
+
+  G4double FielCageGap=(160.3+29.55)*mm;
   
-  //    // visualization attributes ------------------------------------------------
+  // Placing the gas in the chamber
+  G4Tubs* gas_solid =new G4Tubs("GAS", 0., chamber_diam/2., chamber_length/2., 0., twopi);
+  gas_logic = new G4LogicalVolume(gas_solid, gxe, "GAS");
   
-  worldLogical->SetVisAttributes(G4VisAttributes::GetInvisible());
-  //  collimatorLogical->SetVisAttributes(red);
-  //  collimatorLogical2->SetVisAttributes(green);
-  logicGasBox->SetVisAttributes(blue);
-  camLogical->SetVisAttributes(yellow);
-  lensTubeLogical->SetVisAttributes(purple);
-  lensLogical->SetVisAttributes(purple);
+  //gas_logic->SetUserLimits(new G4UserLimits(50*mm));
+  //Defining the Detection Area
+  //G4Tubs* Active_solid =new G4Tubs("ACTIVE", 0., Active_diam/2., Active_length/2., 0., twopi);
+  //G4LogicalVolume* Active_logic = new G4LogicalVolume(Active_solid, gxe, "ACTIVE");
+
+
+  // EL Region
+  G4Tubs* EL_solid = new G4Tubs("EL_GAP", 0., Active_diam/2.,ElGap_/2 , 0., twopi);
+  G4LogicalVolume* EL_logic = new G4LogicalVolume(EL_solid, gxe, "EL_GAP");
+  //EL_logic->SetUserLimits(new G4UserLimits(50*mm));
+
+  // FieldCage
+  G4Tubs* FieldCage_Solid =new G4Tubs("FIELDCAGE", 0., Active_diam/2.,FielCageGap/2 , 0., twopi);
+  G4LogicalVolume* FieldCage_Logic = new G4LogicalVolume(FieldCage_Solid, gxe, "FIELDCAGE");
+  //FieldCage_Logic->SetUserLimits(new G4UserLimits(50*mm));
+
+
+  // Radioactive Source Encloser
+  // Source
+  G4Tubs* SourceHolChamber_solid =new G4Tubs("SourceHolChamber", SourceEn_holedia/2, (SourceEn_diam/2. + SourceEn_thickn),(SourceEn_length/2. + SourceEn_thickn),0,twopi);
+  G4LogicalVolume* SourceHolChamber_logic = new G4LogicalVolume(SourceHolChamber_solid,materials::Steel(), "SourceHolChamber_logic");
+
+  G4Tubs* SourceHolChamberBlock_solid =new G4Tubs("SourceHolChBlock",0,(SourceEn_holedia/2),( SourceEn_thickn/2), 0.,twopi);
+  G4LogicalVolume* SourceHolChamberBlock_logic = new G4LogicalVolume(SourceHolChamberBlock_solid,materials::Steel(), "SourceHolChBlock_logic");
+
+
+  /// Needle Source
+  G4double NeedleyepRMin=0;
+  G4double NeedleyepRMax=(0.42)*mm;
+  G4double NeedleyepDz=( 2/2)*mm;
+  G4double NeedleHalfLength=(2.56/2)*cm;
+  G4double NeedleTailDiam=(0.6/2)*mm;
+  G4double NeedleOffset=1*mm;
+
+  G4Tubs* NeedleEye = new G4Tubs("NeedleEye",NeedleyepRMin,NeedleyepRMax,NeedleyepDz, 0.,twopi);
+  G4Tubs* NeedleTail = new G4Tubs("NeedleTail",NeedleyepRMin,NeedleTailDiam,NeedleHalfLength, 0.,twopi);
+
+  G4Tubs *Collimator = new G4Tubs("Collimator",(5.74/2)*mm,(11.5/2)*mm,0.5*cm, 0.,twopi);
+  G4Tubs * CollimatorBlock = new G4Tubs("CollimatorBlock",NeedleTailDiam,(5.74/2)*mm,0.2*cm, 0.,twopi);
+  
+  // Combining them to create the Needle
+  G4VSolid * Needle = new G4UnionSolid("Needle",NeedleEye,NeedleTail,0,G4ThreeVector(0,0,NeedleHalfLength));
+  G4VSolid * CollimatorWithBlock = new G4UnionSolid("CollimatorWithBlock",Collimator,CollimatorBlock,0,G4ThreeVector(0,0,0.5*cm-0.2*cm));
+  //G4VSolid * NeedleWithCollimator=new G4UnionSolid("NeedleWithCollimator",Needle,Collimator,0,G4ThreeVector(0,0,+5*mm));
+
+  //G4LogicalVolume * Needle_Logic=new G4LogicalVolume(Needle,materials::Steel(),"Needle");
+  G4LogicalVolume * Needle_Logic = new G4LogicalVolume(Needle,materials::Steel(),"Needle");
+  G4LogicalVolume * Coll_Logic = new G4LogicalVolume(CollimatorWithBlock,materials::PEEK(),"CollimatorWithBlock");
+
+
+  ///
+  //Adding the PMTs in here
+  pmt1_=new pmt::PmtR7378A();
+  pmt2_=new pmt::PmtR7378A();
+  pmt1_->SetPMTName("S2");
+  pmt2_->SetPMTName("S1");
+  pmt1_->Construct();
+  pmt2_->Construct();
+
+
+  std::cout << "Finished Initializing PMTs" << std::endl;
+
+  // Adding Logical Volumes for PMTs
+  G4LogicalVolume * pmt1_logic=pmt1_->GetLogicalVolume();
+  G4LogicalVolume * pmt2_logic=pmt2_->GetLogicalVolume();
+
+
+  // PMT1 and PMT3
+
+  // // PMTs
+  G4double PMT_offset=0.2*cm;
+  G4double PMT_pos=(chamber_length/2)+chamber_thickn+(pmt1_->Length()/2)+MgF2_window_thickness_+PMT_offset;
+  G4RotationMatrix* pmt1rotate = new G4RotationMatrix();
+  pmt1rotate->rotateY(180.*deg);
+
+  //// PMT Covering Tube ///
+  G4double offset=1.65*cm;
+  G4double PMT_Tube_Length1=MgF2_window_thickness_+(pmt1_->Length()+0.5*cm)/2 + offset -PMT_offset-0.05*cm ;
+  G4double PMT_Tube_Length0=(17*cm+pmt1_->Length())/2 - 3.87*cm-PMT_offset;
+  G4double PMT_Tube_Block_Thickness=0.2*cm;
+  G4double LongPMTTubeOffset=7.5*cm-3.9*cm;
+  G4double PMTTubeDiam=2.54*cm;
+
+  // Tube Away from EL
+  G4Tubs * PMT_Tube_solid0=new G4Tubs("PMT_TUBE0",(PMTTubeDiam/2)+0.5*cm,(PMTTubeDiam/2)+0.7*cm,PMT_Tube_Length0,0,twopi);
+  G4LogicalVolume * PMT_Tube_Logic0=new G4LogicalVolume(PMT_Tube_solid0,materials::Steel(),PMT_Tube_solid0->GetName());
+
+  G4Tubs * PMT_Block_solid0=new G4Tubs("PMT_TUBE_BLOCK0",0,(PMTTubeDiam/2+0.5*cm),PMT_Tube_Block_Thickness,0,twopi);
+  G4LogicalVolume * PMT_Block_Logic0=new G4LogicalVolume(PMT_Block_solid0,materials::Steel(),PMT_Block_solid0->GetName());
+  
+  // Vacuum for PMT TUBE0
+  /// add 2.54*cm to config file
+  G4Tubs * InsideThePMT_Tube_solid0=new G4Tubs("PMT_TUBE_VACUUM0",0,(PMTTubeDiam/2+0.5*cm),PMT_Tube_Length0,0,twopi);
+  G4LogicalVolume * InsideThePMT_Tube_Logic0=new G4LogicalVolume(InsideThePMT_Tube_solid0,vacuum,InsideThePMT_Tube_solid0->GetName());
+
+  // Tube Close to EL
+  G4Tubs * PMT_Tube_solid1=new G4Tubs("PMT_TUBE1",(PMTTubeDiam/2)+0.5*cm,(PMTTubeDiam/2)+0.7*cm,PMT_Tube_Length1,0,twopi);
+  G4LogicalVolume * PMT_Tube_Logic1=new G4LogicalVolume(PMT_Tube_solid1,materials::Steel(),PMT_Tube_solid1->GetName());
+  G4Tubs * PMT_Block_solid1=new G4Tubs("PMT_TUBE_BLOCK1",0,(PMTTubeDiam/2+0.5*cm),PMT_Tube_Block_Thickness,0,twopi);
+  G4LogicalVolume * PMT_Block_Logic=new G4LogicalVolume(PMT_Block_solid1,materials::Steel(),PMT_Block_solid1->GetName());
+
+  // Vacuum for PMT TUBE1
+
+  G4Tubs * InsideThePMT_Tube_solid1=new G4Tubs("PMT_TUBE_VACUUM1",0,(PMTTubeDiam/2+0.5*cm),PMT_Tube_Length1,0,twopi);
+  G4LogicalVolume * InsideThePMT_Tube_Logic1=new G4LogicalVolume(InsideThePMT_Tube_solid1,vacuum,InsideThePMT_Tube_solid1->GetName());
+
+  // Place the Volumes
+
+  // LAB
+  auto labPhysical = new G4PVPlacement(0, G4ThreeVector(),lab_logic_volume,lab_logic_volume->GetName(),0, false,0, false);
+
+  //Flanges on the Chamber
+  G4VPhysicalVolume *Left_Flange_phys = new G4PVPlacement(0,G4ThreeVector(0,0,(chamber_length/2)),chamber_flange_logic,chamber_flange_solid->GetName(),lab_logic_volume,true,0,false);
+  G4VPhysicalVolume *Right_Flange_phys = new G4PVPlacement(0,G4ThreeVector(0,0,-(chamber_length/2)),chamber_flange_logic,chamber_flange_solid->GetName(),lab_logic_volume,true,1,false);
+
+  //Chamber
+  G4VPhysicalVolume * chamber_phys=  new G4PVPlacement(0,G4ThreeVector(0.,0.,0) ,chamber_logic, chamber_solid->GetName(), lab_logic_volume, false, 0,false);
+
+  // Xenon Gas in Active Area and Non-Active Area
+  G4VPhysicalVolume * gas_phys= new G4PVPlacement(0, G4ThreeVector(0.,0.,0.), gas_logic, gas_solid->GetName(),lab_logic_volume, false, 0, false);
+  //new G4PVPlacement(0, G4ThreeVector(0.,0.,0.), Active_logic, Active_solid->GetName(),gas_logic, false, 0, false);
+
+
+  // FieldCage
+  G4double FieldCagePos=chamber_length/2-((129)*mm)-FielCageGap/2-ElGap_/2;
+  G4double EL_pos=chamber_length/2-FielCageGap/2-((326)*mm)-ElGap_/2;
+  G4VPhysicalVolume *FieldCage_Phys;
+  FieldCage_Phys=new G4PVPlacement(0,G4ThreeVector(0,0,FieldCagePos/2),FieldCage_Logic,FieldCage_Logic->GetName(),gas_logic, 0,0,false);
+
+  // EL_Gap
+  new G4PVPlacement(0,G4ThreeVector(0.,0.,EL_pos/2),EL_logic,EL_solid->GetName(),gas_logic, 0,0, false);
+
+
+  // MgF2 Windows
+  //G4double window_posz = chamber_length/2+chamber_thickn/2;
+  G4double window_posz = chamber_length/2;
+  auto PMT3Mgf2=new G4PVPlacement(0, G4ThreeVector(0., 0., window_posz), MgF2_window_logic,"MgF2_WINDOW1", lab_logic_volume,false, 0, false);
+  new G4PVPlacement(pmt1rotate, G4ThreeVector(0., 0., -window_posz), MgF2_window_logic,"MgF2_WINDOW2", lab_logic_volume, false, 1, false);
+
+  //PMT Tubes
+  G4VPhysicalVolume *PMT_Tube_Phys0=new G4PVPlacement(0,G4ThreeVector(0,0,PMT_pos+LongPMTTubeOffset),PMT_Tube_Logic0,PMT_Tube_Logic0->GetName(),lab_logic_volume,false,0,false);
+  G4VPhysicalVolume *PMT_Tube_Phys1=new G4PVPlacement(pmt1rotate,G4ThreeVector(0,0,-(PMT_pos-PMT_offset)-offset),PMT_Tube_Logic1,PMT_Tube_Logic1->GetName(),lab_logic_volume,false,0,false);
+  //PMT Tube Vacuum
+
+  G4VPhysicalVolume *PMT_Tube_Vacuum_Phys0=new G4PVPlacement(0,G4ThreeVector(0,0,PMT_pos+LongPMTTubeOffset),InsideThePMT_Tube_Logic0,"PMT_TUBE_VACUUM0",lab_logic_volume,false,0,false);
+  G4VPhysicalVolume *PMT_Tube_Vacuum_Phys1=new G4PVPlacement(pmt1rotate,G4ThreeVector(0,0,-(PMT_pos-PMT_offset)-offset),InsideThePMT_Tube_Logic1,"PMT_TUBE_VACUUM1",lab_logic_volume,false,0,false);
+
+  // PMT Tube Block
+  new G4PVPlacement(0,G4ThreeVector(0,0,PMT_pos-PMT_offset+PMT_Tube_Length0-PMT_Tube_Block_Thickness/2+LongPMTTubeOffset),PMT_Block_Logic0,PMT_Block_Logic0->GetName(),lab_logic_volume,false,0,false);
+  new G4PVPlacement(pmt1rotate,G4ThreeVector(0,0,-(PMT_pos-PMT_offset+PMT_Tube_Length1-PMT_Tube_Block_Thickness/2)-offset),PMT_Block_Logic,PMT_Block_Logic->GetName(),lab_logic_volume,false,1,false);
+
+  // PMTs
+  new G4PVPlacement(pmt1rotate,G4ThreeVector (0,0,((PMT3_Pos_)-pmt1_->Length()/2-PMT_Tube_Length1/2-MgF2_window_thickness_/2)),pmt1_logic,pmt1_->GetPMTName(),InsideThePMT_Tube_Logic0,true,0,false);
+  new G4PVPlacement(pmt1rotate,G4ThreeVector (0,0,(PMT1_Pos_-pmt1_->Length()/2-MgF2_window_thickness_/2)),pmt2_logic,pmt2_->GetPMTName(),InsideThePMT_Tube_Logic1,true,0,false);
+
+
+
+  /// CRAB0 Lens
+  //lens = new ::UltraFresnelLens(MgF2_window_diam_,13,MgF2,labPhysical,G4ThreeVector(0., 0., window_posz));
+
+
+
+  // Define this volume as an ionization sensitive detector
+  //FieldCage_Logic->SetUserLimits(new G4UserLimits(1*mm));
+  // IonizationSD* sensdet = new IonizationSD("/CRAB/FIELDCAGE");
+  // //Active_logic->SetSensitiveDetector(sensdet);
+  // FieldCage_Logic->SetSensitiveDetector(sensdet);
+  // G4SDManager::GetSDMpointer()->AddNewDetector(sensdet);
+
+  // Source Holder
+
+  G4VPhysicalVolume * Needle_Phys;
+  if(!HideSourceHolder_){
+      // Particle Source Holder
+      //Rotation Matrix
+
+      // Needle Solid
+
+      G4RotationMatrix* NeedleRotate = new G4RotationMatrix();
+      NeedleRotate->rotateY(90.*deg);
+      //NeedleRotate->rotateX(+10*deg);
+      G4ThreeVector NeedlePos={vtx_[0]-NeedleOffset,vtx_[1],vtx_[2]-FieldCagePos/2};
+      G4ThreeVector CollPosition={NeedlePos[0]-5*mm,NeedlePos[1],NeedlePos[2]};
+
+      Needle_Phys= new G4PVPlacement(NeedleRotate,NeedlePos,Needle_Logic,Needle->GetName(),FieldCage_Logic,true,0,false);
+      if(!HideCollimator_) {
+          new G4PVPlacement(NeedleRotate,CollPosition,Coll_Logic,CollimatorWithBlock->GetName(),FieldCage_Logic,true,0,false);
+      }
+      G4RotationMatrix* rotateHolder = new G4RotationMatrix();
+      rotateHolder->rotateY(90.*deg);
+
+      //new G4PVPlacement(rotateHolder, G4ThreeVector(-SourceEn_offset,0,0), SourceHolChamber_logic, SourceHolChamber_solid->GetName(),gas_logic, false, 0, false);
+      //new G4PVPlacement(rotateHolder, G4ThreeVector(-SourceEn_offset-SourceEn_length/2,0,0), SourceHolChamberBlock_logic, SourceHolChamberBlock_solid->GetName(),gas_logic, false, 0, false);
+
+      // NeedleEyePointSample=new CylinderPointSampler2020(NeedleyepRMin,NeedleyepRMax+2*nm,NeedleyepDz,0,twopi, rotateHolder,G4ThreeVector(NeedlePos[0],NeedlePos[1],NeedlePos[2]+FieldCagePos/2));
+
+  }
+
+
+  /// OpticalSurface
+  G4OpticalSurface * OpSteelSurf=new G4OpticalSurface("SteelSurface",unified,polished,dielectric_metal);
+  OpSteelSurf->SetMaterialPropertiesTable(opticalprops::STEEL());
+  new G4LogicalBorderSurface("SteelSurface_Chamber",gas_phys,chamber_phys,OpSteelSurf);
+  new G4LogicalBorderSurface("SteelSurface_LeftFlange",gas_phys,Left_Flange_phys,OpSteelSurf);
+  new G4LogicalBorderSurface("SteelSurface_RightFlange",gas_phys,Right_Flange_phys,OpSteelSurf);
+  new G4LogicalBorderSurface("SteelSurface_PMT3_Enclosing",PMT_Tube_Vacuum_Phys0,PMT_Tube_Phys0,OpSteelSurf);
+  new G4LogicalBorderSurface("SteelSurface_PMT1_Enclosing",PMT_Tube_Vacuum_Phys1,PMT_Tube_Phys1,OpSteelSurf);
+  if(!HideSourceHolder_ && !HideCollimator_){
+      new G4LogicalBorderSurface("SteelSurface_Needle",FieldCage_Phys,Needle_Phys,OpSteelSurf);
+  }
+
+
+  // Visuals
+
+  AssignVisuals();
+  
+  // G4Optic
+  // this->SetLogicalVolume(lab_logic_volume);
+  // this->SetLogicalVolume(chamber_logic);
 
 
   //Construct a G4Region, connected to the logical volume in which you want to use the G4FastSimulationModel
   G4Region* regionGas = new G4Region("GasRegion");
-  regionGas->AddRootLogicalVolume(logicGasBox);
+  regionGas->AddRootLogicalVolume(gas_logic);
     
-  return physiWorld;
+  return labPhysical;
 
 }
 
@@ -323,7 +365,7 @@ void DetectorConstruction::ConstructSDandField(){
   GasBoxSD* myGasBoxSD = new GasBoxSD(GasBoxSDname);
   SDManager->SetVerboseLevel(1);
   SDManager->AddNewDetector(myGasBoxSD);
-  SetSensitiveDetector(logicGasBox,myGasBoxSD);
+  SetSensitiveDetector(gas_logic,myGasBoxSD);
   
   //These commands generate the four gas models and connect it to the GasRegion
   G4Region* region = G4RegionStore::GetInstance()->GetRegion("GasRegion");
@@ -331,4 +373,100 @@ void DetectorConstruction::ConstructSDandField(){
   new GarfieldVUVPhotonModel(fGasModelParameters,"GarfieldVUVPhotonModel",region,this,myGasBoxSD);
 
 }
+
+void DetectorConstruction::AssignVisuals() {
+      // Chamber
+      G4LogicalVolumeStore* lvStore = G4LogicalVolumeStore::GetInstance();
+
+
+      // Lab
+      G4LogicalVolume* Lab = lvStore->GetVolume("LAB");
+      G4VisAttributes *LabVa=new G4VisAttributes(G4Colour(2,2,2));
+      LabVa->SetForceWireframe(false);
+      //Chamber
+      G4LogicalVolume* Chamber = lvStore->GetVolume("CHAMBER");
+      G4VisAttributes *ChamberVa=new G4VisAttributes(G4Colour(1,1,1));
+      ChamberVa->SetForceSolid(true);
+      Chamber->SetVisAttributes(G4VisAttributes::GetInvisible());
+
+
+
+      //GAS
+      G4LogicalVolume* Gas = lvStore->GetVolume("GAS");
+      G4VisAttributes *GasVa=new G4VisAttributes(G4Colour(2,2,2));
+      GasVa->SetForceCloud(true);
+      Gas->SetVisAttributes(GasVa);
+
+      //Source Enclosure Related
+      G4LogicalVolume* SourceHolder = lvStore->GetVolume("SourceHolChamber_logic");
+      G4LogicalVolume* Needle = lvStore->GetVolume("Needle");
+      G4LogicalVolume* Collimator = lvStore->GetVolume("CollimatorWithBlock");
+      G4VisAttributes *CollimatorVa=new G4VisAttributes(colours::YellowAlpha());
+      CollimatorVa->SetForceSolid(true);
+
+      Collimator->SetVisAttributes(CollimatorVa);
+
+
+
+      Needle->SetVisAttributes(ChamberVa);
+
+      G4LogicalVolume* SourceHolderBlock = lvStore->GetVolume("SourceHolChBlock_logic");
+      G4VisAttributes *SourceHolderVa=new G4VisAttributes(G4Colour(2,2,2));
+      SourceHolderVa->SetForceSolid(true);
+
+      // Flange
+      G4LogicalVolume* flangeLog = lvStore->GetVolume("CHAMBER_FLANGE");
+      G4VisAttributes flangeVis=colours::DarkGreyAlpha();
+      flangeVis.SetForceSolid(true);
+      flangeLog->SetVisAttributes(ChamberVa);
+
+
+      //PMT TUBE AND PMT BLOCK
+      G4LogicalVolume * PmttubeLog0=lvStore->GetVolume("PMT_TUBE0");
+      PmttubeLog0->SetVisAttributes(G4VisAttributes::GetInvisible());
+      G4LogicalVolume * PmttubeBlockLog0=lvStore->GetVolume("PMT_TUBE_BLOCK0");
+      G4LogicalVolume * PmttubeLog1=lvStore->GetVolume("PMT_TUBE1");
+      PmttubeLog1->SetVisAttributes(G4VisAttributes::GetInvisible());
+      G4LogicalVolume * PmttubeBlockLog1=lvStore->GetVolume("PMT_TUBE_BLOCK1");
+      PmttubeBlockLog0->SetVisAttributes(ChamberVa);
+      PmttubeBlockLog1->SetVisAttributes(ChamberVa);
+      G4LogicalVolume * PmttubeVacuumLog1=lvStore->GetVolume("PMT_TUBE_VACUUM0");
+      G4LogicalVolume * PmttubeVacuumLog2=lvStore->GetVolume("PMT_TUBE_VACUUM1");
+      G4VisAttributes PmttubeVacuumVis=colours::Yellow();
+      PmttubeVacuumVis.SetForceCloud(true);
+      PmttubeVacuumLog1->SetVisAttributes(PmttubeVacuumVis);
+      PmttubeVacuumLog2->SetVisAttributes(PmttubeVacuumVis);
+
+
+      //MgF2Window
+      G4LogicalVolume* MgF2WindowLog = lvStore->GetVolume("MgF2_WINDOW");
+      G4VisAttributes  MgF2WindowVis=colours::LillaAlpha();
+      MgF2WindowVis.SetForceSolid(true);
+      MgF2WindowLog->SetVisAttributes(MgF2WindowVis);
+
+      /* // Lens
+      G4LogicalVolume * LensLog=lvStore->GetVolume("LensMotherPV");
+      G4VisAttributes  LensVis=Red();
+      LensVis.SetForceSolid(true);
+      LensLog->SetVisAttributes(LensVis);
+      */
+
+      // EL-Region
+      G4LogicalVolume * ELLogic=lvStore->GetVolume("EL_GAP");
+      G4VisAttributes ELVis=colours::BlueAlpha();
+      ELVis.SetForceCloud(true);
+      ELLogic->SetVisAttributes(ELVis);
+
+      // FieldCage
+      G4LogicalVolume * FieldCage=lvStore->GetVolume("FIELDCAGE");
+      G4VisAttributes FielCageVis=colours::Red();
+      FielCageVis.SetForceCloud(true);
+      FieldCage->SetVisAttributes(FielCageVis);
+
+
+      SourceHolder->SetVisAttributes(SourceHolderVa);
+      SourceHolderBlock->SetVisAttributes(SourceHolderVa);
+      Lab->SetVisAttributes(G4VisAttributes::GetInvisible());
+
+    }
 

@@ -137,15 +137,22 @@ namespace opticalprops {
 
     G4double ri_energy[ri_entries];
     G4double RIndex[ri_entries];
+    G4double MgF2Reflectivity[ri_entries];
+    G4double MgF2Efficiency[ri_entries];
     for (int i=0; i<ri_entries; i++)
     {
           ri_energy[i] = optPhotMinE_ + i * eWidth;
           RIndex[i] = seq.RefractiveIndex(h_Planck*c_light/ri_energy[i]);
+          MgF2Reflectivity[i] = 0.;
+          MgF2Efficiency[i] = 1.0;
     }
+
 
     G4double nEntries = sizeof(ri_energy) / sizeof(G4double);
 
     mpt->AddProperty("RINDEX", ri_energy, RIndex, nEntries);
+    mpt->AddProperty("REFLECTIVITY",ri_energy,MgF2Reflectivity,nEntries);
+    mpt->AddProperty("EFFICIENCY",ri_energy,MgF2Efficiency,nEntries);
     
     return mpt;
 }

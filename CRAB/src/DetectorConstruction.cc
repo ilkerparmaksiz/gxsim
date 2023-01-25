@@ -20,9 +20,7 @@
 #include "DegradModel.hh"
 #include "GarfieldVUVPhotonModel.hh"
 #include "G4SDManager.hh"
-
 #include "Visibilities.hh"
-
 
 
 
@@ -41,7 +39,7 @@ DetectorConstruction::DetectorConstruction(GasModelParameters* gmp)
     SourceEn_length (1 * cm),
     SourceEn_thickn (2. * mm),
     SourceEn_holedia (2. * mm),
-    gas_pressure_(10. * bar),
+    gas_pressure_(9.7 * bar),
     vtx_(0,0,0),
     Active_diam(8.5 * cm),
     sc_yield_(25510./MeV),
@@ -120,7 +118,19 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
                                               (MgF2_window_thickness_ )/2., 0., twopi);
   G4LogicalVolume* MgF2_window_logic= new G4LogicalVolume(MgF2_window_solid, MgF2, "MgF2_WINDOW");
 
-
+  // lens
+  const G4double lensRcurve (5.698*cm); // radius of curvature of MgF2 Lens
+  G4double nind(1.44); // Refractive index of MgF2 at 178 nm at given R of lens
+  
+  const G4ThreeVector posLensTubeIntersect (0.,0.,11.25*cm); // Choose intersect distance to make a 1cm diam
+  
+  // Create lens from the intersection of two spheres
+  G4Orb* sLensTube = new G4Orb("sLensSphereTube",lensRcurve);
+  G4Orb* sLensOrb = new G4Orb("sLensSphere",lensRcurve);
+  G4IntersectionSolid* sLens =  new G4IntersectionSolid("sLens",sLensTube,sLensOrb, 0, posLensTubeIntersect);
+  
+  // Lens logical 
+  G4LogicalVolume* lensLogical = new G4LogicalVolume(sLens, MgF2, "Lens");
 
   //////////////////////////////////////////
 
@@ -264,10 +274,12 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
 
 
   // MgF2 Windows
-  //G4double window_posz = chamber_length/2+chamber_thickn/2;
   G4double window_posz = chamber_length/2;
-  auto PMT3Mgf2=new G4PVPlacement(0, G4ThreeVector(0., 0., window_posz), MgF2_window_logic,"MgF2_WINDOW1", lab_logic_volume,false, 0, false);
+  // auto PMT3Mgf2=new G4PVPlacement(0, G4ThreeVector(0., 0., window_posz), MgF2_window_logic,"MgF2_WINDOW1", lab_logic_volume,false, 0, false);
+  
+  new G4PVPlacement(0, G4ThreeVector(0., 0., window_posz-lensRcurve + chamber_thickn/2.0), lensLogical,"MgF2_WINDOW1", lab_logic_volume,false, 0, false);
   new G4PVPlacement(pmt1rotate, G4ThreeVector(0., 0., -window_posz), MgF2_window_logic,"MgF2_WINDOW2", lab_logic_volume, false, 1, false);
+
 
   //PMT Tubes
   G4VPhysicalVolume *PMT_Tube_Phys0=new G4PVPlacement(0,G4ThreeVector(0,0,PMT_pos+LongPMTTubeOffset),PMT_Tube_Logic0,PMT_Tube_Logic0->GetName(),lab_logic_volume,false,0,false);
@@ -439,8 +451,13 @@ void DetectorConstruction::AssignVisuals() {
 
 
       //MgF2Window
+      G4LogicalVolume* lensLogical = lvStore->GetVolume("Lens");
+      G4VisAttributes  MgF2LensVis=colours::Lilla();
+      MgF2LensVis.SetForceSolid(true);
+      lensLogical->SetVisAttributes(MgF2LensVis);
+
       G4LogicalVolume* MgF2WindowLog = lvStore->GetVolume("MgF2_WINDOW");
-      G4VisAttributes  MgF2WindowVis=colours::LillaAlpha();
+      G4VisAttributes  MgF2WindowVis=colours::Lilla();
       MgF2WindowVis.SetForceSolid(true);
       MgF2WindowLog->SetVisAttributes(MgF2WindowVis);
 

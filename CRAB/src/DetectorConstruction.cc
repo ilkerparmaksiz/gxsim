@@ -72,13 +72,6 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
   endcaps are Silicon detectors, used as calorimeter 
   */
     
-  //Colors for visualization
-  G4VisAttributes* red = new G4VisAttributes(G4Colour(1., 0., 0.));
-  G4VisAttributes* green = new G4VisAttributes(G4Colour(0., 1., 0.));
-  G4VisAttributes* blue = new G4VisAttributes(G4Colour(0., 0., 1.));
-  G4VisAttributes* yellow = new G4VisAttributes(G4Colour(1.0, 1.0, 0.));
-  G4VisAttributes* purple = new G4VisAttributes(G4Colour(1.0, 0., 1.0));
-
   //Materials
   G4Material *gxe    = materials::GXe(gas_pressure_,68);
   G4Material *MgF2   = materials::MgF2();
@@ -89,17 +82,11 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
   MgF2->SetMaterialPropertiesTable(opticalprops::MgF2());
   vacuum->SetMaterialPropertiesTable(opticalprops::Vacuum());
   gxe->SetMaterialPropertiesTable(opticalprops::GXe(gas_pressure_, 68,sc_yield_,e_lifetime_));
-  //Steel->SetMaterialPropertiesTable(opticalprops::STEEL());
   
   // Constructing Lab Space
   G4String lab_name="LAB";
   G4Box * lab_solid_volume = new G4Box(lab_name,Lab_size/2,Lab_size/2,Lab_size/2);
   G4LogicalVolume * lab_logic_volume = new G4LogicalVolume(lab_solid_volume,G4NistManager::Instance()->FindOrBuildMaterial("G4_AIR"),lab_name) ;
-
-
-  // lab_logic_volume->SetVisAttributes(G4VisAttributes::Invisible);
-
-  // Krish -- Edited to here
 
   // Creating the Steel Cylinder that we need
 
@@ -112,17 +99,14 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
   G4LogicalVolume* chamber_logic =new G4LogicalVolume(chamber_solid,materials::Steel(), "CHAMBER"); //
 
 
-
   /// MgF2 window ///
   G4Tubs* MgF2_window_solid = new G4Tubs("MgF2_WINDOW", 0., MgF2_window_diam_/2.,
                                               (MgF2_window_thickness_ )/2., 0., twopi);
   G4LogicalVolume* MgF2_window_logic= new G4LogicalVolume(MgF2_window_solid, MgF2, "MgF2_WINDOW");
 
   // lens
-  const G4double lensRcurve (5.698*cm); // radius of curvature of MgF2 Lens
-  G4double nind(1.44); // Refractive index of MgF2 at 178 nm at given R of lens
-  
-  const G4ThreeVector posLensTubeIntersect (0.,0.,11.25*cm); // Choose intersect distance to make a 1cm diam
+  const G4double lensRcurve (5.698*cm); // radius of curvature of MgF2 Lens  
+  const G4ThreeVector posLensTubeIntersect (0.,0.,11.25*cm); // Choose intersect distance to make a ~1cm diam
   
   // Create lens from the intersection of two spheres
   G4Orb* sLensTube = new G4Orb("sLensSphereTube",lensRcurve);
@@ -139,23 +123,15 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
   // Placing the gas in the chamber
   G4Tubs* gas_solid =new G4Tubs("GAS", 0., chamber_diam/2., chamber_length/2., 0., twopi);
   gas_logic = new G4LogicalVolume(gas_solid, gxe, "GAS");
-  
-  //gas_logic->SetUserLimits(new G4UserLimits(50*mm));
-  //Defining the Detection Area
-  //G4Tubs* Active_solid =new G4Tubs("ACTIVE", 0., Active_diam/2., Active_length/2., 0., twopi);
-  //G4LogicalVolume* Active_logic = new G4LogicalVolume(Active_solid, gxe, "ACTIVE");
 
 
   // EL Region
   G4Tubs* EL_solid = new G4Tubs("EL_GAP", 0., Active_diam/2.,ElGap_/2 , 0., twopi);
   G4LogicalVolume* EL_logic = new G4LogicalVolume(EL_solid, gxe, "EL_GAP");
-  //EL_logic->SetUserLimits(new G4UserLimits(50*mm));
 
   // FieldCage
   G4Tubs* FieldCage_Solid =new G4Tubs("FIELDCAGE", 0., Active_diam/2.,FielCageGap/2 , 0., twopi);
   G4LogicalVolume* FieldCage_Logic = new G4LogicalVolume(FieldCage_Solid, gxe, "FIELDCAGE");
-  //FieldCage_Logic->SetUserLimits(new G4UserLimits(50*mm));
-
 
   // Radioactive Source Encloser
   // Source
@@ -183,9 +159,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
   // Combining them to create the Needle
   G4VSolid * Needle = new G4UnionSolid("Needle",NeedleEye,NeedleTail,0,G4ThreeVector(0,0,NeedleHalfLength));
   G4VSolid * CollimatorWithBlock = new G4UnionSolid("CollimatorWithBlock",Collimator,CollimatorBlock,0,G4ThreeVector(0,0,0.5*cm-0.2*cm));
-  //G4VSolid * NeedleWithCollimator=new G4UnionSolid("NeedleWithCollimator",Needle,Collimator,0,G4ThreeVector(0,0,+5*mm));
 
-  //G4LogicalVolume * Needle_Logic=new G4LogicalVolume(Needle,materials::Steel(),"Needle");
   G4LogicalVolume * Needle_Logic = new G4LogicalVolume(Needle,materials::Steel(),"Needle");
   G4LogicalVolume * Coll_Logic = new G4LogicalVolume(CollimatorWithBlock,materials::PEEK(),"CollimatorWithBlock");
 
@@ -199,8 +173,6 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
   pmt1_->Construct();
   pmt2_->Construct();
 
-
-  std::cout << "Finished Initializing PMTs" << std::endl;
 
   // Adding Logical Volumes for PMTs
   G4LogicalVolume * pmt1_logic=pmt1_->GetLogicalVolume();
@@ -299,11 +271,6 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
 
 
 
-  /// CRAB0 Lens
-  //lens = new ::UltraFresnelLens(MgF2_window_diam_,13,MgF2,labPhysical,G4ThreeVector(0., 0., window_posz));
-
-
-
   // Define this volume as an ionization sensitive detector
   //FieldCage_Logic->SetUserLimits(new G4UserLimits(1*mm));
   // IonizationSD* sensdet = new IonizationSD("/CRAB/FIELDCAGE");
@@ -349,6 +316,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
   new G4LogicalBorderSurface("SteelSurface_RightFlange",gas_phys,Right_Flange_phys,OpSteelSurf);
   new G4LogicalBorderSurface("SteelSurface_PMT3_Enclosing",PMT_Tube_Vacuum_Phys0,PMT_Tube_Phys0,OpSteelSurf);
   new G4LogicalBorderSurface("SteelSurface_PMT1_Enclosing",PMT_Tube_Vacuum_Phys1,PMT_Tube_Phys1,OpSteelSurf);
+  
   if(!HideSourceHolder_ && !HideCollimator_){
       new G4LogicalBorderSurface("SteelSurface_Needle",FieldCage_Phys,Needle_Phys,OpSteelSurf);
   }
@@ -358,11 +326,6 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
 
   AssignVisuals();
   
-  // G4Optic
-  // this->SetLogicalVolume(lab_logic_volume);
-  // this->SetLogicalVolume(chamber_logic);
-
-
   //Construct a G4Region, connected to the logical volume in which you want to use the G4FastSimulationModel
   G4Region* regionGas = new G4Region("GasRegion");
   regionGas->AddRootLogicalVolume(gas_logic);

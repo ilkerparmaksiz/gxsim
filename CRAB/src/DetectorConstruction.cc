@@ -121,7 +121,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
   G4double FielCageGap=(160.3+29.55)*mm;
   
   // Placing the gas in the chamber
-  G4Tubs* gas_solid =new G4Tubs("GAS", 0., chamber_diam/2., chamber_length/2., 0., twopi);
+  G4Tubs* gas_solid =new G4Tubs("GAS", 0., chamber_diam/2., chamber_length/2. + chamber_thickn, 0., twopi);
   gas_logic = new G4LogicalVolume(gas_solid, gxe, "GAS");
 
 
@@ -247,10 +247,10 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
 
   // MgF2 Windows
   G4double window_posz = chamber_length/2;
-  // auto PMT3Mgf2=new G4PVPlacement(0, G4ThreeVector(0., 0., window_posz), MgF2_window_logic,"MgF2_WINDOW1", lab_logic_volume,false, 0, false);
+  // G4VPhysicalVolume* lensPhysical = new G4PVPlacement(0, G4ThreeVector(0., 0., window_posz), MgF2_window_logic,"MgF2_WINDOW1", lab_logic_volume,false, 0, false);
   
-  new G4PVPlacement(0, G4ThreeVector(0., 0., window_posz-lensRcurve + chamber_thickn/2.0), lensLogical,"MgF2_WINDOW1", lab_logic_volume,false, 0, false);
-  new G4PVPlacement(pmt1rotate, G4ThreeVector(0., 0., -window_posz), MgF2_window_logic,"MgF2_WINDOW2", lab_logic_volume, false, 1, false);
+  G4VPhysicalVolume* lensPhysical = new G4PVPlacement(0, G4ThreeVector(0., 0., window_posz-lensRcurve + chamber_thickn/2.0), lensLogical,"MgF2_WINDOW1", gas_logic,false, 0, false);
+  new G4PVPlacement(pmt1rotate, G4ThreeVector(0., 0., -window_posz), MgF2_window_logic,"MgF2_WINDOW2", gas_logic, false, 1, false);
 
 
   //PMT Tubes
@@ -321,6 +321,13 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
       new G4LogicalBorderSurface("SteelSurface_Needle",FieldCage_Phys,Needle_Phys,OpSteelSurf);
   }
 
+  // Lens
+  G4OpticalSurface* opXenon_Glass2 = new G4OpticalSurface("XenonLensSurface");
+  opXenon_Glass2->SetModel(glisur);                  // SetModel
+  opXenon_Glass2->SetType(dielectric_dielectric);   // SetType
+  opXenon_Glass2->SetFinish(polished);                 // SetFinish
+  opXenon_Glass2->SetPolish(0.0);
+  new G4LogicalBorderSurface("XenonLensSurface",labPhysical,lensPhysical,opXenon_Glass2);
 
   // Visuals
 

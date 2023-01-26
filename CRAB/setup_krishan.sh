@@ -1,7 +1,7 @@
 #setenv PATH {$PATH}:/Applications/Emacs.app/Contents/MacOS:/Applications/CMake.app/Contents/bin:/usr/local/gfortran/bin
 
 # Geant4 Path, edit G4Install path to where the main geant4 code folder your downloaded
-export G4INSTALL=/Users/mistryk2/Packages//geant4-v10/geant4.10.06.p03;
+export G4INSTALL=/Users/mistryk2/Packages//geant4-v10/geant4.10.07.p04;
 export PATH=$G4INSTALL/bin:$PATH;
 export DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH:$G4INSTALL/lib;
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$G4INSTALL/lib;

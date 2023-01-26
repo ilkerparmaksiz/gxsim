@@ -105,11 +105,12 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
   G4LogicalVolume* MgF2_window_logic= new G4LogicalVolume(MgF2_window_solid, MgF2, "MgF2_WINDOW");
 
   // lens
-  const G4double lensRcurve (5.698*cm); // radius of curvature of MgF2 Lens  
-  const G4ThreeVector posLensTubeIntersect (0.,0.,11.25*cm); // Choose intersect distance to make a ~1cm diam
+  const G4double lensRcurve (2.84*cm); // radius of curvature of MgF2 Lens  
+  const G4ThreeVector posLensTubeIntersect (0.,0.,-lensRcurve);
   
-  // Create lens from the intersection of two spheres
-  G4Orb* sLensTube = new G4Orb("sLensSphereTube",lensRcurve);
+  // Create lens from the intersection of a sphere and a cylinder
+  G4double maxLensLength = 4*mm;
+  G4Tubs* sLensTube = new G4Tubs("sLensSphereTube", 0, MgF2_window_diam_/2, maxLensLength, 0.,twopi); // 4 mm is the max lens length
   G4Orb* sLensOrb = new G4Orb("sLensSphere",lensRcurve);
   G4IntersectionSolid* sLens =  new G4IntersectionSolid("sLens",sLensTube,sLensOrb, 0, posLensTubeIntersect);
   
@@ -249,7 +250,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
   G4double window_posz = chamber_length/2;
   // G4VPhysicalVolume* lensPhysical = new G4PVPlacement(0, G4ThreeVector(0., 0., window_posz), MgF2_window_logic,"MgF2_WINDOW1", lab_logic_volume,false, 0, false);
   
-  G4VPhysicalVolume* lensPhysical = new G4PVPlacement(0, G4ThreeVector(0., 0., window_posz-lensRcurve + chamber_thickn/2.0), lensLogical,"MgF2_WINDOW1", gas_logic,false, 0, false);
+  G4VPhysicalVolume* lensPhysical = new G4PVPlacement(0, G4ThreeVector(0., 0., window_posz+ maxLensLength/2.0), lensLogical,"MgF2_WINDOW1", gas_logic,false, 0, false);
   new G4PVPlacement(pmt1rotate, G4ThreeVector(0., 0., -window_posz), MgF2_window_logic,"MgF2_WINDOW2", gas_logic, false, 1, false);
 
 
@@ -422,12 +423,12 @@ void DetectorConstruction::AssignVisuals() {
 
       //MgF2Window
       G4LogicalVolume* lensLogical = lvStore->GetVolume("Lens");
-      G4VisAttributes  MgF2LensVis=colours::Lilla();
+      G4VisAttributes  MgF2LensVis=colours::DarkGreen();
       MgF2LensVis.SetForceSolid(true);
       lensLogical->SetVisAttributes(MgF2LensVis);
 
       G4LogicalVolume* MgF2WindowLog = lvStore->GetVolume("MgF2_WINDOW");
-      G4VisAttributes  MgF2WindowVis=colours::Lilla();
+      G4VisAttributes  MgF2WindowVis=colours::DarkGreen();
       MgF2WindowVis.SetForceSolid(true);
       MgF2WindowLog->SetVisAttributes(MgF2WindowVis);
 

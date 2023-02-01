@@ -59,8 +59,10 @@ class DetectorConstruction : public G4VUserDetectorConstruction {
   inline void SetGasPressure(G4double d){gasPressure=d;};
   inline void SetTemperature(G4double d){temperature=d;};
   
-  inline G4double GetGasBoxR(){return Active_diam/2.0;};
-  inline G4double GetGasBoxH(){return (19.685)*cm;}; // length of FC+EL gap
+  inline G4double GetChamberR(){return chamber_diam/2.0/cm;};
+  inline G4double GetChamberL(){return chamber_length/cm; }; 
+  inline G4double GetActiveR() {return Active_diam/2.0/cm; }; 
+  inline G4double GetActiveL() {return FielCageGap/cm; }; 
   inline G4double GetGasPressure(){return gasPressure;};
   inline G4double GetTemperature(){return temperature;};
   

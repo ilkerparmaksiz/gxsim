@@ -40,6 +40,14 @@ const static G4double gapLEM = 0.7; //cm
 const static G4double fieldDrift = 438.0; // V/cm
 const static G4double fieldLEM   = 11400.0; // V/cm higher than 3k (as used for 2 bar) for 10 bar!
 
+G4double DetChamberL;
+G4double DetChamberR;
+G4double DetActiveL; 
+G4double DetActiveR; 
+G4double ELPos;
+G4double FCTop;
+
+
 const G4double res(0.01); // Estimated fluctuations in EL yield - high? EC, 21-June-2022.
 
 
@@ -155,7 +163,9 @@ void GarfieldVUVPhotonModel::GenerateVUVPhotons(const G4FastTrack& fastTrack, G4
 	for(unsigned int i=0;i<n;i++){
 	  fAvalancheMC->GetDriftLinePoint(i,xi,yi,zi,ti);
     //   std::cout << "GVUVPM: positions are " << xi<<"," <<yi<<","<<zi <<"," <<ti<< std::endl;
-	  if (yi < 12.0975)
+        
+
+	  if (yi < ELPos && ( std::sqrt(xi*xi + zi*zi) < DetActiveR/2.0) )
 	    break; 
 	  else if (i==n-1)
 	    return;
@@ -239,21 +249,33 @@ void GarfieldVUVPhotonModel::GenerateVUVPhotons(const G4FastTrack& fastTrack, G4
 
 void ePiecewise (const double x, const double y, const double z,
 		 double& ex, double& ey, double& ez) {
-  //  G4double dethz(detCon->GetGasBoxH()*0.5);
-  
-  G4double dethz = 12.0975; // cm -- position of the EL region start
-  
-  ex = ez = 0.;
-  
-  // y Distance is greater than EL region, else use EL region field
-  if (y > dethz)
-    ey = fieldDrift;
-  else if (y < dethz-gapLEM)
-    ey = 1;
-  else {
-    ey = fieldLEM;
+
     
-  }
+    // Only want Ey component to the field
+    ex = ez = 0.;
+
+    // Define a field region for the whole gas region
+
+    // Set ey  for regions outside of the radius of the FC
+    if ( std::sqrt(x*x + z*z) > DetActiveR/2.0){
+        ey = -fieldDrift; // Negative field will send them away from the LEM region
+    }
+
+    // Field past the cathode drift them away from the LEM with negative field
+    if (y > FCTop)
+        ey = -fieldDrift;
+
+    // Drift region
+    if (y <= FCTop)
+        ey = fieldDrift;
+
+    // EL region
+    if (y <= ELPos && y > ELPos-gapLEM)
+        ey = fieldLEM;
+
+    // Drift towards the end cap
+    if (y <= ELPos - gapLEM)
+        ey = fieldDrift; 
 
 //   std::cout<<"ePiecewise: y, dethz, ey are [cm]: " << y << ", " << dethz << ", " << ey << std::endl;
  
@@ -294,10 +316,18 @@ void GarfieldVUVPhotonModel::InitialisePhysics(){
 	Garfield::GeometrySimple* geo = new Garfield::GeometrySimple();
 	
 	// Make a box
-	G4double detectorRadius=detCon->GetGasBoxR();//cm -- 4.25
-	G4double detectorHalfZ=detCon->GetGasBoxH()*0.5;//cm -- 9.8425
+	DetChamberR= detCon->GetChamberR(); // cm
+	DetChamberL= detCon->GetChamberL(); // cm 
+    
+    DetActiveR = detCon->GetActiveR(); // cm
+    DetActiveL = detCon->GetActiveL(); // cm
 
-	Garfield::SolidTube* tube = new Garfield::SolidTube(0.0, 21.59 ,0.0, detectorRadius, detectorHalfZ, 0.,1.,0.);//Tube oriented in Y'axis (0.,1.,0.,)
+    ELPos = (DetChamberL- DetActiveL)/2.0;
+    FCTop = (DetChamberL + DetActiveL)/2.0;
+
+    // std::cout << "Detector Dimentions: "<< DetChamberR << " " << DetChamberL << "  " << DetActiveR << "  " << DetActiveL << std::endl; 
+
+	Garfield::SolidTube* tube = new Garfield::SolidTube(0.0, DetChamberL*0.5,0.0, DetChamberR, DetChamberL*0.5, 0.,1.,0.);//Tube oriented in Y'axis (0.,1.,0.,)
 
 	// Add the solid to the geometry, together with the medium inside
 	geo->AddSolid(tube, fMediumMagboltz);
@@ -333,15 +363,8 @@ void GarfieldVUVPhotonModel::InitialisePhysics(){
 	fAvalancheMC->EnableAttachment();
 	//    fAvalancheMC->DisableAttachment();
 
-	const double axis_x = detCon->GetGasBoxR()/CLHEP::cm;  
-  // Y-width of drift simulation will cover between +/- axis_y
-	const double axis_z = detCon->GetGasBoxR()/CLHEP::cm;  
-	const double axis_y = detCon->GetGasBoxH()/CLHEP::cm;
-
-	std::cout << "\n\n\n\n\nBoundary of the sensor: " << (12.0975-gapLEM)<< "  " << 31.0825<< std::endl;
-	std::cout  << axis_x << " " << axis_y  << "  "<< axis_z << std::endl;
-
-	fSensor->SetArea(-4.25, 11.3975, -4.25, 4.25, 31.0825, 4.25); // cm
+    // Set the region where the sensor is active -- based on the gas volume
+	fSensor->SetArea(-DetChamberR, 0, -DetChamberR, DetChamberR, DetChamberL, DetChamberR); // cm
 
 	//std::array<double, 3> ef{0,0,0};
 	//Garfield::Medium* medium = nullptr;

@@ -36,11 +36,11 @@
 namespace{G4Mutex aMutex = G4MUTEX_INITIALIZER;}
 
 const static G4double torr = 1. / 760. * bar;
-const static G4double gapLEM = 0.5; //cm
-const static G4double fieldDrift = 1000.0; // V/cm
-const static G4double fieldLEM   = 10000.0; // V/cm higher than 3k (as used for 2 bar) for 10 bar!
+const static G4double gapLEM = 0.7; //cm
+const static G4double fieldDrift = 438.0; // V/cm
+const static G4double fieldLEM   = 11400.0; // V/cm higher than 3k (as used for 2 bar) for 10 bar!
 
-const G4double res(0.01); // high? EC, 21-June-2022.
+const G4double res(0.01); // Estimated fluctuations in EL yield - high? EC, 21-June-2022.
 
 
 GarfieldVUVPhotonModel::GarfieldVUVPhotonModel(GasModelParameters* gmp, G4String modelName,G4Region* envelope,DetectorConstruction* dc,GasBoxSD* sd) :
@@ -94,7 +94,7 @@ void GarfieldVUVPhotonModel::DoIt(const G4FastTrack& fastTrack, G4FastStep& fast
 
    */
   
-    //G4cout<<"HELLO Garfield"<<G4endl;
+    // G4cout<<"HELLO Garfield"<<G4endl;
     ////The details of the Garfield model are implemented here
      fastStep.KillPrimaryTrack();//KILL NEST/DEGRAD/G4 TRACKS
      garfPos = fastTrack.GetPrimaryTrack()->GetVertexPosition();
@@ -154,8 +154,8 @@ void GarfieldVUVPhotonModel::GenerateVUVPhotons(const G4FastTrack& fastTrack, G4
 	// pick highest yi in drift region => that is the beginning of the LEM
 	for(unsigned int i=0;i<n;i++){
 	  fAvalancheMC->GetDriftLinePoint(i,xi,yi,zi,ti);
-	  //	  std::cout << "GVUVPM: ghb, yi is " << detCon->GetGasBoxH() << "," << yi << std::endl;
-	  if (yi> (detCon->GetGasBoxH()/CLHEP::cm-gapLEM))
+    //   std::cout << "GVUVPM: positions are " << xi<<"," <<yi<<","<<zi <<"," <<ti<< std::endl;
+	  if (yi < 12.0975)
 	    break; 
 	  else if (i==n-1)
 	    return;
@@ -163,7 +163,7 @@ void GarfieldVUVPhotonModel::GenerateVUVPhotons(const G4FastTrack& fastTrack, G4
 
 
 	e0 = 1.13;
-	//	std::cout << "GVUVPM: Avalanching in high field starting at: "  << xi<<"," <<yi<<","<<zi <<"," <<ti << std::endl;
+	// std::cout << "GVUVPM: Avalanching in high field starting at: "  << xi<<"," <<yi<<","<<zi <<"," <<ti << std::endl;
 	//	std::cout << "GVUVPM: fMediumMagboltz: "  << fMediumMagboltz << std::endl;
 
 	/// fAvalanche->AvalancheElectron() is slow AF: it's the biggest offender in slowing the simulation.
@@ -179,6 +179,7 @@ void GarfieldVUVPhotonModel::GenerateVUVPhotons(const G4FastTrack& fastTrack, G4
 
 	const G4double YoverP = 105.*fieldLEM/(detCon->GetGasPressure()/torr) - 116.; // yield/cm/bar, with P in Torr ... JINST 2 p05001 (2007).
 	colHitsEntries = YoverP * detCon->GetGasPressure()/bar * gapLEM; // with P in bar this time.
+	// colHitsEntries=1; // This needs to be removed!
 
 	colHitsEntries *= (G4RandGauss::shoot(1.0,res));
 	//G4cout<<"YoverP,pressure [torr],fieldLEM, gapLEM and Number  Xe excitations: "<< YoverP << ", " << detCon->GetGasPressure()/torr << ", " << fieldLEM << ", " << gapLEM << " and " << colHitsEntries <<G4endl;
@@ -187,7 +188,7 @@ void GarfieldVUVPhotonModel::GenerateVUVPhotons(const G4FastTrack& fastTrack, G4
 	for (G4int i=0;i<colHitsEntries;i++){
 	  GarfieldExcitationHit* newExcHit=new GarfieldExcitationHit();
 	  /// fGap = 0.5 cm, 5 mm
-	  G4ThreeVector fakepos (xi*10,yi*10.+10*gapLEM*float(i)/float(colHitsEntries),zi*10.); /// ignoring diffusion in small LEM gap, EC 17-June-2022.
+	  G4ThreeVector fakepos (xi*10,yi*10.-10*gapLEM*float(i)/float(colHitsEntries),zi*10.); /// ignoring diffusion in small LEM gap, EC 17-June-2022.
 	  newExcHit->SetPos(fakepos);
 	  /// newExcHit->SetPos((*garfExcHitsCol)[i]->GetPos());
 	  /// newExcHit->SetTime((*garfExcHitsCol)[i]->GetTime());
@@ -239,15 +240,23 @@ void GarfieldVUVPhotonModel::GenerateVUVPhotons(const G4FastTrack& fastTrack, G4
 void ePiecewise (const double x, const double y, const double z,
 		 double& ex, double& ey, double& ez) {
   //  G4double dethz(detCon->GetGasBoxH()*0.5);
-  G4double dethz = 10.0;  
+  
+  G4double dethz = 12.0975; // cm -- position of the EL region start
+  
   ex = ez = 0.;
-  if (y<(dethz - gapLEM))
-    ey = -fieldDrift;
+  
+  // y Distance is greater than EL region, else use EL region field
+  if (y > dethz)
+    ey = fieldDrift;
+  else if (y < dethz-gapLEM)
+    ey = 1;
   else {
-    ey = -fieldLEM;
-    //    std::cout<<"ePiecewise: y, dethz, ey are [cm]: " << y << ", " << dethz << ", " << ey << std::endl;
+    ey = fieldLEM;
+    
   }
 
+//   std::cout<<"ePiecewise: y, dethz, ey are [cm]: " << y << ", " << dethz << ", " << ey << std::endl;
+ 
 }
 
 
@@ -283,11 +292,12 @@ void GarfieldVUVPhotonModel::InitialisePhysics(){
 
 	
 	Garfield::GeometrySimple* geo = new Garfield::GeometrySimple();
+	
 	// Make a box
-	G4double detectorRadius=detCon->GetGasBoxR();//cm
-	G4double detectorHalfZ=detCon->GetGasBoxH()*0.5;//cm
+	G4double detectorRadius=detCon->GetGasBoxR();//cm -- 4.25
+	G4double detectorHalfZ=detCon->GetGasBoxH()*0.5;//cm -- 9.8425
 
-	Garfield::SolidTube* tube = new Garfield::SolidTube(0.0, detectorHalfZ/CLHEP::cm,0.0, detectorRadius/CLHEP::cm, detectorHalfZ/CLHEP::cm,0.,1.,0.);//Tube oriented in Y'axis (0.,1.,0.,)
+	Garfield::SolidTube* tube = new Garfield::SolidTube(0.0, 21.59 ,0.0, detectorRadius, detectorHalfZ, 0.,1.,0.);//Tube oriented in Y'axis (0.,1.,0.,)
 
 	// Add the solid to the geometry, together with the medium inside
 	geo->AddSolid(tube, fMediumMagboltz);
@@ -325,10 +335,13 @@ void GarfieldVUVPhotonModel::InitialisePhysics(){
 
 	const double axis_x = detCon->GetGasBoxR()/CLHEP::cm;  
   // Y-width of drift simulation will cover between +/- axis_y
-	const double axis_z = detCon->GetGasBoxR();  
+	const double axis_z = detCon->GetGasBoxR()/CLHEP::cm;  
 	const double axis_y = detCon->GetGasBoxH()/CLHEP::cm;
 
-	fSensor->SetArea(-axis_x, -0, -axis_z, axis_x, axis_y, axis_z);
+	std::cout << "\n\n\n\n\nBoundary of the sensor: " << (12.0975-gapLEM)<< "  " << 31.0825<< std::endl;
+	std::cout  << axis_x << " " << axis_y  << "  "<< axis_z << std::endl;
+
+	fSensor->SetArea(-4.25, 11.3975, -4.25, 4.25, 31.0825, 4.25); // cm
 
 	//std::array<double, 3> ef{0,0,0};
 	//Garfield::Medium* medium = nullptr;
@@ -338,8 +351,6 @@ void GarfieldVUVPhotonModel::InitialisePhysics(){
 
 	//	fSensor->AddElectrode(comp,"s2");
 
-
-	
 }
 
   
@@ -384,7 +395,7 @@ void GarfieldVUVPhotonModel::S1Fill(const G4FastTrack& ftrk)
   G4AnalysisManager* analysisManager = G4AnalysisManager::Instance();
   G4int  event = G4EventManager::GetEventManager()->GetConstCurrentEvent()->GetEventID();
 
-  if (time/ns<10) ; // S1 thermale's
+  if (time/ns<10) // // S1 thermale's
     {
       // Weirdly, S1 is filled in two places. Here for the thermal e's and in TrackingAction::PreSteppingAction() for optphotons. 
 	  analysisManager->FillNtupleDColumn(id,0, event);

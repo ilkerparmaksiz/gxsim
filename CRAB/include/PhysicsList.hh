@@ -47,7 +47,7 @@ class PhysicsList : public G4VModularPhysicsList {
   void AddParametrisation();
   
   //   void ConstructParticle() 
-                                   ;
+                                  
   //  void ConstructProcess() ; // uncommenting this makes my simulation suddenly have no e- physics, infinite track lengths
   
  private:

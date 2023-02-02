@@ -60,7 +60,7 @@
 #include "G4IonParametrisedLossModel.hh"
 #include "G4NuclearStopping.hh"
 
-#include "G4EmProcessOptions.hh"
+#include "G4EmParameters.hh"
 #include "G4MscStepLimitType.hh"
 
 #include "G4LossTableManager.hh"
@@ -175,7 +175,8 @@ void PhysListEmStandard::ConstructProcess() {
     // Main options and setting parameters are shown here.
     // Several of them have default values.
     //
-    G4EmProcessOptions emOptions;
+    G4EmParameters *emOptions= G4EmParameters::Instance();
+;
     
     // physics tables
     //

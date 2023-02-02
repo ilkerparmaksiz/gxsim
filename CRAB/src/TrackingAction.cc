@@ -28,8 +28,9 @@ void TrackingAction::PreUserTrackingAction(const G4Track *aTrack) {
     return;
 
   G4int id(12);
-  if (pos[1]/mm<590.0) id = 1; // S1 optphotons
-  if (pos[1]/mm>590.0) id = 2; // S2 optphotons
+  // The 120.075 is a hardcoded number for the position of the EL top in mm
+  if (pos[1]/mm>120.975) id = 1; // S1 optphotons
+  if (pos[1]/mm<120.975) id = 2; // S2 optphotons
 
   /*
   G4ProcessManager* pmanager = particle->GetProcessManager();

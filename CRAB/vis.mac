@@ -45,7 +45,7 @@
 ## needed to keep the display from clearing out many drawn objects. EC, 22-June-2022.
 /vis/ogl/set/displayListLimit 5000000 
 #/vis/viewer/set/lightsThetaPhi 90. 0.
-/vis/viewer/set/viewpointThetaPhi 150. 90.
+#/vis/viewer/set/viewpointThetaPhi 150. 90.
 #/vis/viewer/set/viewpointThetaPhi 180. 90.
 /vis/viewer/set/style surface
 /vis/viewer/set/hiddenEdge true
@@ -71,38 +71,24 @@
 /vis/geometry/set/forceWireframe camLogical -1 1
 /tracking/storeTrajectory 1
 
-
 #/gps/direction 0. 1. 0
-/gps/direction -0.707 0. -0.707
+/gps/direction 0 1. 0
 /gps/ene/type Mono
-#/gps/particle e-
-/gps/particle gamma
-/gps/ene/mono 30 keV
+/gps/particle e-
+#/gps/particle gamma
+/gps/ene/mono 100 eV
 #/gps/ene/mono 1592 keV # double esc pk
 #/gps/ene/mono 2.0 MeV
-/gps/position 0. 30. 0. cm
-/run/beamOn 4
-
-
-
-
-
-
+/gps/position 0. 25 0. cm
+/run/beamOn 1
 
 #/gps/particle opticalphoton
 #/gps/ene/mono 7.2 eV
-##/gps/ang/type iso
-##/gps/ang/maxtheta 3 deg
-#/gps/direction 0 -1 0
-#/gps/ang/rot1 1 0 0
-#/gps/ang/rot2 0 0 -1
+#/gps/direction 0 1 0
 #/gps/pos/type Plane
-#/gps/pos/shape Square
-#/gps/pos/centre 7.5 59.8 0. cm 
-##/gps/pos/halfx 3 cm
-##/gps/pos/halfz 5 cm
-#/gps/pos/confine "detectorPhysical" 
-#/run/beamOn 50
+#/gps/pos/shape Circle
+#/gps/pos/radius 5 mm
+#/gps/pos/centre 0 20 0 cm
 
 #/vis/viewer/panTo -0.0 -.28
 #/vis/viewer/set/viewpointThetaPhi 60. 0.

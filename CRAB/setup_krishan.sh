@@ -32,5 +32,6 @@ export PATH=/opt/homebrew/bin:$PATH
 # NEST
 export NEST_INCLUDE_DIRS=/Users/mistryk2/Packages/NEST/install_g4v10/include/NEST
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/Users/mistryk2/Packages/NEST/install_g4v10/lib
+export DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH:/Users/mistryk2/Packages/NEST/install_g4v10/lib;
 
 export CRABPATH=/Users/mistryk2/Packages/GXeTPCSim/gxsim_g4v10/CRAB/

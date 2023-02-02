@@ -205,7 +205,7 @@ void PhysListEmStandard::ConstructProcess() {
   std::cout  << "PhysicsListEMStandard::ConstructProcess() pit is "  << particleIteratorP << std::endl;
 
   gasNESTdet* gndet = new gasNESTdet();
-  //  std::shared_ptr<gasNESTdet> gndet(new gasNESTdet());
+  // std::shared_ptr<gasNESTdet> gndet(new gasNESTdet());
   NEST::NESTcalc* calcNEST = new NEST::NESTcalc(gndet);  
 
   while( (*particleIteratorP)() ){
@@ -213,7 +213,7 @@ void PhysListEmStandard::ConstructProcess() {
     G4ProcessManager* pmanager = particle->GetProcessManager();
     G4String particleName = particle->GetParticleName();
 
-    //    std::cout << "PhysicsListEMStandard::ConstructProcess(): pname, pmanager are " << particleName << ", " << pmanager << std::endl;
+    // td::cout << "PhysicsListEMStandard::ConstructProcess(): pname, pmanager are " << particleName << ", " << pmanager << std::endl;
     if ( !(particleName.find("e-")!=std::string::npos  || particleName.find("opticalphoton")!=std::string::npos ) )
       continue;
     if (pmanager) {
@@ -224,9 +224,9 @@ void PhysListEmStandard::ConstructProcess() {
       theNEST2ScintillationProcess->SetStackElectrons(true);
 
       if (theNEST2ScintillationProcess->IsApplicable(*particle) && pmanager) {
-	std::cout << "PhysicsList::InitialisePhysics(): particleName, pmanager  " << particleName << ", " << pmanager << "." << std::endl;
-	std::cout << "ordDefault, ordInActive " << ordDefault << ", " << ordInActive  << std::endl;
-	pmanager->AddProcess(theNEST2ScintillationProcess, ordDefault + 1, ordInActive, ordDefault + 1);
+        std::cout << "PhysicsList::InitialisePhysics(): particleName, pmanager  " << particleName << ", " << pmanager << "." << std::endl;
+        std::cout << "ordDefault, ordInActive " << ordDefault << ", " << ordInActive  << std::endl;
+        pmanager->AddProcess(theNEST2ScintillationProcess, ordDefault + 1, ordInActive, ordDefault + 1);
       }
 
       G4OpBoundaryProcess* fBoundaryProcess = new G4OpBoundaryProcess();

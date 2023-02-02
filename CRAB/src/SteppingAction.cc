@@ -61,7 +61,7 @@ void SteppingAction::UserSteppingAction(const G4Step *aStep)
   G4VPhysicalVolume* eVolume = touch->GetVolume();
   G4String eVname("null");
 
-  if (pID==11 && track->GetKineticEnergy()/keV>0.100 && (lVolume->GetName().find("detector")!=std::string::npos)) // don't count the thermale's, just G4 e's
+  if (pID==11 && track->GetKineticEnergy()/keV>0.100 && (lVolume->GetName().find("GAS")!=std::string::npos)) // don't count the thermale's, just G4 e's
     fEventAction->EDepPrim(aStep->GetTotalEnergyDeposit());
  
  
@@ -71,7 +71,7 @@ void SteppingAction::UserSteppingAction(const G4Step *aStep)
     {
       eVname = eVolume->GetName();
 
-      if (lVolume->GetName().find("cam")!=std::string::npos) // PMT
+      if (lVolume->GetName().find("camLogical")!=std::string::npos) // PMT
 	//      if (/*eVname=="detectorLogical" && */ lVolume->GetName()=="pmtPhysical")
       	{
 	  //	  std::cout << "SteppingAction: Stepping from  " << lVolume->GetName() <<  " into " << eVname << " Killing OpticalPhoton." << std::endl;

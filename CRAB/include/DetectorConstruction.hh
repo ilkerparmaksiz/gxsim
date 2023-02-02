@@ -59,8 +59,10 @@ class DetectorConstruction : public G4VUserDetectorConstruction {
   inline void SetGasPressure(G4double d){gasPressure=d;};
   inline void SetTemperature(G4double d){temperature=d;};
   
-  inline G4double GetGasBoxR(){return chamber_diam/2.0;};
-  inline G4double GetGasBoxH(){return chamber_length;};
+  inline G4double GetChamberR(){return chamber_diam/2.0/cm;};
+  inline G4double GetChamberL(){return chamber_length/cm; }; 
+  inline G4double GetActiveR() {return Active_diam/2.0/cm; }; 
+  inline G4double GetActiveL() {return FielCageGap/cm; }; 
   inline G4double GetGasPressure(){return gasPressure;};
   inline G4double GetTemperature(){return temperature;};
   
@@ -111,6 +113,8 @@ class DetectorConstruction : public G4VUserDetectorConstruction {
   G4bool HideSourceHolder_;
   G4double max_step_size_;
   G4double ELyield_;
+
+  G4double FielCageGap;
 
   G4LogicalVolume* gas_logic;
 

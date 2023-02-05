@@ -285,34 +285,46 @@ void ePiecewise (const double x, const double y, const double z,
 
 // Selection of Xenon exitations and ionizations
 void GarfieldVUVPhotonModel::InitialisePhysics(){
+	
+	// Set the gas Properties
 	fMediumMagboltz = new Garfield::MediumMagboltz();
-	double pressure = detCon->GetGasPressure()/torr;
-	double temperature = detCon->GetTemperature()/kelvin;
-
-	fMediumMagboltz->SetTemperature(temperature);
-	fMediumMagboltz->SetPressure(pressure);
 	fMediumMagboltz->SetComposition("Xe", 100.);
-	fMediumMagboltz->Initialise(true);
 	fMediumMagboltz->DisableDebugging();
-	gasFile =  "Xenon.gas";
+	
+	//  --- Load in Ion Mobility file --- 
 	ionMobFile = "IonMobility_Ar+_Ar.txt";
-	G4cout << gasFile << G4endl;
 	const std::string path = getenv("GARFIELD_HOME");
 	G4AutoLock lock(&aMutex);
+	
 	if(ionMobFile!="")
 	  fMediumMagboltz->LoadIonMobility(path + "/Data/" + ionMobFile);
+	
 	if(gasFile!=""){
-	  const bool useLog = true; // to use Logarithmic spacing.
-	  // fMediumMagboltz->SetFieldGrid(10.,200000.,20,useLog); // In 99:1 N2:O2 E/p = 3000000/3 causes Magboltz to crash. EC, 5-Nov-2021.`
-	  //fMediumMagboltz->GenerateGasTable(5); // num of 1E7 collisions to do ... something.
-	  //	  std::cout << "Writing gasfile." << std::endl;
-	  // fMediumMagboltz->WriteGasFile(gasFile.c_str());      
-	  //	  std::cout << "Wrote gasfile."<< std::endl;
-	  fMediumMagboltz->LoadGasFile(gasFile.c_str());
+	  
 	  std::cout << "Loaded gasfile." << std::endl;
 	}
 
+	//  --- Get Xenon file --- 
+	char* nexus_path = std::getenv("CRABPATH");
+	if (nexus_path == nullptr) {
+		G4Exception("[GarfieldVUVPhotonModel]", "InitialisePhysics()", FatalException,
+					"Environment variable CRABPATH not defined!");
+	}
+
+	G4String gas_path(nexus_path);
+	gasFile = gas_path + "/data/Xenon_10Bar.gas";
+	G4cout << gasFile << G4endl;
+	fMediumMagboltz->LoadGasFile(gasFile.c_str());
+	std::cout << "Finished Loading in the gas file" << std::endl;
+
+	// Initialize the gas
+	fMediumMagboltz->Initialise(true);
+
+	// Print the gas properties
+	fMediumMagboltz->PrintGas();
+
 	
+	//  ---- Create the Garfield Field region --- 
 	Garfield::GeometrySimple* geo = new Garfield::GeometrySimple();
 	
 	// Make a box
@@ -337,14 +349,11 @@ void GarfieldVUVPhotonModel::InitialisePhysics(){
 	Garfield::ComponentUser* componentDriftLEM = new Garfield::ComponentUser();
 	componentDriftLEM->SetGeometry(geo);
 	componentDriftLEM->SetElectricField(ePiecewise);
-	std::cout << " .....   now forcing density for the Garfield gas medium -- via P, T." << std::endl;
-	geo->GetMedium(0.,0.,0.)->SetPressure(detCon->GetGasPressure()/torr);
-	geo->GetMedium(0.,0.,0.)->SetTemperature(detCon->GetTemperature()/kelvin);
-	// pull out the density to see if our pressure-setting in .mac file is in fact effected down in Garfield. EC, 28-Oct-2021.
-	double ggeodens = geo->GetMedium(0.,0.,0.)->GetMassDensity();
-	double ggeopress = geo->GetMedium(0.,0.,0.)->GetPressure();
 
-	std::cout << "GarfieldVUVPhotonModel::buildBox(): Garfield mass density [g/cm3], pressure [Torr] is: " << ggeodens << ", " << ggeopress << std::endl;
+	// Printing pressure and temperature
+	std::cout << "GarfieldVUVPhotonModel::buildBox(): Garfield mass density [g/cm3], pressure [Torr], temp [K]: " <<
+	 	geo->GetMedium(0.,0.,0.)->GetMassDensity() << ", " << geo->GetMedium(0.,0.,0.)->GetPressure()<< ", " 
+	 	<< geo->GetMedium(0.,0.,0.)->GetTemperature() << std::endl;
 
 	
 	fAvalanche = new Garfield::AvalancheMicroscopic();
@@ -366,14 +375,6 @@ void GarfieldVUVPhotonModel::InitialisePhysics(){
 
     // Set the region where the sensor is active -- based on the gas volume
 	fSensor->SetArea(-DetChamberR, 0, -DetChamberR, DetChamberR, DetChamberL, DetChamberR); // cm
-
-	//std::array<double, 3> ef{0,0,0};
-	//Garfield::Medium* medium = nullptr;
-	//int status(0);
-	//fSensor->ElectricField(0.1, 0.5, 0.1, ef[0], ef[1], ef[2], medium, status);
-	//std::cout << "E field at 0.1,0.5,0.1 is " << ef[0]<<","<<ef[1]<<","<<ef[2] << std::endl;
-
-	//	fSensor->AddElectrode(comp,"s2");
 
 }
 

@@ -334,13 +334,13 @@ void GarfieldVUVPhotonModel::InitialisePhysics(){
     DetActiveR = detCon->GetActiveR(); // cm
     DetActiveL = detCon->GetActiveL(); // cm
 
-    ELPos = (DetChamberL- DetActiveL)/2.0;
-    FCTop = (DetChamberL + DetActiveL)/2.0;
+    ELPos =  - DetActiveL/2.0;
+    FCTop =  + DetActiveL/2.0;
 
     std::cout << "Detector Dimentions: "<< DetChamberR << " " << DetChamberL << "  " << DetActiveR << "  " << DetActiveL << std::endl; 
 
 	// Tube oriented in Y'axis (0.,1.,0.,) The addition of the 1 cm is for making sure it doesnt fail on the boundary
-	Garfield::SolidTube* tube = new Garfield::SolidTube(0.0, DetChamberL*0.5,0.0, DetChamberR+1, DetChamberL*0.5, 0.,1.,0.);
+	Garfield::SolidTube* tube = new Garfield::SolidTube(0.0, 0.0 ,0.0, DetChamberR+1, DetChamberL*0.5, 0.,1.,0.);
 
 	// Add the solid to the geometry, together with the medium inside
 	geo->AddSolid(tube, fMediumMagboltz);
@@ -374,7 +374,7 @@ void GarfieldVUVPhotonModel::InitialisePhysics(){
 	//    fAvalancheMC->DisableAttachment();
 
     // Set the region where the sensor is active -- based on the gas volume
-	fSensor->SetArea(-DetChamberR, 0, -DetChamberR, DetChamberR, DetChamberL, DetChamberR); // cm
+	fSensor->SetArea(-DetChamberR, -DetChamberL/2.0, -DetChamberR, DetChamberR, DetChamberL/2.0, DetChamberR); // cm
 
 }
 

@@ -91,7 +91,7 @@ target_link_libraries(CRAB -lGarfield -lgfortran ${ROOT_LIBRARIES} libNESTCore.d
 #
 
 set(CRAB_SCRIPTS
-  Xenon.gas
+  #Xenon.gas
   #vis.mac
   #run1.mac
   convertDegradFile.py

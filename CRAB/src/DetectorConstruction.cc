@@ -28,8 +28,7 @@ DetectorConstruction::DetectorConstruction(GasModelParameters* gmp)
     :
     fGasModelParameters(gmp),
     checkOverlaps(1),
-    gasPressure(9.7*bar), // Pressure inside the gas
-    temperature(273.15*kelvin), // temperature
+    temperature(300*kelvin), // temperature
     Lab_size(3. *m),
     chamber_diam   (15. * cm),
     chamber_length (43.18 * cm), // Config files vary
@@ -39,7 +38,7 @@ DetectorConstruction::DetectorConstruction(GasModelParameters* gmp)
     SourceEn_length (1 * cm),
     SourceEn_thickn (2. * mm),
     SourceEn_holedia (2. * mm),
-    gas_pressure_(9.7 * bar),
+    gas_pressure_(10 * bar),
     vtx_(0,0,0),
     Active_diam(8.5 * cm),
     sc_yield_(25510./MeV),

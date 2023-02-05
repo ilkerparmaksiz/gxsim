@@ -56,14 +56,14 @@ class DetectorConstruction : public G4VUserDetectorConstruction {
 
   //Setters for the dimensions and environment variables of the setup
   inline void CheckOverlaps(G4bool co){checkOverlaps=co;};
-  inline void SetGasPressure(G4double d){gasPressure=d;};
+  inline void SetGasPressure(G4double d){gas_pressure_=d;};
   inline void SetTemperature(G4double d){temperature=d;};
   
   inline G4double GetChamberR(){return chamber_diam/2.0/cm;};
   inline G4double GetChamberL(){return chamber_length/cm; }; 
   inline G4double GetActiveR() {return Active_diam/2.0/cm; }; 
   inline G4double GetActiveL() {return FielCageGap/cm; }; 
-  inline G4double GetGasPressure(){return gasPressure;};
+  inline G4double GetGasPressure(){return gas_pressure_;};
   inline G4double GetTemperature(){return temperature;};
   
   
@@ -75,7 +75,7 @@ class DetectorConstruction : public G4VUserDetectorConstruction {
   DetectorMessenger* detectorMessenger;
   GasModelParameters* fGasModelParameters;
   G4bool checkOverlaps; // Check overlaps in the detector geometry if true
-  G4double gasPressure; // pressure in the gas
+  G4double gas_pressure_; // pressure in the gas
   G4double temperature; // temperature of the gas
 
   G4double Lab_size;
@@ -87,7 +87,6 @@ class DetectorConstruction : public G4VUserDetectorConstruction {
   G4double SourceEn_length ;
   G4double SourceEn_thickn ;
   G4double SourceEn_holedia ;
-  G4double gas_pressure_;
   G4ThreeVector vtx_;
   G4double Active_diam;
   G4double Active_length;

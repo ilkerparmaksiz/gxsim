@@ -239,14 +239,14 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
   auto labPhysical = new G4PVPlacement(0, G4ThreeVector(),lab_logic_volume,lab_logic_volume->GetName(),0, false,0, false);
 
   // Flanges on the Chamber
-  G4VPhysicalVolume *Left_Flange_phys = new G4PVPlacement(rotateX,G4ThreeVector(0,(chamber_length/2), 0),chamber_flange_logic,chamber_flange_solid->GetName(),lab_logic_volume,true,0,false);
-  G4VPhysicalVolume *Right_Flange_phys = new G4PVPlacement(rotateX,G4ThreeVector(0,-(chamber_length/2), 0),chamber_flange_logic,chamber_flange_solid->GetName(),lab_logic_volume,true,1,false);
+  G4VPhysicalVolume *Left_Flange_phys  = new G4PVPlacement(0,G4ThreeVector(0, 0, chamber_length/2),chamber_flange_logic,chamber_flange_solid->GetName(),lab_logic_volume,true,0,false);
+  G4VPhysicalVolume *Right_Flange_phys = new G4PVPlacement(0,G4ThreeVector(0,0, -chamber_length/2),chamber_flange_logic,chamber_flange_solid->GetName(),lab_logic_volume,true,1,false);
 
   // Chamber
-  G4VPhysicalVolume * chamber_phys=  new G4PVPlacement(rotateX,G4ThreeVector(0.,0.,0) ,chamber_logic, chamber_solid->GetName(), lab_logic_volume, false, 0,false);
+  G4VPhysicalVolume * chamber_phys=  new G4PVPlacement(0,G4ThreeVector(0.,0.,0) ,chamber_logic, chamber_solid->GetName(), lab_logic_volume, false, 0,false);
 
   // Xenon Gas in Active Area and Non-Active Area
-  G4VPhysicalVolume * gas_phys= new G4PVPlacement(rotateX, G4ThreeVector(0.,0.,0.), gas_logic, gas_solid->GetName(),lab_logic_volume, false, 0, false);
+  G4VPhysicalVolume * gas_phys= new G4PVPlacement(0, G4ThreeVector(0.,0.,0.), gas_logic, gas_solid->GetName(),lab_logic_volume, false, 0, false);
   //new G4PVPlacement(0, G4ThreeVector(0.,0.,0.), Active_logic, Active_solid->GetName(),gas_logic, false, 0, false);
 
 
@@ -272,25 +272,25 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
 
 
   // PMT Tubes
-  G4VPhysicalVolume *PMT_Tube_Phys0=new G4PVPlacement(rotateX,G4ThreeVector(0,PMT_pos+LongPMTTubeOffset, 0),PMT_Tube_Logic0,PMT_Tube_Logic0->GetName(),lab_logic_volume,false,0,false);
-  G4VPhysicalVolume *PMT_Tube_Phys1=new G4PVPlacement(rotateX,G4ThreeVector(0,-(PMT_pos-PMT_offset)-offset, 0),PMT_Tube_Logic1,PMT_Tube_Logic1->GetName(),lab_logic_volume,false,0,false);
+  G4VPhysicalVolume *PMT_Tube_Phys0=new G4PVPlacement(0,G4ThreeVector(0, 0, PMT_pos + LongPMTTubeOffset),     PMT_Tube_Logic0,PMT_Tube_Logic0->GetName(),lab_logic_volume,false,0,false);
+  G4VPhysicalVolume *PMT_Tube_Phys1=new G4PVPlacement(0,G4ThreeVector(0, 0, -(PMT_pos - PMT_offset) - offset),PMT_Tube_Logic1,PMT_Tube_Logic1->GetName(),lab_logic_volume,false,0,false);
   
   // PMT Tube Vacuum
-  G4VPhysicalVolume *PMT_Tube_Vacuum_Phys0=new G4PVPlacement(rotateX,G4ThreeVector(0,PMT_pos+LongPMTTubeOffset, 0),InsideThePMT_Tube_Logic0,"PMT_TUBE_VACUUM0",lab_logic_volume,false,0,false);
-  G4VPhysicalVolume *PMT_Tube_Vacuum_Phys1=new G4PVPlacement(rotateX,G4ThreeVector(0,-(PMT_pos-PMT_offset)-offset, 0),InsideThePMT_Tube_Logic1,"PMT_TUBE_VACUUM1",lab_logic_volume,false,0,false);
+  G4VPhysicalVolume *PMT_Tube_Vacuum_Phys0=new G4PVPlacement(0,G4ThreeVector(0, 0, PMT_pos+LongPMTTubeOffset),   InsideThePMT_Tube_Logic0,"PMT_TUBE_VACUUM0",lab_logic_volume,false,0,false);
+  G4VPhysicalVolume *PMT_Tube_Vacuum_Phys1=new G4PVPlacement(0,G4ThreeVector(0, 0, -(PMT_pos-PMT_offset)-offset),InsideThePMT_Tube_Logic1,"PMT_TUBE_VACUUM1",lab_logic_volume,false,0,false);
 
   // PMT Tube Block
-  new G4PVPlacement(rotateX,G4ThreeVector(0,PMT_pos-PMT_offset+PMT_Tube_Length0-PMT_Tube_Block_Thickness/2+LongPMTTubeOffset, 0),PMT_Block_Logic0,PMT_Block_Logic0->GetName(),lab_logic_volume,false,0,false);
-  new G4PVPlacement(rotateX,G4ThreeVector(0,-(PMT_pos-PMT_offset+PMT_Tube_Length1-PMT_Tube_Block_Thickness/2)-offset, 0),PMT_Block_Logic,PMT_Block_Logic->GetName(),lab_logic_volume,false,1,false);
+  new G4PVPlacement(0,G4ThreeVector(0,0, PMT_pos-PMT_offset+PMT_Tube_Length0-PMT_Tube_Block_Thickness/2+LongPMTTubeOffset),PMT_Block_Logic0,PMT_Block_Logic0->GetName(),lab_logic_volume,false,0,false);
+  new G4PVPlacement(0,G4ThreeVector(0,0, -(PMT_pos-PMT_offset+PMT_Tube_Length1-PMT_Tube_Block_Thickness/2)-offset),        PMT_Block_Logic,PMT_Block_Logic->GetName(),lab_logic_volume,false,1,false);
 
   // PMTs
   // new G4PVPlacement(pmt1rotate,G4ThreeVector (0,0,((PMT3_Pos_)-pmt1_->Length()/2-PMT_Tube_Length1/2-MgF2_window_thickness_/2)),pmt1_logic,pmt1_->GetPMTName(),InsideThePMT_Tube_Logic0,true,0,false);
-  new G4PVPlacement(0,G4ThreeVector (0,(PMT1_Pos_-pmt1_->Length()/2-MgF2_window_thickness_/2), 0),pmt2_logic,pmt2_->GetPMTName(),InsideThePMT_Tube_Logic1,true,0,false);
+  new G4PVPlacement(0,G4ThreeVector (0, 0., (PMT1_Pos_-pmt1_->Length()/2-MgF2_window_thickness_/2)),pmt2_logic,pmt2_->GetPMTName(),InsideThePMT_Tube_Logic1,true,0,false);
 
 
   // Place the camera Make camLogical mother and photocathode daughter
   G4double LensFocalDist = 6.54*cm; // Got from trial and error as calculations not consistent with NEXUS
-  G4VPhysicalVolume* camPhysical= new G4PVPlacement(0,  G4ThreeVector (0,(chamber_length/2+LensFocalDist) - PMT_pos-LongPMTTubeOffset, 0),camLogical,"camPhysical",InsideThePMT_Tube_Logic0, false,0,false);  
+  G4VPhysicalVolume* camPhysical= new G4PVPlacement(0,  G4ThreeVector (0,0, (chamber_length/2+LensFocalDist) - PMT_pos-LongPMTTubeOffset),camLogical,"camPhysical",InsideThePMT_Tube_Logic0, false,0,false);  
 
 
   // Define this volume as an ionization sensitive detector

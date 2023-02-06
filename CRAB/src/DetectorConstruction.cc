@@ -220,8 +220,8 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
   G4LogicalVolume * InsideThePMT_Tube_Logic1=new G4LogicalVolume(InsideThePMT_Tube_solid1,vacuum,InsideThePMT_Tube_solid1->GetName());
 
   // CAMERA WINDOW
-  G4double camHalfLength=0.25*cm;
-  G4double camRadius=(PMTTubeDiam/2+0.5*cm);
+  G4double camHalfLength=0.5*mm;
+  G4double camRadius= 12.7*mm;
   G4VSolid* camSolid = new G4Tubs("camWindow",0.,camRadius,camHalfLength,0.,twopi);
   G4LogicalVolume* camLogical = new G4LogicalVolume(camSolid,MgF2,"camLogical");
 
@@ -289,8 +289,9 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
 
 
   // Place the camera Make camLogical mother and photocathode daughter
-  G4double LensFocalDist = 6.54*cm; // Got from trial and error as calculations not consistent with NEXUS
-  G4VPhysicalVolume* camPhysical= new G4PVPlacement(0,  G4ThreeVector (0,0, (chamber_length/2+LensFocalDist) - PMT_pos-LongPMTTubeOffset),camLogical,"camPhysical",InsideThePMT_Tube_Logic0, false,0,false);  
+  // G4double LensFocalDist = 6.34*cm; // Got from trial and error as calculations not consistent with NEXUS
+  G4double LensFocalDist = 8.11*cm; // Got from trial and error as calculations not consistent with NEXUS
+  G4VPhysicalVolume* camPhysical= new G4PVPlacement(0,  G4ThreeVector (0,0, (chamber_length/2+ 2*mm + LensFocalDist) - PMT_pos-LongPMTTubeOffset),camLogical,"camPhysical",InsideThePMT_Tube_Logic0, false,0,false);  
 
 
   // Define this volume as an ionization sensitive detector

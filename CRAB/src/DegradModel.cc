@@ -54,7 +54,7 @@ void DegradModel::DoIt(const G4FastTrack& fastTrack, G4FastStep& fastStep) {
         G4ThreeVector degradPos =fastTrack.GetPrimaryTrack()->GetVertexPosition();
         G4double degradTime = fastTrack.GetPrimaryTrack()->GetGlobalTime();
 	G4int KE = int(fPrimPhotonKE/eV);
-	const static G4double torr = 1. / 760. * bar;
+	const static G4double torr = 1. / 750.062 * bar;
 	G4int Press = int(detCon->GetGasPressure()/torr); 
         fastStep.SetPrimaryTrackPathLength(0.0);
         G4cout<<"GLOBAL TIME "<<G4BestUnit(degradTime,"Time")<<" POSITION "<<G4BestUnit(degradPos,"Length")<<G4endl;

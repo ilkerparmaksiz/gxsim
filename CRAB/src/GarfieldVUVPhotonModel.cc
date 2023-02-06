@@ -179,6 +179,7 @@ void GarfieldVUVPhotonModel::GenerateVUVPhotons(const G4FastTrack& fastTrack, G4
 
 	const G4double YoverP = 105.*fieldLEM/(detCon->GetGasPressure()/torr) - 116.; // yield/cm/bar, with P in Torr ... JINST 2 p05001 (2007).
 	colHitsEntries = YoverP * detCon->GetGasPressure()/bar * gapLEM; // with P in bar this time.
+	// colHitsEntries*=1.7; // Max val before G4 cant handle the memory anymore
 	// colHitsEntries=1; // This is to turn down S2 so the vis doesnt get overwelmed
 
 	colHitsEntries *= (G4RandGauss::shoot(1.0,res));

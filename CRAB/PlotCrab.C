@@ -12,8 +12,9 @@ void PlotCrab(){
 
 
     // TFile *FileIn = TFile::Open("build/crab50MeVeminus_noref.root", "READ");
-    TFile *FileIn = TFile::Open("build/crab50MeVeminus_withref.root", "READ");
-    // TFile *FileIn = TFile::Open("build/crab2MeV.root", "READ");
+    // TFile *FileIn = TFile::Open("build/crab50MeVeminus_withref.root", "READ");
+    TFile *FileIn = TFile::Open("build/crab2MeV.root", "READ");
+    // TFile *FileIn = TFile::Open("build/crab2MeV_noref_S2x10.root", "READ");
 
 
     // CAM --------------------------------------------------------------------
@@ -28,17 +29,17 @@ void PlotCrab(){
     tPMT->SetBranchAddress("Event",&PMT_Ev);
 
     //create two histograms
-    TH2F *hPMTXZ = new TH2F("hPMTXY","Camera X vs Z",100, -20, 20, 100, -20, 20) ;
+    TH2F *hPMTXY = new TH2F("hPMTXY","Camera X vs Y",50, -15, 15, 50, -15, 15) ;
 
     //read all entries and fill the histograms
     Long64_t nPMT = tPMT->GetEntries();
     for (Long64_t i=0;i<nPMT;i++) {
         tPMT->GetEntry(i);
-        hPMTXZ->Fill(PMT_X, PMT_Z);
+        hPMTXY->Fill(-PMT_X, -PMT_Y);
     }
 
     TCanvas *cPMT = new TCanvas();
-    hPMTXZ->Draw("colz");
+    hPMTXY->Draw("colz");
 
     // LENS -------------------------------------------------------------------
 
@@ -52,25 +53,25 @@ void PlotCrab(){
     tLens->SetBranchAddress("Time",&Lens_T);
 
     //create two histograms
-    TH2F *hLensXZ = new TH2F("hLensXY","Lens X vs Z",10, -5, 5, 10, -5, 5) ;
+    TH2F *hLensXY = new TH2F("hLensXY","Lens X vs Y",10, -5, 5, 10, -5, 5) ;
 
     // XZ vs T
-    TH3F *hLensXZT = new TH3F("hLensXXT","Lens XZ vs T",50, 80e3, 130e3, 10, -5, 5, 10, -5, 5 ) ;
+    TH3F *hLensXYT = new TH3F("hLensXXT","Lens XY vs T",50, 80e3, 130e3, 10, -5, 5, 10, -5, 5 ) ;
 
     //read all entries and fill the histograms
     Long64_t nLens = tLens->GetEntries();
     for (Long64_t i=0;i<nLens;i++) {
         tLens->GetEntry(i);
-        hLensXZ->Fill(Lens_X, Lens_Z);
-        hLensXZT->Fill(Lens_T, Lens_X, Lens_Z);
+        hLensXY->Fill(Lens_X, Lens_Y);
+        hLensXYT->Fill(Lens_T, Lens_X, Lens_Y);
     }
 
     TCanvas *cLens = new TCanvas();
-    hLensXZ->Draw("colz");
+    hLensXY->Draw("colz");
 
 
     TCanvas *cLens2 = new TCanvas();
-    hLensXZT->Draw("lego2");
+    hLensXYT->Draw("lego2");
 
 
     // S1 ---------------------------------------------------------------------
@@ -84,17 +85,22 @@ void PlotCrab(){
     tS1->SetBranchAddress("Event",&S1_Ev);
 
     //create two histograms
-    TH3F *hS1XYZ = new TH3F("hS1XYZ","S1 XYZ; X [mm]; Z [mm]; Y [mm]",40, -150, 150, 40, -150, 150, 40, 0, 440) ;
+    TH3F *hS1XYZ = new TH3F("hS1XYZ","S1 XYZ; X [mm]; Y [mm]; Z [mm]",40, -42.5, 42.5, 40, -42.5, 42.5, 40, -220, 220) ;
+    TH2F *hS1XY = new TH2F("hS1XY","S1 XY; X [mm]; Y [mm]",40, -42.5, 42.5, 40, -42.5, 42.5) ;
 
     //read all entries and fill the histograms
     Long64_t nS1 = tS1->GetEntries();
     for (Long64_t i=0;i<nS1;i++) {
         tS1->GetEntry(i);
-        hS1XYZ->Fill(S1_X, S1_Z, S1_Y);
+        hS1XYZ->Fill(S1_X, S1_Y, S1_Z);
+        hS1XY->Fill(S1_X, S1_Y);
     }
 
     TCanvas *cS1 = new TCanvas();
     hS1XYZ->Draw("lego2");
+    
+    TCanvas *cS12 = new TCanvas();
+    hS1XY->Draw("colz");
 
     
 

@@ -29,6 +29,8 @@ DegradModel::~DegradModel() {}
 G4bool DegradModel::IsApplicable(const G4ParticleDefinition& particleType) {
   if (particleType.GetParticleName()=="e-")
     return true;
+  //if (particleType.GetParticleName()=="alpha" || particleType.GetParticleName()=="mu-" )
+      //return true;
   return false;
 }
 
@@ -38,8 +40,8 @@ G4bool DegradModel::ModelTrigger(const G4FastTrack& fastTrack) {
       //  also require that only photoelectric effect electrons are tracked here.
       if ((fastTrack.GetPrimaryTrack()->GetCreatorProcess()->GetProcessName().find("phot") != std::string::npos) ||
 	  (fastTrack.GetPrimaryTrack()->GetCreatorProcess()->GetProcessName().find("comp") != std::string::npos)
-	  )
-	return true;
+	  ) return true;
+
     }
   return false;
 
@@ -158,7 +160,7 @@ void DegradModel::GetElectronsFromDegrad(G4FastStep& fastStep,G4ThreeVector degr
                 
                 G4String solidName=myVolume->GetName();
                 
-                if (solidName.contains("detectorPhysical")){//AROUCA: APENAS PARA LIMITAR O NUMERO DE ELECTROES EM TESTES
+                if (solidName.contains("FIELDCAGE") || solidName.contains("GAS")  ){//AROUCA: APENAS PARA LIMITAR O NUMERO DE ELECTROES EM TESTES
                     //G4cout<<"INSIDE"<<G4endl;
                     
                     //AROUCA: METER AQUI O ESPECTRO DE EMISSAO DO XENON

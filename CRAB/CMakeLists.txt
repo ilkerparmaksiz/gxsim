@@ -47,9 +47,7 @@ include_directories($ENV{GARFIELD_HOME}/Heed)
 # Add additional libraries needed for GARFIELD++
 #link_directories($ENV{GARFIELD_LIB})
 link_directories($ENV{GARFIELD_HOME}/build)
-link_directories(/opt/homebrew/Cellar/gcc/12.2.0/lib/gcc/12/)
 link_directories($ENV{G4INSTALL}/lib)
-link_directories(/opt/homebrew/lib/)
 
 # NEST
 find_package(NEST REQUIRED)
@@ -61,6 +59,8 @@ message(STATUS "include dir: $ENV{NEST_INCLUDE_DIRS} $ENV{NEST_INCLUDE_DIRS}/.."
 
 IF(APPLE)
     # Fix linking on 10.14+. See https://stackoverflow.com/questions/54068035
+    link_directories(/opt/homebrew/lib/)
+    link_directories(/opt/homebrew/Cellar/gcc/12.2.0/lib/gcc/12/)
     LINK_DIRECTORIES(/usr/local/lib)
 ENDIF()
 #---------------------------------------------------------------------------
@@ -86,7 +86,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -g")
 add_executable(CRAB CRAB.cc ${sources} ${headers})
 message(STATUS "GEANT4 libraries libs: ${Geant4_LIBRARIES}")
 #target_link_libraries(CRAB -lGarfield -lgfortran ${ROOT_LIBRARIES} libNESTCore.a  libNESTG4.a ${Geant4_LIBRARIES})
-target_link_libraries(CRAB -lGarfield -lgfortran ${ROOT_LIBRARIES} libNESTCore.dylib  libNESTG4.dylib ${Geant4_LIBRARIES})
+target_link_libraries(CRAB -lGarfield -lgfortran ${ROOT_LIBRARIES} libNESTCore.a  libNESTG4.a ${Geant4_LIBRARIES})
 #----------------------------------------------------------------------------
 # Copy all scripts to the build directory, i.e. the directory in which we
 # build B1. This is so that we can run the executable directly because it

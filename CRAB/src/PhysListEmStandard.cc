@@ -125,6 +125,7 @@ void PhysListEmStandard::ConstructProcess() {
             ph->RegisterProcess(new G4eMultipleScattering(), particle);
             G4eIonisation* eIoni = new G4eIonisation();
             eIoni->SetStepFunction(0.1, 100 * um);
+            eIoni->SetDEDXBinning(12 * 10);
             ph->RegisterProcess(eIoni, particle);
             ph->RegisterProcess(new G4eBremsstrahlung(), particle);
             ph->RegisterProcess(new G4eplusAnnihilation(), particle);
@@ -149,6 +150,7 @@ void PhysListEmStandard::ConstructProcess() {
         } else if (particleName == "alpha" || particleName == "He3") {
             ph->RegisterProcess(new G4hMultipleScattering(), particle);
             G4ionIonisation* ionIoni = new G4ionIonisation();
+            ionIoni->SetDEDXBinning(12 * 10);
             ionIoni->SetStepFunction(0.1, 1 * um);
             ph->RegisterProcess(ionIoni, particle);
             ph->RegisterProcess(new G4NuclearStopping(), particle);
@@ -180,14 +182,13 @@ void PhysListEmStandard::ConstructProcess() {
     
     // physics tables
     //
-    emOptions.SetMinEnergy(10 * eV);      // default 100 eV
-    emOptions.SetMaxEnergy(10 * TeV);     // default 100 TeV
-    emOptions.SetDEDXBinning(12 * 10);    // default=12*7
-    emOptions.SetLambdaBinning(12 * 10);  // default=12*7
-    
+    emOptions->SetMinEnergy(10 * eV);      // default 100 eV
+    emOptions->SetMaxEnergy(10 * TeV);     // default 100 TeV
+   // emOptions->SetDEDXBinning(12 * 10);    // default=12*7
+   // emOptions->SetLambdaBinning(12 * 10);  // default=12*7
     // multiple coulomb scattering
     //
-    emOptions.SetMscStepLimitation(fUseSafety);  // default
+    emOptions->SetMscStepLimitType(fUseSafety);  // default
     
     // Deexcitation
     //
@@ -213,22 +214,21 @@ void PhysListEmStandard::ConstructProcess() {
     G4ProcessManager* pmanager = particle->GetProcessManager();
     G4String particleName = particle->GetParticleName();
 
-    // td::cout << "PhysicsListEMStandard::ConstructProcess(): pname, pmanager are " << particleName << ", " << pmanager << std::endl;
-    if ( !(particleName.find("e-")!=std::string::npos  || particleName.find("opticalphoton")!=std::string::npos ) )
-      continue;
+    // std::cout << "PhysicsListEMStandard::ConstructProcess(): pname, pmanager are " << particleName << ", " << pmanager << std::endl;
+    //if ( !(particleName.find("e-")!=std::string::npos   || particleName.find("opticalphoton")!=std::string::npos ) )
+    //if ( !(particleName.find("e-")!=std::string::npos   || particleName.find("alpha")!=std::string::npos || particleName.find("proton")!=std::string::npos || particleName.find("muon")!=std::string::npos  || particleName.find("opticalphoton")!=std::string::npos ) )
+      //continue;
     if (pmanager) {
-
-
       NEST::NESTProc* theNEST2ScintillationProcess = new NEST::NESTProc("S1",fElectromagnetic, calcNEST, gndet); //gndet);
       theNEST2ScintillationProcess->SetDetailedSecondaries(true);
       theNEST2ScintillationProcess->SetStackElectrons(true);
 
+      std::cout<<"----- Here ----------------------- "<< theNEST2ScintillationProcess->IsApplicable(*particle) <<std::endl;
       if (theNEST2ScintillationProcess->IsApplicable(*particle) && pmanager) {
-        std::cout << "PhysicsList::InitialisePhysics(): particleName, pmanager  " << particleName << ", " << pmanager << "." << std::endl;
+          std::cout << "PhysicsList::InitialisePhysics(): particleName, pmanager  " << particleName << ", " << pmanager << "." << std::endl;
         std::cout << "ordDefault, ordInActive " << ordDefault << ", " << ordInActive  << std::endl;
         pmanager->AddProcess(theNEST2ScintillationProcess, ordDefault + 1, ordInActive, ordDefault + 1);
       }
-
       G4OpBoundaryProcess* fBoundaryProcess = new G4OpBoundaryProcess();
       G4OpAbsorption* fAbsorptionProcess = new G4OpAbsorption();
       G4OpWLS* fTheWLSProcess = new G4OpWLS();

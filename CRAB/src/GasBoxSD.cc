@@ -52,6 +52,23 @@ G4bool GasBoxSD::ProcessHits(G4Step* aStep, G4TouchableHistory* hist){
         return true;
     }
 
+    if(aTrack->GetDefinition()->GetParticleName() == "alpha" or aTrack->GetDefinition()->GetParticleName() == "mu-"){
+        /*
+          G4cout << "GasBox Hit!!" << G4endl;
+          G4cout << "Particle ID: " << aTrack->GetTrackID() << G4endl;
+          G4cout << "Energy electron: " << aTrack->GetKineticEnergy() << G4endl;
+        */
+        return true;
+    }
+
+    if(aTrack->GetDefinition()->GetParticleName() == "muon"){
+        /*
+          G4cout << "GasBox Hit!!" << G4endl;
+          G4cout << "Particle ID: " << aTrack->GetTrackID() << G4endl;
+          G4cout << "Energy electron: " << aTrack->GetKineticEnergy() << G4endl;
+        */
+        return true;
+    }
     return false;
     
     

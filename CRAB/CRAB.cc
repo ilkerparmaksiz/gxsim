@@ -39,9 +39,6 @@ int main(int argc, char** argv) {
     G4cout << "Creation of G4RunManager" << G4endl;
 #endif
 
-
-  
-  
   G4int randseed = atoi(argv[2]);
   G4Random::setTheSeed(randseed);
   G4cout << "Setting the Random seed: " << randseed << G4endl;

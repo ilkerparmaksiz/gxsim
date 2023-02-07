@@ -144,7 +144,7 @@ namespace pmt {
     // light is generated only in that fraction of solid angle that subtends the
     // window of the PMT.
     G4MaterialPropertiesTable* phcath_mpt = new G4MaterialPropertiesTable();
-    filehandler::FileHandling *f1=new filehandler::FileHandling();
+    //filehandler::FileHandling *f1=new filehandler::FileHandling();
     std::vector<std::vector<G4double>> t;
     /// Note: In order this efficiency to work , you need to list it from low energy to high energy
     
@@ -157,7 +157,7 @@ namespace pmt {
                   "Environment variable CRABPATH not defined!");
   }
 
-  G4String path(nexus_path);
+  /*G4String path(nexus_path);
   G4String filename = path + "/data/PMTR7378A_Efficiency.txt";
     
     t=f1->GetData(filename,',',1);
@@ -175,7 +175,7 @@ namespace pmt {
         //G4cout<<ENERGIES[kk]<<" "<<EFFICIENCY[kk]<<G4endl;
     }
 
-    /*
+    */
       const G4int entries = 31;
       G4double ENERGIES[entries] =
       {1.72194*eV, 1.77114*eV, 1.82324*eV, 1.87848*eV, 1.93719*eV,
@@ -202,7 +202,7 @@ namespace pmt {
   0., 0., 0., 0., 0.,
   0., 0., 0., 0., 0.,0 };
 
-    */
+
 
 
     phcath_mpt->AddProperty("EFFICIENCY", ENERGIES, EFFICIENCY, entries);

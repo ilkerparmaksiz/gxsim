@@ -263,19 +263,20 @@ namespace opticalprops {
     //  G4cout << "* GXe Scint:  " << std::setw(7) << sc_energy[i]/eV
     //         << " eV -> " << intensity[i] << G4endl;
     //}
-    mpt->AddProperty("FASTCOMPONENT", sc_energy, intensity, sc_entries);
-    mpt->AddProperty("ELSPECTRUM",    sc_energy, intensity, sc_entries);
-    mpt->AddProperty("SLOWCOMPONENT", sc_energy, intensity, sc_entries);
+    mpt->AddProperty("FASTCOMPONENT", sc_energy, intensity, sc_entries,true);
+    mpt->AddProperty("ELSPECTRUM",    sc_energy, intensity, sc_entries,true);
+    mpt->AddProperty("SLOWCOMPONENT", sc_energy, intensity, sc_entries,true);
 
     // CONST PROPERTIES
-    mpt->AddConstProperty("SCINTILLATIONYIELD", sc_yield);
-    mpt->AddConstProperty("RESOLUTIONSCALE",    1.0);
-    mpt->AddConstProperty("FASTTIMECONSTANT",   4.5  * ns);
-    mpt->AddConstProperty("SLOWTIMECONSTANT",   100. * ns);
-    mpt->AddConstProperty("YIELDRATIO",         .1);
-    mpt->AddConstProperty("ATTACHMENT",         e_lifetime);
+    mpt->AddConstProperty("SCINTILLATIONYIELD", sc_yield,true);
+    mpt->AddConstProperty("RESOLUTIONSCALE",    1.0,true);
+    mpt->AddConstProperty("FASTTIMECONSTANT",   4.5  * ns,true);
+    mpt->AddConstProperty("SLOWTIMECONSTANT",   100. * ns,true);
+    mpt->AddConstProperty("YIELDRATIO",         .1,true);
+    mpt->AddConstProperty("ATTACHMENT",         e_lifetime,true);
 
-    return mpt;
+
+      return mpt;
   }
   
   // Stainles Steel Optical Properties Table

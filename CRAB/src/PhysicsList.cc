@@ -129,6 +129,7 @@ void PhysicsList::InitializePhysicsList(const G4String& name) {
   }
 
   if (name == "local") {
+
     ReplacePhysics(new PhysListEmStandard(name));
   } else if (name == "emstandard_opt0") {
     ReplacePhysics(new G4EmStandardPhysics(1));
@@ -147,7 +148,7 @@ void PhysicsList::InitializePhysicsList(const G4String& name) {
     ReplacePhysics(new G4EmStandardPhysics(1));
     AddIonGasModels();
   }
-  
+    std::cout<<"####----- Setting PhysicsList as ---->>" << name<<G4endl;
 
 }
 

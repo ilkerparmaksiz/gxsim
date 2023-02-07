@@ -18,11 +18,14 @@ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$ROOTSYS/lib;
 export DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH:$ROOTSYS/lib;
 
 # Garfield
-export GARFIELD_INSTALL=/Users/mistryk2/Packages/garfieldpp
-export GARFIELD_HOME=/Users/mistryk2/Packages/garfieldpp
-export CMAKE_PREFIX_PATH=/Users/mistryk2/Packages/garfieldpp:$CMAKE_PREFIX_PATH
-export HEED_DATABASE=/Users/mistryk2/Packages/garfieldpp/Heed/heed++/database
+export GARFIELD_INSTALL=/Users/mistryk2/Packages/garfieldpp/install
+export GARFIELD_HOME=/Users/mistryk2/Packages/garfieldpp/
+export CMAKE_PREFIX_PATH=/Users/mistryk2/Packages/garfieldpp/install:$CMAKE_PREFIX_PATH
+export HEED_DATABASE=$GARFIELD_INSTALL/share/Heed/database
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$GARFIELD_INSTALL/lib
+export DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH:$GARFIELD_INSTALL/lib
+
+
 
 # DEGRAD
 export DEGRAD_HOME=/Users/mistryk2/Packages/Degrad

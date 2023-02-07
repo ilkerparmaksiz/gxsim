@@ -43,7 +43,7 @@ include_directories($ENV{GARFIELD_HOME}/Include/Garfield)
 include_directories($ENV{GARFIELD_HOME}/Heed)
 # Add additional libraries needed for GARFIELD++
 #link_directories($ENV{GARFIELD_LIB})
-link_directories($ENV{GARFIELD_HOME}/build)
+link_directories($ENV{GARFIELD_HOME}/install/lib)
 link_directories(/opt/homebrew/Cellar/gcc/12.2.0/lib/gcc/12/)
 link_directories($ENV{G4INSTALL}/lib)
 link_directories(/opt/homebrew/lib/)

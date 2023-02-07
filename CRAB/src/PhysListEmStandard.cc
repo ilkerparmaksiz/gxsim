@@ -60,7 +60,7 @@
 #include "G4IonParametrisedLossModel.hh"
 #include "G4NuclearStopping.hh"
 
-#include "G4EmProcessOptions.hh"
+#include "G4EmParameters.hh"
 #include "G4MscStepLimitType.hh"
 
 #include "G4LossTableManager.hh"
@@ -118,6 +118,7 @@ void PhysListEmStandard::ConstructProcess() {
             ph->RegisterProcess(new G4eMultipleScattering(), particle);
             G4eIonisation* eIoni = new G4eIonisation();
             eIoni->SetStepFunction(0.1, 100 * um);
+            eIoni->SetDEDXBinning(12 * 10);
             ph->RegisterProcess(eIoni, particle);
             ph->RegisterProcess(new G4eBremsstrahlung(), particle);
             
@@ -125,6 +126,7 @@ void PhysListEmStandard::ConstructProcess() {
             ph->RegisterProcess(new G4eMultipleScattering(), particle);
             G4eIonisation* eIoni = new G4eIonisation();
             eIoni->SetStepFunction(0.1, 100 * um);
+            eIoni->SetDEDXBinning(12 * 10);
             ph->RegisterProcess(eIoni, particle);
             ph->RegisterProcess(new G4eBremsstrahlung(), particle);
             ph->RegisterProcess(new G4eplusAnnihilation(), particle);
@@ -150,6 +152,7 @@ void PhysListEmStandard::ConstructProcess() {
             ph->RegisterProcess(new G4hMultipleScattering(), particle);
             G4ionIonisation* ionIoni = new G4ionIonisation();
             ionIoni->SetStepFunction(0.1, 1 * um);
+            ionIoni->SetDEDXBinning(12 * 10);
             ph->RegisterProcess(ionIoni, particle);
             ph->RegisterProcess(new G4NuclearStopping(), particle);
             
@@ -175,18 +178,18 @@ void PhysListEmStandard::ConstructProcess() {
     // Main options and setting parameters are shown here.
     // Several of them have default values.
     //
-    G4EmProcessOptions emOptions;
+    G4EmParameters *emOptions= G4EmParameters::Instance();
     
     // physics tables
     //
     emOptions.SetMinEnergy(10 * eV);      // default 100 eV
     emOptions.SetMaxEnergy(10 * TeV);     // default 100 TeV
-    emOptions.SetDEDXBinning(12 * 10);    // default=12*7
-    emOptions.SetLambdaBinning(12 * 10);  // default=12*7
+    // emOptions.SetDEDXBinning(12 * 10);    // default=12*7
+    // emOptions.SetLambdaBinning(12 * 10);  // default=12*7
     
     // multiple coulomb scattering
     //
-    emOptions.SetMscStepLimitation(fUseSafety);  // default
+    emOptions->SetMscStepLimitType(fUseSafety); // default  // default
     
     // Deexcitation
     //

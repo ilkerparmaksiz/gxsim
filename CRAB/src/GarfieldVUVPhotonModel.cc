@@ -139,42 +139,32 @@ void GarfieldVUVPhotonModel::GenerateVUVPhotons(const G4FastTrack& fastTrack, G4
 	if (particleName.find("thermalelectron")!=std::string::npos) particleName = "e-";
 
 	garfExcHitsCol = new GarfieldExcitationHitsCollection();
-	std::array<double, 3> ef{0,0,0};
-	std::array<double, 3> bf{0,0,0};
-	std::vector<double> vf{0,0,0};
-	Garfield::Medium* medium = nullptr;
-	int status(0);
-	//	fSensor->ElectricField(x0,y0,z0, ef[0], ef[1], ef[2], medium, status);
-	//	std::cout << "GVUVPM: E field in medium " << medium << " at " <<  x0<<","<<y0<<","<<z0 << "  is:  "  << ef[0]<<","<<ef[1]<<","<<ef[2] << std::endl;
-	// bool bstatus;
-	//medium->EnableDebugging(); // EC, 20-May-2022, 6pm MDT.
-	//bstatus = medium->ElectronVelocity(ef[0],ef[1],ef[2],bf[0],bf[1],bf[2],vf[0],vf[1],vf[2]);
-	//std::cout << "GVUVPM: Drift velocity status, velocity: " << bstatus << ", " << vf[0]<<","<<vf[1]<<","<<vf[2] << std::endl;
-	//std::cout << "GVUVPM: Medium atomic number, mass, density: " <<  medium->GetAtomicNumber() << ", " << medium->GetAtomicWeight() << "," << medium->GetNumberDensity() << std::endl;
-
-	// Need to get the AvalancheMC drift at the High-Field point in y, and then call fAvalanche-AvalancheElectron() to create excitations/VUVphotons.
+	
+	// Need to get the AvalancheMC drift at the High-Field point in z, and then call fAvalanche-AvalancheElectron() to create excitations/VUVphotons.
 	fAvalancheMC->DriftElectron(x0,y0,z0,t0);
 
 	unsigned int n = fAvalancheMC->GetNumberOfDriftLinePoints();
 	double xi,yi,zi,ti;
 	//	std::cout << "Drift(): avalanchetracking, n DLTs is " << n << std::endl;
 
-	// pick highest yi in drift region => that is the beginning of the LEM
+	// Get zi when in the beginning of the EL region
 	for(unsigned int i=0;i<n;i++){
 	  fAvalancheMC->GetDriftLinePoint(i,xi,yi,zi,ti);
-    //   std::cout << "GVUVPM: positions are " << xi<<"," <<yi<<","<<zi <<"," <<ti<< std::endl;
+      //   std::cout << "GVUVPM: positions are " << xi<<"," <<yi<<","<<zi <<"," <<ti<< std::endl;
         
 
-	  if (yi < ELPos && ( std::sqrt(xi*xi + zi*zi) < DetActiveR/2.0) )
+	  // Drift line point entered LEM
+	  if (zi < ELPos && ( std::sqrt(xi*xi + yi*yi) < DetActiveR/2.0) )
 	    break; 
+	  // No drift line point meets criteria, so return
 	  else if (i==n-1)
 	    return;
-	} // pts in driftline
+
+	}  // pts in driftline
 
 
 	e0 = 1.13;
 	// std::cout << "GVUVPM: Avalanching in high field starting at: "  << xi<<"," <<yi<<","<<zi <<"," <<ti << std::endl;
-	//	std::cout << "GVUVPM: fMediumMagboltz: "  << fMediumMagboltz << std::endl;
 
 	/// fAvalanche->AvalancheElectron() is slow AF: it's the biggest offender in slowing the simulation.
 	/// I am replacing this call with picking a fake interaction number and sites. Tracks that were ~8 sec drop to 1 msec.
@@ -189,16 +179,18 @@ void GarfieldVUVPhotonModel::GenerateVUVPhotons(const G4FastTrack& fastTrack, G4
 
 	const G4double YoverP = 105.*fieldLEM/(detCon->GetGasPressure()/torr) - 116.; // yield/cm/bar, with P in Torr ... JINST 2 p05001 (2007).
 	colHitsEntries = YoverP * detCon->GetGasPressure()/bar * gapLEM; // with P in bar this time.
-	// colHitsEntries=1; // This needs to be removed!
+	// colHitsEntries*=1.7; // Max val before G4 cant handle the memory anymore
+	// colHitsEntries=1; // This is to turn down S2 so the vis doesnt get overwelmed
 
 	colHitsEntries *= (G4RandGauss::shoot(1.0,res));
 	//G4cout<<"YoverP,pressure [torr],fieldLEM, gapLEM and Number  Xe excitations: "<< YoverP << ", " << detCon->GetGasPressure()/torr << ", " << fieldLEM << ", " << gapLEM << " and " << colHitsEntries <<G4endl;
+	
 	G4double tig4(0.);
 	const G4double vd(2.4); // mm/musec, https://arxiv.org/pdf/1902.05544.pdf. Pretty much flat at our E/p..
 	for (G4int i=0;i<colHitsEntries;i++){
 	  GarfieldExcitationHit* newExcHit=new GarfieldExcitationHit();
-	  /// fGap = 0.5 cm, 5 mm
-	  G4ThreeVector fakepos (xi*10,yi*10.-10*gapLEM*float(i)/float(colHitsEntries),zi*10.); /// ignoring diffusion in small LEM gap, EC 17-June-2022.
+
+	  G4ThreeVector fakepos (xi*10,yi*10.,zi*10.-10*gapLEM*float(i)/float(colHitsEntries)); /// ignoring diffusion in small LEM gap, EC 17-June-2022.
 	  newExcHit->SetPos(fakepos);
 	  /// newExcHit->SetPos((*garfExcHitsCol)[i]->GetPos());
 	  /// newExcHit->SetTime((*garfExcHitsCol)[i]->GetTime());
@@ -228,7 +220,8 @@ void GarfieldVUVPhotonModel::GenerateVUVPhotons(const G4FastTrack& fastTrack, G4
 
 	    tig4 = ti + float(i)/float(colHitsEntries)*gapLEM*10./vd*1E3; // in nsec (gapLEM is in cm). Still ignoring diffusion in small LEM.
 	    //	    std::cout << "VUV photon time [nsec]: " << tig4 << std::endl;
-	    newExcHit->SetTime(tig4);
+	    
+		newExcHit->SetTime(tig4);
 	    fGasBoxSD->InsertGarfieldExcitationHit(newExcHit);
 	    G4Track *newTrack=fastStep.CreateSecondaryTrack(VUVphoton, fakepos, tig4 ,false);
 	    newTrack->SetPolarization(G4ThreeVector(0.,0.,1.0)); // Needs some pol'n, else we will only ever reflect at an OpBoundary. EC, 8-Aug-2022.
@@ -252,32 +245,32 @@ void ePiecewise (const double x, const double y, const double z,
 
     
     // Only want Ey component to the field
-    ex = ez = 0.;
+    ex = ey = 0.;
 
     // Define a field region for the whole gas region
 
-    // Set ey  for regions outside of the radius of the FC
-    if ( std::sqrt(x*x + z*z) > DetActiveR/2.0){
-        ey = -fieldDrift; // Negative field will send them away from the LEM region
+    // Set ez for regions outside of the radius of the FC
+    if ( std::sqrt(x*x + y*y) > DetActiveR/2.0){
+        ez = -fieldDrift; // Negative field will send them away from the LEM region
     }
 
     // Field past the cathode drift them away from the LEM with negative field
-    if (y > FCTop)
-        ey = -fieldDrift;
+    if (z > FCTop)
+        ez = -fieldDrift;
 
     // Drift region
-    if (y <= FCTop)
-        ey = fieldDrift;
+    if (z <= FCTop)
+        ez = fieldDrift;
 
     // EL region
-    if (y <= ELPos && y > ELPos-gapLEM)
-        ey = fieldLEM;
+    if (z <= ELPos && z > ELPos-gapLEM)
+        ez = fieldLEM;
 
     // Drift towards the end cap
-    if (y <= ELPos - gapLEM)
-        ey = fieldDrift; 
+    if (z <= ELPos - gapLEM)
+        ez = fieldDrift; 
 
-//   std::cout<<"ePiecewise: y, dethz, ey are [cm]: " << y << ", " << dethz << ", " << ey << std::endl;
+  	// std::cout<<"ePiecewise: z, ez are [cm]: " << z << ", " << ez << std::endl;
  
 }
 
@@ -285,34 +278,46 @@ void ePiecewise (const double x, const double y, const double z,
 
 // Selection of Xenon exitations and ionizations
 void GarfieldVUVPhotonModel::InitialisePhysics(){
+	
+	// Set the gas Properties
 	fMediumMagboltz = new Garfield::MediumMagboltz();
-	double pressure = detCon->GetGasPressure()/torr;
-	double temperature = detCon->GetTemperature()/kelvin;
-
-	fMediumMagboltz->SetTemperature(temperature);
-	fMediumMagboltz->SetPressure(pressure);
 	fMediumMagboltz->SetComposition("Xe", 100.);
-	fMediumMagboltz->Initialise(true);
 	fMediumMagboltz->DisableDebugging();
-	gasFile =  "Xenon.gas";
+	
+	//  --- Load in Ion Mobility file --- 
 	ionMobFile = "IonMobility_Ar+_Ar.txt";
-	G4cout << gasFile << G4endl;
 	const std::string path = getenv("GARFIELD_HOME");
 	G4AutoLock lock(&aMutex);
+	
 	if(ionMobFile!="")
 	  fMediumMagboltz->LoadIonMobility(path + "/Data/" + ionMobFile);
+	
 	if(gasFile!=""){
-	  const bool useLog = true; // to use Logarithmic spacing.
-	  // fMediumMagboltz->SetFieldGrid(10.,200000.,20,useLog); // In 99:1 N2:O2 E/p = 3000000/3 causes Magboltz to crash. EC, 5-Nov-2021.`
-	  //fMediumMagboltz->GenerateGasTable(5); // num of 1E7 collisions to do ... something.
-	  //	  std::cout << "Writing gasfile." << std::endl;
-	  // fMediumMagboltz->WriteGasFile(gasFile.c_str());      
-	  //	  std::cout << "Wrote gasfile."<< std::endl;
-	  fMediumMagboltz->LoadGasFile(gasFile.c_str());
+	  
 	  std::cout << "Loaded gasfile." << std::endl;
 	}
 
+	//  --- Get Xenon file --- 
+	char* nexus_path = std::getenv("CRABPATH");
+	if (nexus_path == nullptr) {
+		G4Exception("[GarfieldVUVPhotonModel]", "InitialisePhysics()", FatalException,
+					"Environment variable CRABPATH not defined!");
+	}
+
+	G4String gas_path(nexus_path);
+	gasFile = gas_path + "/data/Xenon_10Bar.gas";
+	G4cout << gasFile << G4endl;
+	fMediumMagboltz->LoadGasFile(gasFile.c_str());
+	std::cout << "Finished Loading in the gas file" << std::endl;
+
+	// Initialize the gas
+	fMediumMagboltz->Initialise(true);
+
+	// Print the gas properties
+	fMediumMagboltz->PrintGas();
+
 	
+	//  ---- Create the Garfield Field region --- 
 	Garfield::GeometrySimple* geo = new Garfield::GeometrySimple();
 	
 	// Make a box
@@ -322,12 +327,13 @@ void GarfieldVUVPhotonModel::InitialisePhysics(){
     DetActiveR = detCon->GetActiveR(); // cm
     DetActiveL = detCon->GetActiveL(); // cm
 
-    ELPos = (DetChamberL- DetActiveL)/2.0;
-    FCTop = (DetChamberL + DetActiveL)/2.0;
+    ELPos =  - DetActiveL/2.0;
+    FCTop =  + DetActiveL/2.0;
 
-    // std::cout << "Detector Dimentions: "<< DetChamberR << " " << DetChamberL << "  " << DetActiveR << "  " << DetActiveL << std::endl; 
+    std::cout << "Detector Dimentions: "<< DetChamberR << " " << DetChamberL << "  " << DetActiveR << "  " << DetActiveL << std::endl; 
 
-	Garfield::SolidTube* tube = new Garfield::SolidTube(0.0, DetChamberL*0.5,0.0, DetChamberR, DetChamberL*0.5, 0.,1.,0.);//Tube oriented in Y'axis (0.,1.,0.,)
+	// Tube oriented in Y'axis (0.,1.,0.,) The addition of the 1 cm is for making sure it doesnt fail on the boundary
+	Garfield::SolidTube* tube = new Garfield::SolidTube(0.0, 0.0 ,0.0, DetChamberR+1, DetChamberL*0.5, 0.,0.,1.);
 
 	// Add the solid to the geometry, together with the medium inside
 	geo->AddSolid(tube, fMediumMagboltz);
@@ -336,14 +342,11 @@ void GarfieldVUVPhotonModel::InitialisePhysics(){
 	Garfield::ComponentUser* componentDriftLEM = new Garfield::ComponentUser();
 	componentDriftLEM->SetGeometry(geo);
 	componentDriftLEM->SetElectricField(ePiecewise);
-	std::cout << " .....   now forcing density for the Garfield gas medium -- via P, T." << std::endl;
-	geo->GetMedium(0.,0.,0.)->SetPressure(detCon->GetGasPressure()/torr);
-	geo->GetMedium(0.,0.,0.)->SetTemperature(detCon->GetTemperature()/kelvin);
-	// pull out the density to see if our pressure-setting in .mac file is in fact effected down in Garfield. EC, 28-Oct-2021.
-	double ggeodens = geo->GetMedium(0.,0.,0.)->GetMassDensity();
-	double ggeopress = geo->GetMedium(0.,0.,0.)->GetPressure();
 
-	std::cout << "GarfieldVUVPhotonModel::buildBox(): Garfield mass density [g/cm3], pressure [Torr] is: " << ggeodens << ", " << ggeopress << std::endl;
+	// Printing pressure and temperature
+	std::cout << "GarfieldVUVPhotonModel::buildBox(): Garfield mass density [g/cm3], pressure [Torr], temp [K]: " <<
+	 	geo->GetMedium(0.,0.,0.)->GetMassDensity() << ", " << geo->GetMedium(0.,0.,0.)->GetPressure()<< ", " 
+	 	<< geo->GetMedium(0.,0.,0.)->GetTemperature() << std::endl;
 
 	
 	fAvalanche = new Garfield::AvalancheMicroscopic();
@@ -364,15 +367,7 @@ void GarfieldVUVPhotonModel::InitialisePhysics(){
 	//    fAvalancheMC->DisableAttachment();
 
     // Set the region where the sensor is active -- based on the gas volume
-	fSensor->SetArea(-DetChamberR, 0, -DetChamberR, DetChamberR, DetChamberL, DetChamberR); // cm
-
-	//std::array<double, 3> ef{0,0,0};
-	//Garfield::Medium* medium = nullptr;
-	//int status(0);
-	//fSensor->ElectricField(0.1, 0.5, 0.1, ef[0], ef[1], ef[2], medium, status);
-	//std::cout << "E field at 0.1,0.5,0.1 is " << ef[0]<<","<<ef[1]<<","<<ef[2] << std::endl;
-
-	//	fSensor->AddElectrode(comp,"s2");
+	fSensor->SetArea(-DetChamberR, -DetChamberR, -DetChamberL/2.0, DetChamberR, DetChamberR, DetChamberL/2.0); // cm
 
 }
 

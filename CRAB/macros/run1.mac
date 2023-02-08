@@ -17,12 +17,12 @@
 ##/process/optical/processActivation Scintillation false ### not with NEST. EC, 6-May-2022.
 
 #/random/setSeeds 0 0
-#/run/initialize
+/run/initialize
 
 #/param/InActivateModel DegradModel
 #/param/InActivateModel GarfieldVUVPhotonModel
 
-/analysis/setFileName crab2MeV
+/analysis/setFileName crab2MeV.root
 
 ####################################
 ############ Verbosities ###########
@@ -48,16 +48,16 @@
 /gps/pos/type Point
 #/gps/pos/type Volume
 #/gps/pos/shape Para
-/gps/pos/centre 0. 30. 0. cm
+/gps/pos/centre 0. 0. 10. cm
 #/gps/position 0. 30. 0. cm
 
 
 #/gps/pos/halfx 15 cm
 #/gps/pos/halfz 15 cm
 #/gps/pos/halfy 30 cm
-/gps/pos/confine "detectorLogical" 
+#/gps/pos/confine "detectorLogical" 
 
 /run/initialize
-/run/beamOn 200
+/run/beamOn 1
 
 

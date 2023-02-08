@@ -22,7 +22,7 @@
 #/param/InActivateModel DegradModel
 #/param/InActivateModel GarfieldVUVPhotonModel
 
-/analysis/setFileName test
+/analysis/setFileName test.root
 
 ####################################
 ############ Verbosities ###########
@@ -35,20 +35,23 @@
 ####################################
 ########### Visualization ##########
 ####################################
-#/vis/open VRML2FILE
 /vis/open OGL 600x600-0+0
-#/vis/open OGLSX
+
+/vis/verbose errors
+
 # Draw geometry:
 /vis/drawVolume
 /vis/scene/add/trajectories smooth
-/vis/scene/add/hits
+#/vis/scene/add/hits
+
 ## needed to keep the display from clearing out many drawn objects. EC, 22-June-2022.
-/vis/ogl/set/displayListLimit 5000000 
+#/vis/ogl/set/displayListLimit 5000000
 #/vis/viewer/set/lightsThetaPhi 90. 0.
 #/vis/viewer/set/viewpointThetaPhi 150. 90.
 #/vis/viewer/set/viewpointThetaPhi 180. 90.
-/vis/viewer/set/style surface
-/vis/viewer/set/hiddenEdge true
+#/vis/viewer/set/style surface
+#/vis/viewer/set/hiddenEdge true
+
 # Draw smooth trajectories at end of event.
 # Gamma-rays represented in red.
 #/vis/modeling/trajectories/create/drawByParticleID
@@ -60,15 +63,15 @@
 #/vis/modeling/trajectories/drawByCharge-0/default/setDrawStepPts true
 #/vis/modeling/trajectories/drawByCharge-0/default/setStepPtsSize 6
 
-/vis/scene/endOfEventAction accumulate 1
+#/vis/scene/endOfEventAction accumulate 1
 #/vis/scene/endOfRunAction accumulate
-/vis/geometry/set/forceWireframe collimatorLogical -1 1
-/vis/geometry/set/forceWireframe collimatorLogical2 -1 1
-/vis/geometry/set/forceWireframe windowLogical -1 1
-/vis/geometry/set/forceWireframe detectorLogical -1 1
-/vis/geometry/set/forceWireframe macorLogical -1 1
-/vis/geometry/set/forceWireframe lensLogical -1 1
-/vis/geometry/set/forceWireframe camLogical -1 1
+#/vis/geometry/set/forceWireframe collimatorLogical -1 1
+#/vis/geometry/set/forceWireframe collimatorLogical2 -1 1
+#/vis/geometry/set/forceWireframe windowLogical -1 1
+#/vis/geometry/set/forceWireframe detectorLogical -1 1
+#/vis/geometry/set/forceWireframe macorLogical -1 1
+#/vis/geometry/set/forceWireframe lensLogical -1 1
+#/vis/geometry/set/forceWireframe camLogical -1 1
 /tracking/storeTrajectory 1
 
 #/gps/direction 0. 1. 0
@@ -76,11 +79,11 @@
 /gps/ene/type Mono
 /gps/particle e-
 #/gps/particle gamma
-/gps/ene/mono 100 eV
+/gps/ene/mono 100 keV
 #/gps/ene/mono 1592 keV # double esc pk
 #/gps/ene/mono 2.0 MeV
-/gps/position 0. 25 0. cm
-/run/beamOn 1
+/gps/position 0 0 5 cm
+#/run/beamOn 1
 
 #/gps/particle opticalphoton
 #/gps/ene/mono 7.2 eV

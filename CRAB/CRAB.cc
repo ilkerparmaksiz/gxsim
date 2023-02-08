@@ -105,12 +105,12 @@ int main(int argc, char** argv) {
 
   if (visManager)
     delete visManager;
-  /*
+  
   if (runManager)
     {
       std::cout << "Deleting runManager" << std::endl;
       delete runManager;
     }
-  */
+  
   //  return 0;
 }

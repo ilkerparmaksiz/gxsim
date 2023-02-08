@@ -22,6 +22,16 @@ DegradModel::DegradModel(GasModelParameters* gmp, G4String modelName, G4Region* 
     : G4VFastSimulationModel(modelName, envelope),detCon(dc), fGasBoxSD(sd){
         thermalE=gmp->GetThermalEnergy();
         processOccured = false;
+
+        // Get the path to crab
+        crab_path = std::getenv("CRABPATH");
+        if (crab_path == nullptr) {
+          G4Exception("[DegradModel]", "DegradModel()", FatalException,
+                        "Environment variable CRABPATH not defined!");
+        }
+
+        G4String path(crab_path);
+
     }
 
 DegradModel::~DegradModel() {}
@@ -53,20 +63,20 @@ void DegradModel::DoIt(const G4FastTrack& fastTrack, G4FastStep& fastStep) {
     if(!processOccured){
         G4ThreeVector degradPos =fastTrack.GetPrimaryTrack()->GetVertexPosition();
         G4double degradTime = fastTrack.GetPrimaryTrack()->GetGlobalTime();
-	G4int KE = int(fPrimPhotonKE/eV);
-	const static G4double torr = 1. / 750.062 * bar;
-	G4int Press = int(detCon->GetGasPressure()/torr); 
+        G4int KE = int(fPrimPhotonKE/eV);
+        const static G4double torr = 1. / 750.062 * bar;
+        G4int Press = int(detCon->GetGasPressure()/torr); 
         fastStep.SetPrimaryTrackPathLength(0.0);
         G4cout<<"GLOBAL TIME "<<G4BestUnit(degradTime,"Time")<<" POSITION "<<G4BestUnit(degradPos,"Length")<<G4endl;
 
         G4int stdout;
         G4int SEED=54217137*G4UniformRand();
         G4String seed = G4UIcommand::ConvertToString(SEED);
-	// Note the exact precision in below arguments. The integers gammaKE,xenonP in particular need a ".0" tacked on.
-	// G4String degradString="printf \"1,1,3,-1,"+seed+",30000.0,7.0,0.0\n7,0,0,0,0,0\n100.0,0.0,0.0,0.0,0.0,0.0,20.0,900.0\n500.0,0.0,0.0,1,0\n100.0,0.5,1,1,1,1,1,1,1\n0,0,0,0,0,0\" > conditions_Degrad.txt";
-	G4String gammaKE(","+std::to_string(KE));
-	G4String xenonP(","+std::to_string(Press));
-	G4String degradString="printf \"1,1,3,-1,"+seed+gammaKE+".0,7.0,0.0\n7,0,0,0,0,0\n100.0,0.0,0.0,0.0,0.0,0.0,20.0"+xenonP+".0\n500.0,0.0,0.0,1,0\n100.0,0.5,1,1,1,1,1,1,1\n0,0,0,0,0,0\" > conditions_Degrad.txt";
+        // Note the exact precision in below arguments. The integers gammaKE,xenonP in particular need a ".0" tacked on.
+        // G4String degradString="printf \"1,1,3,-1,"+seed+",30000.0,7.0,0.0\n7,0,0,0,0,0\n100.0,0.0,0.0,0.0,0.0,0.0,20.0,900.0\n500.0,0.0,0.0,1,0\n100.0,0.5,1,1,1,1,1,1,1\n0,0,0,0,0,0\" > conditions_Degrad.txt";
+        G4String gammaKE(","+std::to_string(KE));
+        G4String xenonP(","+std::to_string(Press));
+        G4String degradString="printf \"1,1,3,-1,"+seed+gammaKE+".0,7.0,0.0\n7,0,0,0,0,0\n100.0,0.0,0.0,0.0,0.0,0.0,20.0"+xenonP+".0\n500.0,0.0,0.0,1,0\n100.0,0.5,1,1,1,1,1,1,1\n0,0,0,0,0,0\" > conditions_Degrad.txt";
         G4cout << degradString << G4endl;
         stdout=system(degradString.data());
         G4cout << degradString << G4endl;
@@ -77,7 +87,7 @@ void DegradModel::DoIt(const G4FastTrack& fastTrack, G4FastStep& fastStep) {
         const char *mychar = full_path.c_str();
         G4cout << mychar << G4endl;
         stdout=system(mychar);
-        stdout=system("./convertDegradFile.py");
+        stdout=system(crab_path + "/convertDegradFile.py");
 
         GetElectronsFromDegrad(fastStep,degradPos,degradTime);
 	// We call Degrad only once, which now that we have the x,y,z location of our primary Xray interaction, re-simulates that interaction. 

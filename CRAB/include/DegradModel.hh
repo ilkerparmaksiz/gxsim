@@ -43,6 +43,8 @@ class DegradModel : public G4VFastSimulationModel {
   DetectorConstruction* detCon;
   GasBoxSD* fGasBoxSD;
   G4bool processOccured;
+
+  char* crab_path; // Path to the root directory
  
 
 

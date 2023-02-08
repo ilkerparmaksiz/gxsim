@@ -1,14 +1,10 @@
-#setenv PATH {$PATH}:/Applications/Emacs.app/Contents/MacOS:/Applications/CMake.app/Contents/bin:/usr/local/gfortran/bin
-
-# Geant4 Path, edit G4Install path to where the main geant4 code folder your downloaded
-export G4INSTALL=/Users/mistryk2/Packages//geant4-v10/geant4.10.07.p04;
+# Set the path to the Geant4 Installation
+export G4INSTALL=/Users/mistryk2/Packages/geant4-v11/geant4-v11.1.0/install;
 export PATH=$G4INSTALL/bin:$PATH;
-export DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH:$G4INSTALL/lib;
-export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$G4INSTALL/lib;
+export DYLD_LIBRARY_PATH=$G4INSTALL/lib:$DYLD_LIBRARY_PATH;
+export LD_LIBRARY_PATH=$G4INSTALL/lib:$LD_LIBRARY_PATH;
 
-cd $G4INSTALL/bin;
-source geant4.sh;
-cd -;
+cd $G4INSTALL/bin; source geant4.sh; cd -;
 
 
 # Path to ROOT
@@ -33,8 +29,8 @@ export DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH:/opt/homebrew/Cellar/gcc/11.3.0_2/li
 export PATH=/opt/homebrew/bin:$PATH
 
 # NEST
-export NEST_INCLUDE_DIRS=/Users/mistryk2/Packages/NEST/install_g4v10/include/NEST
-export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/Users/mistryk2/Packages/NEST/install_g4v10/lib
-export DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH:/Users/mistryk2/Packages/NEST/install_g4v10/lib;
+export NEST_INCLUDE_DIRS=/Users/mistryk2/Packages/NEST/install/include/NEST
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/Users/mistryk2/Packages/NEST/install/lib
+export DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH:/Users/mistryk2/Packages/NEST/install/lib;
 
-export CRABPATH=/Users/mistryk2/Packages/GXeTPCSim/gxsim_g4v10/CRAB/
+export CRABPATH=/Users/mistryk2/Packages/GXeTPCSim/gxsim/CRAB/

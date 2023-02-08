@@ -182,8 +182,8 @@ void PhysListEmStandard::ConstructProcess() {
     
     // physics tables
     //
-    emOptions.SetMinEnergy(10 * eV);      // default 100 eV
-    emOptions.SetMaxEnergy(10 * TeV);     // default 100 TeV
+    emOptions->SetMinEnergy(10 * eV);      // default 100 eV
+    emOptions->SetMaxEnergy(10 * TeV);     // default 100 TeV
     // emOptions.SetDEDXBinning(12 * 10);    // default=12*7
     // emOptions.SetLambdaBinning(12 * 10);  // default=12*7
     

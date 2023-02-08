@@ -151,13 +151,13 @@ namespace pmt {
     
   // Open file
 
-  char* nexus_path = std::getenv("CRABPATH");
-  if (nexus_path == nullptr) {
+  char* crab_path = std::getenv("CRABPATH");
+  if (crab_path == nullptr) {
     G4Exception("[PmtR7378A]", "Construct()", FatalException,
                   "Environment variable CRABPATH not defined!");
   }
 
-  G4String path(nexus_path);
+  G4String path(crab_path);
   G4String filename = path + "/data/PMTR7378A_Efficiency.txt";
     
     t=f1->GetData(filename,',',1);

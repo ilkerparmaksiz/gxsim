@@ -87,7 +87,7 @@ void DegradModel::DoIt(const G4FastTrack& fastTrack, G4FastStep& fastStep) {
         const char *mychar = full_path.c_str();
         G4cout << mychar << G4endl;
         stdout=system(mychar);
-        stdout=system(crab_path + "/convertDegradFile.py");
+        stdout=system("/convertDegradFile.py");
 
         GetElectronsFromDegrad(fastStep,degradPos,degradTime);
 	// We call Degrad only once, which now that we have the x,y,z location of our primary Xray interaction, re-simulates that interaction. 

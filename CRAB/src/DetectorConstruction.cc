@@ -155,7 +155,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
   G4double hex_circumR = EL_hex_size/std::sqrt(3)*mm;  
 
   // Number of hexagons needed -- need to use fixed amount, too many and nexus will crash
-  G4int nHole = 2;
+  G4int nHole = 50;
 
   // Define the Stainless steel mesh cylinder to subtract hex pattern from
   G4Tubs* Mesh_Solid = new G4Tubs("Mesh", 0., EL_ID/2.0 , EL_mesh_thick/2., 0., twopi);
@@ -427,15 +427,15 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
   new G4PVPlacement(0, G4ThreeVector(0.,0.,EL_pos),EL_logic,EL_solid->GetName(),gas_logic, 0,0, false);
 
   G4VPhysicalVolume * EL_Ring_Plus        = new G4PVPlacement(0, G4ThreeVector(0.,0., EL_thick/2.0 - FR_thick - 4*(FR_thick + PEEK_Rod_thick) - 2.5*cm - EL_thick), EL_ring_logic, EL_solid->GetName(), gas_logic, 0,0, false);
-  // G4VPhysicalVolume * EL_Mesh_Plus        = new G4PVPlacement(0, G4ThreeVector(0.,0., 0), EL_Mesh_logic, "EL_MeshP", gas_logic, false, 0, false);
+  // G4VPhysicalVolume * EL_Mesh_Plus        = new G4PVPlacement(0, G4ThreeVector(0.,0., EL_thick/2.0 - FR_thick - 4*(FR_thick + PEEK_Rod_thick) - 2.5*cm - EL_thick), EL_Mesh_logic, "EL_MeshP", gas_logic, false, 0, false);
 
   G4VPhysicalVolume * EL_Ring_Plus_plus   = new G4PVPlacement(0, G4ThreeVector(0.,0., EL_thick/2.0 - FR_thick - 4*(FR_thick + PEEK_Rod_thick) - 2.5*cm - EL_thick - ElGap_ - EL_thick), EL_ring_logic, EL_solid->GetName(), gas_logic, 0,0, false);
-  // G4VPhysicalVolume * EL_Mesh_Plus_plus   = new G4PVPlacement(0, G4ThreeVector(0.,0., EL_thick/2.0  - 4*(FR_thick + PEEK_Rod_thick) - 2.5*cm - EL_thick - ElGap_ -EL_thick), EL_Mesh_logic, "EL_MeshPP", gas_logic, false, 1, false);
+  // G4VPhysicalVolume * EL_Mesh_Plus_plus   = new G4PVPlacement(0, G4ThreeVector(0.,0., EL_thick/2.0 - FR_thick - 4*(FR_thick + PEEK_Rod_thick) - 2.5*cm - EL_thick - ElGap_ - EL_thick), EL_Mesh_logic, "EL_MeshPP", gas_logic, false, 1, false);
 
 
   // Cathode
-  G4VPhysicalVolume * Cathode       = new G4PVPlacement(0, G4ThreeVector(0.,0.,  EL_thick/2.0 + 1*cm + 5*(FR_thick + PEEK_Rod_thick)), EL_ring_logic, EL_solid->GetName(), gas_logic, 0,0, false);
-  // G4VPhysicalVolume * Cathode_Mesh  = new G4PVPlacement(0, G4ThreeVector(0.,0., EL_thick + 1*cm/2.0 + FR_thick/2  + 5*(FR_thick + PEEK_Rod_thick)), EL_Mesh_logic, "CathodeMesh", gas_logic, false, 1, false);
+  G4VPhysicalVolume * Cathode       = new G4PVPlacement(0, G4ThreeVector(0.,0., EL_thick/2.0 + 1*cm + 5*(FR_thick + PEEK_Rod_thick)), EL_ring_logic, EL_solid->GetName(), gas_logic, 0,0, false);
+  // G4VPhysicalVolume * Cathode_Mesh  = new G4PVPlacement(0, G4ThreeVector(0.,0., EL_thick/2.0 + 1*cm + 5*(FR_thick + PEEK_Rod_thick)), EL_Mesh_logic, "CathodeMesh", gas_logic, false, 1, false);
 
 
   // MgF2 Windows
@@ -532,6 +532,27 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
   new G4LogicalBorderSurface("SteelSurface_PMT3_Enclosing",PMT_Tube_Vacuum_Phys0,PMT_Tube_Phys0,OpSteelSurf);
   new G4LogicalBorderSurface("SteelSurface_PMT1_Enclosing",PMT_Tube_Vacuum_Phys1,PMT_Tube_Phys1,OpSteelSurf);
   
+
+  new G4LogicalBorderSurface("SteelSurfaceFR1",gas_phys,FR_FC_1,OpSteelSurf);
+  new G4LogicalBorderSurface("SteelSurfaceFR2",gas_phys,FR_FC_2,OpSteelSurf);
+  new G4LogicalBorderSurface("SteelSurfaceFR3",gas_phys,FR_FC_3,OpSteelSurf);
+  new G4LogicalBorderSurface("SteelSurfaceFR4",gas_phys,FR_FC_4,OpSteelSurf);
+  new G4LogicalBorderSurface("SteelSurfaceFR5",gas_phys,FR_FC_5,OpSteelSurf);
+  new G4LogicalBorderSurface("SteelSurfaceFR6",gas_phys,FR_FC_6,OpSteelSurf);
+  new G4LogicalBorderSurface("SteelSurfaceFR7",gas_phys,FR_FC_7,OpSteelSurf);
+  new G4LogicalBorderSurface("SteelSurfaceFR8",gas_phys,FR_FC_8,OpSteelSurf);
+  new G4LogicalBorderSurface("SteelSurfaceFR9",gas_phys,FR_FC_9,OpSteelSurf);
+  new G4LogicalBorderSurface("SteelSurfaceFR10",gas_phys,FR_FC_10,OpSteelSurf);
+
+  new G4LogicalBorderSurface("SteelSurfaceFR_EL1",gas_phys,FR_EL_1,OpSteelSurf);
+  new G4LogicalBorderSurface("SteelSurfaceFR_EL2",gas_phys,FR_EL_2,OpSteelSurf);
+  new G4LogicalBorderSurface("SteelSurfaceFR_EL3",gas_phys,FR_EL_3,OpSteelSurf);
+
+  new G4LogicalBorderSurface("SteelSurfaceELRing1",gas_phys,EL_Ring_Plus,OpSteelSurf);
+  new G4LogicalBorderSurface("SteelSurfaceELRing2",gas_phys,EL_Ring_Plus_plus,OpSteelSurf);
+  new G4LogicalBorderSurface("SteelSurfaceCathodeRing",gas_phys,Cathode,OpSteelSurf);
+
+
   if(!HideSourceHolder_ && !HideCollimator_){
       new G4LogicalBorderSurface("SteelSurface_Needle",FieldCage_Phys,Needle_Phys,OpSteelSurf);
   }
@@ -599,7 +620,7 @@ void DetectorConstruction::AssignVisuals() {
 
       //GAS
       G4LogicalVolume* Gas = lvStore->GetVolume("GAS");
-      G4VisAttributes *GasVa=new G4VisAttributes(G4Colour(2,2,2));
+      G4VisAttributes *GasVa=new G4VisAttributes(colours::WhiteAlpha());
       GasVa->SetForceCloud(true);
       Gas->SetVisAttributes(GasVa);
 
@@ -673,7 +694,7 @@ void DetectorConstruction::AssignVisuals() {
       PmttubeBlockLog1->SetVisAttributes(ChamberVa);
       G4LogicalVolume * PmttubeVacuumLog1=lvStore->GetVolume("PMT_TUBE_VACUUM0");
       G4LogicalVolume * PmttubeVacuumLog2=lvStore->GetVolume("PMT_TUBE_VACUUM1");
-      G4VisAttributes PmttubeVacuumVis=colours::Yellow();
+      G4VisAttributes PmttubeVacuumVis=colours::DarkGreyAlpha();
       PmttubeVacuumVis.SetForceCloud(true);
       PmttubeVacuumLog1->SetVisAttributes(PmttubeVacuumVis);
       PmttubeVacuumLog2->SetVisAttributes(PmttubeVacuumVis);
@@ -707,19 +728,19 @@ void DetectorConstruction::AssignVisuals() {
       G4LogicalVolume * ELLogic=lvStore->GetVolume("EL_GAP");
       G4VisAttributes ELVis=colours::BlueAlpha();
       ELVis.SetForceCloud(true);
-      ELLogic->SetVisAttributes(ELVis);
+      ELLogic->SetVisAttributes(G4VisAttributes::GetInvisible());
 
       // Cathode Grid
       G4LogicalVolume* Meshlog = lvStore->GetVolume("Mesh");
       G4VisAttributes mesh_col = colours::DarkGrey();
       mesh_col.SetForceSolid(true);
-      Meshlog->SetVisAttributes(mesh_col);
+      Meshlog->SetVisAttributes(G4VisAttributes::GetInvisible());
 
       // FieldCage
       G4LogicalVolume * FieldCage=lvStore->GetVolume("FIELDCAGE");
       G4VisAttributes FielCageVis=colours::Red();
       FielCageVis.SetForceCloud(true);
-      FieldCage->SetVisAttributes(FielCageVis);
+      FieldCage->SetVisAttributes(G4VisAttributes::GetInvisible());
 
 
       SourceHolder->SetVisAttributes(SourceHolderVa);

@@ -42,6 +42,7 @@
 #include "MediumMagboltz.hh"
 #include "AvalancheMicroscopic.hh"
 #include "AvalancheMC.hh"
+#include "ComponentUser.hh"
 
 #include "TrackHeed.hh"
 
@@ -69,6 +70,8 @@ public:
 	G4ThreeVector garfPos;
 	G4double garfTime;
 	
+	// Function to create simple geometry for field
+	Garfield::ComponentUser* CreateSimpleGeometry();
 	
 	
 private:

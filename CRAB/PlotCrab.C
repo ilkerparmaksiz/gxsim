@@ -13,33 +13,34 @@ void PlotCrab(){
 
     // TFile *FileIn = TFile::Open("build/crab50MeVeminus_noref.root", "READ");
     // TFile *FileIn = TFile::Open("build/crab50MeVeminus_withref.root", "READ");
-    TFile *FileIn = TFile::Open("build/crab2MeV.root", "READ");
+    // TFile *FileIn = TFile::Open("macros/crab2MeV_t0.root", "READ");
     // TFile *FileIn = TFile::Open("build/crab2MeV_noref_S2x10.root", "READ");
+    TFile *FileIn = TFile::Open("test_t0.root", "READ");
+    
 
 
     // CAM --------------------------------------------------------------------
-    // Code uses PMT, so sticking with that convention. Really we mean camera.
-
-    TTree *tPMT = (TTree*)FileIn->Get("ntuple/PMT");
     
-    Double_t PMT_X, PMT_Y, PMT_Z, PMT_Ev;
-    tPMT->SetBranchAddress("X",&PMT_X);
-    tPMT->SetBranchAddress("Y",&PMT_Y);
-    tPMT->SetBranchAddress("Z",&PMT_Z);
-    tPMT->SetBranchAddress("Event",&PMT_Ev);
+    TTree *tCam = (TTree*)FileIn->Get("ntuple/Camera");
+    
+    Double_t Cam_X, Cam_Y, Cam_Z, Cam_Ev;
+    tCam->SetBranchAddress("X",&Cam_X);
+    tCam->SetBranchAddress("Y",&Cam_Y);
+    tCam->SetBranchAddress("Z",&Cam_Z);
+    tCam->SetBranchAddress("Event",&Cam_Ev);
 
     //create two histograms
-    TH2F *hPMTXY = new TH2F("hPMTXY","Camera X vs Y",50, -15, 15, 50, -15, 15) ;
+    TH2F *hCamXY = new TH2F("hCameraXY","Camera X vs Y",100, -15, 15, 100, -15, 15) ;
 
     //read all entries and fill the histograms
-    Long64_t nPMT = tPMT->GetEntries();
-    for (Long64_t i=0;i<nPMT;i++) {
-        tPMT->GetEntry(i);
-        hPMTXY->Fill(-PMT_X, -PMT_Y);
+    Long64_t nCam = tCam->GetEntries();
+    for (Long64_t i=0;i<nCam;i++) {
+        tCam->GetEntry(i);
+        hCamXY->Fill(-Cam_X, -Cam_Y);
     }
 
-    TCanvas *cPMT = new TCanvas();
-    hPMTXY->Draw("colz");
+    TCanvas *cCam = new TCanvas();
+    hCamXY->Draw("colz");
 
     // LENS -------------------------------------------------------------------
 
@@ -102,7 +103,36 @@ void PlotCrab(){
     TCanvas *cS12 = new TCanvas();
     hS1XY->Draw("colz");
 
+
+    // S2 ---------------------------------------------------------------------
+
+    TTree *tS2 = (TTree*)FileIn->Get("ntuple/S2");
     
+    Double_t S2_X, S2_Y, S2_Z, S2_t,S2_Ev;
+    tS2->SetBranchAddress("X",&S2_X);
+    tS2->SetBranchAddress("Y",&S2_Y);
+    tS2->SetBranchAddress("Z",&S2_Z);
+    tS2->SetBranchAddress("Time",&S2_t);
+    tS2->SetBranchAddress("Event",&S2_Ev);
+
+    //create two histograms
+    TH1F *hS2T = new TH1F("hS2T","S2 Timing; Time [us]; Entries",500, 194, 205) ;
+
+    //read all entries and fill the histograms
+    Long64_t nS2 = tS2->GetEntries();
+    
+    for (Long64_t i=0;i<nS2;i++) {
+        tS2->GetEntry(i);
+
+        hS2T->Fill(S2_t/1000.);
+
+    }
+
+    TCanvas *cS2 = new TCanvas();
+    hS2T->Draw("hist");
+
+
+
 
 
 }

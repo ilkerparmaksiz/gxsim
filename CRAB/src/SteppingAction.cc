@@ -67,60 +67,52 @@ void SteppingAction::UserSteppingAction(const G4Step *aStep)
  
 
   
-  if (eVolume)
-    {
-      eVname = eVolume->GetName();
-
-      if (lVolume->GetName().find("camLogical")!=std::string::npos) // PMT
-	//      if (/*eVname=="detectorLogical" && */ lVolume->GetName()=="pmtPhysical")
-      	{
-	  //	  std::cout << "SteppingAction: Stepping from  " << lVolume->GetName() <<  " into " << eVname << " Killing OpticalPhoton." << std::endl;
-	  //std::cout << "SteppingAction: startp and endproc are " << startp << " and " << endp << std::endl;
-	  track->SetTrackStatus(fStopAndKill);
-	  analysisManager->FillNtupleDColumn(id,0, event);
-	  analysisManager->FillNtupleDColumn(id,1, pID);
-	  analysisManager->FillNtupleDColumn(id,2, time/ns);
-	  analysisManager->FillNtupleDColumn(id,3, pos[0]/mm);
-	  analysisManager->FillNtupleDColumn(id,4, pos[1]/mm);
-	  analysisManager->FillNtupleDColumn(id,5, pos[2]/mm);
-	  //	  analysisManager->FillNtupleSColumn(id,6, startp);
-
-	  analysisManager->AddNtupleRow(id);
-
-	}
-      id = 4;
-
-      if (lVolume->GetName().find("Lens")!=std::string::npos) //      
-	//      if (/*eVname=="detectorLogical" && */ lVolume->GetName()=="pmtPhysical")
-      	{
-	  //	  std::cout << "SteppingAction: Stepping from  " << lVolume->GetName() <<  " into " << eVname << " Killing OpticalPhoton." << std::endl;
-	  //std::cout << "SteppingAction: startp and endproc are " << startp << " and " << endp << std::endl;
-
-	  analysisManager->FillNtupleDColumn(id,0, event);
-	  analysisManager->FillNtupleDColumn(id,1, pID);
-	  analysisManager->FillNtupleDColumn(id,2, time/ns);
-	  analysisManager->FillNtupleDColumn(id,3, pos[0]/mm);
-	  analysisManager->FillNtupleDColumn(id,4, pos[1]/mm);
-	  analysisManager->FillNtupleDColumn(id,5, pos[2]/mm);
-	  //	  analysisManager->FillNtupleSColumn(id,6, startp);
-
-	  /*
-	  std::cout << "current, exiting Volumes" << lVolume->GetName() << ", " << eVolume->GetName() << std::endl;
-	  std::cout << "Incoming lens dir:" << sdir[0]<<"," <<sdir[1] << "," <<sdir[2] <<" exiting dir " << eVname << " at: "<< tdir[0]  <<"," <<tdir[1] << "," <<tdir[2] << std::endl;
-	  std::cout << "In/out lens pos:" << pos[0]<<"," <<pos[1] << "," <<pos[2] <<" exiting pos " << eVname << " at: "<< tpos[0]  <<"," <<tpos[1] << "," <<tpos[2] << std::endl;
-	  std::cout << "In lens energy; trackID, startp, endp, trackstatus : " << tID << ", " << aStep->GetPreStepPoint()->GetTotalEnergy() << "; " << startp << ", " << endp << ", " << track->GetTrackStatus() <<std::endl;
-	  */
-	  
-	  analysisManager->AddNtupleRow(id);
-  
-	  
-
-	}
-
-
+  if (eVolume){
     
+    eVname = eVolume->GetName();
+
+    // Camera
+    if (lVolume->GetName().find("camLogical")!=std::string::npos){
+      track->SetTrackStatus(fStopAndKill);
+      analysisManager->FillNtupleDColumn(id,0, event);
+      analysisManager->FillNtupleDColumn(id,1, pID);
+      analysisManager->FillNtupleDColumn(id,2, time/ns);
+      analysisManager->FillNtupleDColumn(id,3, pos[0]/mm);
+      analysisManager->FillNtupleDColumn(id,4, pos[1]/mm);
+      analysisManager->FillNtupleDColumn(id,5, pos[2]/mm);
+      analysisManager->AddNtupleRow(id);
 
     }
+    
+
+    // Lens
+    id = 4;
+    if (lVolume->GetName().find("Lens")!=std::string::npos)  {
+
+        analysisManager->FillNtupleDColumn(id,0, event);
+        analysisManager->FillNtupleDColumn(id,1, pID);
+        analysisManager->FillNtupleDColumn(id,2, time/ns);
+        analysisManager->FillNtupleDColumn(id,3, pos[0]/mm);
+        analysisManager->FillNtupleDColumn(id,4, pos[1]/mm);
+        analysisManager->FillNtupleDColumn(id,5, pos[2]/mm);
+        analysisManager->AddNtupleRow(id);
+
+	  }
+
+    // PMT location
+    id = 5;
+    if (lVolume->GetName().find("S1_WINDOW")!=std::string::npos){
+      analysisManager->FillNtupleDColumn(id,0, event);
+      analysisManager->FillNtupleDColumn(id,1, pID);
+      analysisManager->FillNtupleDColumn(id,2, time/ns);
+      analysisManager->FillNtupleDColumn(id,3, pos[0]/mm);
+      analysisManager->FillNtupleDColumn(id,4, pos[1]/mm);
+      analysisManager->FillNtupleDColumn(id,5, pos[2]/mm);	  
+      analysisManager->AddNtupleRow(id);
+    
+    }
+
+  }
   
   // if particle == thermale, opticalphoton and parent == primary and stepID==1, or trackID<=2
   // count the NEST e-s/photons into a class variable from the primary particle. Retrieve at EndEvent().

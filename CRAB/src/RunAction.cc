@@ -44,7 +44,7 @@ void RunAction::BeginOfRunAction(const G4Run* aRun) {
   auto analysisManager = G4AnalysisManager::Instance();
   analysisManager->OpenFile();
   
-  analysisManager->CreateNtuple("PMT", "PMT Hits"); 
+  analysisManager->CreateNtuple("Camera", "Camera Hits"); 
   analysisManager->CreateNtupleDColumn("Event");     //column 0
   analysisManager->CreateNtupleDColumn("PID");       //column 1
   analysisManager->CreateNtupleDColumn("Time");      //column 2
@@ -88,7 +88,15 @@ void RunAction::BeginOfRunAction(const G4Run* aRun) {
   analysisManager->CreateNtupleDColumn("X");         //column 3
   analysisManager->CreateNtupleDColumn("Y");         //column 4
   analysisManager->CreateNtupleDColumn("Z");         //column 5
+  analysisManager->FinishNtuple();
 
+  analysisManager->CreateNtuple("PMT", "PMT Hits"); 
+  analysisManager->CreateNtupleDColumn("Event");     //column 0
+  analysisManager->CreateNtupleDColumn("PID");       //column 1
+  analysisManager->CreateNtupleDColumn("Time");      //column 2
+  analysisManager->CreateNtupleDColumn("X");         //column 3
+  analysisManager->CreateNtupleDColumn("Y");         //column 4
+  analysisManager->CreateNtupleDColumn("Z");         //column 5
   analysisManager->FinishNtuple();
 
   analysisManager->SetNtupleActivation(true);

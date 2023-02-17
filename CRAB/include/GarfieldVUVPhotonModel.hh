@@ -35,6 +35,7 @@
 #include "G4OpRayleigh.hh"
 #include "G4OpWLS.hh"
 #include "G4OpBoundaryProcess.hh"
+#include "FileHandling.hh"
 
 #include "G4VFastSimulationModel.hh"
 #include "Medium.hh"
@@ -72,6 +73,12 @@ public:
 	
 	// Function to create simple geometry for field
 	Garfield::ComponentUser* CreateSimpleGeometry();
+
+	// Generate EL photons in the gap according to Garfield Microphysical Model
+	void MakeELPhotonsFromFile(G4FastStep& fastStep, G4double xi, G4double yi, G4double zi, G4double ti);
+	
+	// Generate EL photons in the gap according to a simple model
+	void MakeELPhotonsSimple(G4FastStep& fastStep, G4double xi, G4double yi, G4double zi, G4double ti);
 	
 	
 private:
@@ -96,6 +103,17 @@ private:
 	GasBoxSD* fGasBoxSD;
         Garfield::TrackHeed* fTrackHeed;
         std::vector<uint> counter {0,0,0,0};
+
+	// Variable to store the EL timing profiles to sample from
+	// <event> <photon> <x,y,z,t of photon>
+	std::vector<std::vector<std::vector<G4double>>> EL_profiles;
+	
+	// Vector consisting of the event numbers from the simulated Garfield using 
+	// COMSOL geometry
+	std::vector<G4double> EL_events; 
+
+	// For reading in files
+	filehandler::FileHandling FileHandler;
 
   
 };

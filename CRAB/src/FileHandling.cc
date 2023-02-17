@@ -140,7 +140,9 @@ namespace filehandler{
         fstfile.close();
     }
 
-      void FileHandling::GetTimeProfileData(string filename, vector<vector<vector<G4double>>> data, vector<G4double> events) {
+      void FileHandling::GetTimeProfileData(string filename, vector<vector<vector<G4double>>> &data, vector<G4double> &events) {
+
+        std::cout << "[File Handling] Loading EL timing profiles..." << std::endl;
         
 
         // Open the file
@@ -193,6 +195,9 @@ namespace filehandler{
         } // END While
 
         FileIn_.close();
+
+        std::cout << "[File Handling] Finished loading EL timing profiles..." << std::endl;
+
 
     }
 

@@ -23,7 +23,7 @@ namespace filehandler{
             vector<vector<G4double>> GetData(string file, char del,G4int SkipRow);
 
             // Load in data for photon yields
-            void GetTimeProfileData(string filename, vector<vector<vector<G4double>>> data, vector<G4double> events);
+            void GetTimeProfileData(string filename, vector<vector<vector<G4double>>> &data, vector<G4double> &events);
 
 
             // This is for wrting detector counts to a text file

@@ -41,6 +41,8 @@ const static G4double gapLEM = 0.7; //cm
 const static G4double fieldDrift = 438.0; // V/cm
 const static G4double fieldLEM   = 11400.0; // V/cm higher than 3k (as used for 2 bar) for 10 bar!
 
+G4bool useEL_File = true;
+
 G4double DetChamberL;
 G4double DetChamberR;
 G4double DetActiveL; 
@@ -80,7 +82,7 @@ G4bool GarfieldVUVPhotonModel::ModelTrigger(const G4FastTrack& fastTrack){
   S1Fill(fastTrack);
   G4String particleName = fastTrack.GetPrimaryTrack()->GetParticleDefinition()->GetParticleName();
 
-	std::cout << particleName << " " << ekin << std::endl;
+	// std::cout << particleName << " " << ekin << std::endl;
 
    if (ekin<thermalE && particleName=="thermalelectron")
     {
@@ -127,7 +129,7 @@ GarfieldExcitationHitsCollection *garfExcHitsCol;
 void GarfieldVUVPhotonModel::GenerateVUVPhotons(const G4FastTrack& fastTrack, G4FastStep& fastStep,G4ThreeVector garfPos,G4double garfTime)
 {
 
-  // Drift in main region, then as LEM region is approached and traversed, avalanche multiplication and excitations  will occur.
+ 	// Drift in main region, then as LEM region is approached and traversed, avalanche multiplication and excitations  will occur.
 
   
   
@@ -166,80 +168,22 @@ void GarfieldVUVPhotonModel::GenerateVUVPhotons(const G4FastTrack& fastTrack, G4
 
 	}  // pts in driftline
 
+	// Generate the El photons from a microphys model ran externally in Garfield
+	// We sample the output file which contains the timing profile of emission and diffusion
+	if (useEL_File)
+		MakeELPhotonsFromFile(fastStep, xi, yi, zi, ti);
+	// Use a simpler model
+	else
+		MakeELPhotonsSimple(fastStep, xi, yi, zi, ti);
 
-	e0 = 1.13;
+
 	// std::cout << "GVUVPM: Avalanching in high field starting at: "  << xi<<"," <<yi<<","<<zi <<"," <<ti << std::endl;
-
-	/// fAvalanche->AvalancheElectron() is slow AF: it's the biggest offender in slowing the simulation.
-	/// I am replacing this call with picking a fake interaction number and sites. Tracks that were ~8 sec drop to 1 msec.
-	///
-	///   fAvalanche->AvalancheElectron(xi,yi,zi,ti, e0, 0., 0., 0.);
 	
-	unsigned int nElastic, nIonising, nAttachment, nInelastic, nExcitation, nSuperelastic;
-	fMediumMagboltz->GetNumberOfElectronCollisions(nElastic, nIonising, nAttachment, nInelastic, nExcitation, nSuperelastic);
-	//	G4cout<<"NExcitation "<<nExcitation<<G4endl; // This quantity seems to be cumulative over (at least) the event. ... EC, 2-Dec-2021.
-	G4int colHitsEntries= 0.0; //garfExcHitsCol->entries();
-	//	G4cout<<"GarfExcHits entries "<<colHitsEntries<<G4endl; // This one is not cumulative.
-
-	const G4double YoverP = 140.*fieldLEM/(detCon->GetGasPressure()/torr) - 116.; // yield/cm/bar, with P in Torr ... JINST 2 p05001 (2007).
-	colHitsEntries = YoverP * detCon->GetGasPressure()/bar * gapLEM; // with P in bar this time.
-	// colHitsEntries*=1.7; // Max val before G4 cant handle the memory anymore
-	// colHitsEntries=1; // This is to turn down S2 so the vis doesnt get overwelmed
-
-	colHitsEntries *= (G4RandGauss::shoot(1.0,res));
-	//G4cout<<"YoverP,pressure [torr],fieldLEM, gapLEM and Number  Xe excitations: "<< YoverP << ", " << detCon->GetGasPressure()/torr << ", " << fieldLEM << ", " << gapLEM << " and " << colHitsEntries <<G4endl;
-	
-	G4double tig4(0.);
-	const G4double vd(2.4); // mm/musec, https://arxiv.org/pdf/1902.05544.pdf. Pretty much flat at our E/p..
-	for (G4int i=0;i<colHitsEntries;i++){
-	  GarfieldExcitationHit* newExcHit=new GarfieldExcitationHit();
-
-	  G4ThreeVector fakepos (xi*10,yi*10.,zi*10.-10*gapLEM*float(i)/float(colHitsEntries)); /// ignoring diffusion in small LEM gap, EC 17-June-2022.
-	  newExcHit->SetPos(fakepos);
-	  /// newExcHit->SetPos((*garfExcHitsCol)[i]->GetPos());
-	  /// newExcHit->SetTime((*garfExcHitsCol)[i]->GetTime());
-	  /// fGasBoxSD->InsertGarfieldExcitationHit(newExcHit);
-	  //	  fastStep.SetNumberOfSecondaryTracks(1);	//1 photon per excitation .... Causes weirdness w stack. EC, 12-Apr-2022.
-	  
-	  if (i % (colHitsEntries/colHitsEntries ) == 0){ // 50. Need to uncomment this condition, along with one in degradmodel.cc. EC, 2-Dec-2021.
-	  
-	    auto* optphot = G4OpticalPhoton::OpticalPhotonDefinition();
-	    /*
-	    G4ProcessManager* pmanager = optphot->GetProcessManager();
-	    if (pmanager) {
-	      std::cout << "FastTrack OptPhoton process list (of length) " << pmanager->GetProcessList()->size() << " for opticalphoton  is: " << std::endl;
-
-	      for (short int ii = 0; ii<(short int)(pmanager->GetProcessList()->size());++ii)
-		{
-		  std::cout << (*pmanager->GetProcessList())[ii]->GetProcessName() << std::endl;
-		}
-	    }
-	    */
-	    G4DynamicParticle VUVphoton(optphot,G4RandomDirection(), 7.2*eV);
-	    // Create photons track
-	    ///	 G4Track *newTrack=fastStep.CreateSecondaryTrack(VUVphoton, (*garfExcHitsCol)[i]->GetPos(),(*garfExcHitsCol)[i]->GetTime(),false);
-
-	    /// std::cout <<  "fakepos,time is " << fakepos[0] << ", " << fakepos[1] << ", " << fakepos[2] << ", " << ti << std::endl;
-	    //	    std::cout <<  "garfxchits is " << (*garfExcHitsCol)[i]->GetPos()[0] << ", " << (*garfExcHitsCol)[i]->GetPos()[1] << ", " << (*garfExcHitsCol)[i]->GetPos()[2] << ", " << (*garfExcHitsCol)[i]->GetTime() << std::endl;
-
-	    tig4 = ti + float(i)/float(colHitsEntries)*gapLEM*10./vd*1E3; // in nsec (gapLEM is in cm). Still ignoring diffusion in small LEM.
-	    //	    std::cout << "VUV photon time [nsec]: " << tig4 << std::endl;
-	    
-		newExcHit->SetTime(tig4);
-	    fGasBoxSD->InsertGarfieldExcitationHit(newExcHit);
-	    G4Track *newTrack=fastStep.CreateSecondaryTrack(VUVphoton, fakepos, tig4 ,false);
-	    newTrack->SetPolarization(G4ThreeVector(0.,0.,1.0)); // Needs some pol'n, else we will only ever reflect at an OpBoundary. EC, 8-Aug-2022.
-	    //	G4ProcessManager* pm= newTrack->GetDefinition()->GetProcessManager();
-	    //	G4ProcessVectorfAtRestDoItVector = pm->GetAtRestProcessVector(typeDoIt);
-	  }
-	}
-
 	const G4Track* pG4trk = fastTrack.GetPrimaryTrack();
 	G4int pntid = pG4trk->GetParentID();
 	G4int tid = pG4trk->GetTrackID();
 	
 	delete garfExcHitsCol;
-
 	
 }
 
@@ -384,6 +328,11 @@ void GarfieldVUVPhotonModel::InitialisePhysics(){
 	fAvalancheMC->SetDistanceSteps(2.e-2); // cm, 10x example
 	fAvalancheMC->EnableDebugging(false); // way too much information. 
 	fAvalancheMC->EnableAttachment();
+
+
+	// Load in the events
+	if (useEL_File)
+		FileHandler.GetTimeProfileData(gas_path+"data/CRAB_Profiles.csv", EL_profiles, EL_events);
     
 }
 
@@ -475,5 +424,93 @@ Garfield::ComponentUser* GarfieldVUVPhotonModel::CreateSimpleGeometry(){
 	 	<< geo->GetMedium(0.,0.,0.)->GetTemperature() << std::endl;
 
 	return componentDriftLEM;
+
+}
+
+
+void GarfieldVUVPhotonModel::MakeELPhotonsFromFile( G4FastStep& fastStep, G4double xi, G4double yi, G4double zi, G4double ti){
+
+
+	// Here we get the photon timing profile from a file
+	G4int EL_event  = round(G4UniformRand()*EL_events.size());
+	G4int index = EL_events[EL_event] - EL_events[0]; // Need to subtract from where the first event is from so the indexes go from zero
+
+	// Get the right EL array
+	std::vector<std::vector<G4double>> EL_profile = EL_profiles[index];
+
+	// Now loop over and make the photons
+	G4int colHitsEntries = EL_profile.size();
+
+	G4double tig4(0.);
+	
+	for (G4int i=0;i<colHitsEntries;i++){
+	  GarfieldExcitationHit* newExcHit=new GarfieldExcitationHit();
+
+	  G4ThreeVector fakepos ( (xi+ EL_profile[i][0])*10., (yi+ EL_profile[i][1])*10., (zi+ EL_profile[i][2])*10. ); // 0 = x, 1 = y, 2 = z
+	  newExcHit->SetPos(fakepos);
+	 
+	  
+	  if (i % (colHitsEntries/colHitsEntries ) == 0){ // 50. Need to uncomment this condition, along with one in degradmodel.cc. EC, 2-Dec-2021.
+	  
+	    auto* optphot = G4OpticalPhoton::OpticalPhotonDefinition();
+	    
+	    G4DynamicParticle VUVphoton(optphot,G4RandomDirection(), 7.2*eV);
+	   
+	    tig4 = ti + EL_profile[i][3]; // in nsec, t = index 3 in vector. Units are ns, so just add it on
+		// std::cout <<  "fakepos,time is " << fakepos[0] << ", " << fakepos[1] << ", " << fakepos[2] << ", " << tig4 << std::endl;
+	    
+		newExcHit->SetTime(tig4);
+	    fGasBoxSD->InsertGarfieldExcitationHit(newExcHit);
+	    G4Track *newTrack=fastStep.CreateSecondaryTrack(VUVphoton, fakepos, tig4 ,false);
+	    newTrack->SetPolarization(G4ThreeVector(0.,0.,1.0)); // Needs some pol'n, else we will only ever reflect at an OpBoundary. EC, 8-Aug-2022.
+	    //	G4ProcessManager* pm= newTrack->GetDefinition()->GetProcessManager();
+	    //	G4ProcessVectorfAtRestDoItVector = pm->GetAtRestProcessVector(typeDoIt);
+	  }
+	}
+}
+
+
+void GarfieldVUVPhotonModel::MakeELPhotonsSimple(G4FastStep& fastStep, G4double xi, G4double yi, G4double zi, G4double ti){
+	
+	G4int colHitsEntries= 0.0; //garfExcHitsCol->entries();
+	//	G4cout<<"GarfExcHits entries "<<colHitsEntries<<G4endl; // This one is not cumulative.
+
+	const G4double YoverP = 140.*fieldLEM/(detCon->GetGasPressure()/torr) - 116.; // yield/cm/bar, with P in Torr ... JINST 2 p05001 (2007).
+	colHitsEntries = YoverP * detCon->GetGasPressure()/bar * gapLEM; // with P in bar this time.
+	// colHitsEntries*=1.7; // Max val before G4 cant handle the memory anymore
+	// colHitsEntries=1; // This is to turn down S2 so the vis doesnt get overwelmed
+
+	colHitsEntries *= (G4RandGauss::shoot(1.0,res));
+	
+	G4double tig4(0.);
+	const G4double vd(2.4); // mm/musec, https://arxiv.org/pdf/1902.05544.pdf. Pretty much flat at our E/p..
+	for (G4int i=0;i<colHitsEntries;i++){
+	  GarfieldExcitationHit* newExcHit=new GarfieldExcitationHit();
+
+	  G4ThreeVector fakepos (xi*10,yi*10.,zi*10.-10*gapLEM*float(i)/float(colHitsEntries)); /// ignoring diffusion in small LEM gap, EC 17-June-2022.
+	  newExcHit->SetPos(fakepos);
+	 
+	  
+	  if (i % (colHitsEntries/colHitsEntries ) == 0){ // 50. Need to uncomment this condition, along with one in degradmodel.cc. EC, 2-Dec-2021.
+	  
+	    auto* optphot = G4OpticalPhoton::OpticalPhotonDefinition();
+	    
+	    G4DynamicParticle VUVphoton(optphot,G4RandomDirection(), 7.2*eV);
+	   
+
+	    /// std::cout <<  "fakepos,time is " << fakepos[0] << ", " << fakepos[1] << ", " << fakepos[2] << ", " << ti << std::endl;
+	   
+
+	    tig4 = ti + float(i)/float(colHitsEntries)*gapLEM*10./vd*1E3; // in nsec (gapLEM is in cm). Still ignoring diffusion in small LEM.
+	    //	    std::cout << "VUV photon time [nsec]: " << tig4 << std::endl;
+	    
+		newExcHit->SetTime(tig4);
+	    fGasBoxSD->InsertGarfieldExcitationHit(newExcHit);
+	    G4Track *newTrack=fastStep.CreateSecondaryTrack(VUVphoton, fakepos, tig4 ,false);
+	    newTrack->SetPolarization(G4ThreeVector(0.,0.,1.0)); // Needs some pol'n, else we will only ever reflect at an OpBoundary. EC, 8-Aug-2022.
+	    //	G4ProcessManager* pm= newTrack->GetDefinition()->GetProcessManager();
+	    //	G4ProcessVectorfAtRestDoItVector = pm->GetAtRestProcessVector(typeDoIt);
+	  }
+	}
 
 }

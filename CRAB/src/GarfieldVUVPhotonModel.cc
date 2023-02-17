@@ -30,6 +30,7 @@
 #include "G4ProcessManager.hh"
 #include "G4EventManager.hh"
 #include "Analysis.hh"
+#include "ComponentComsol.hh"
 
 
 #include "G4AutoLock.hh"
@@ -63,7 +64,7 @@ GarfieldVUVPhotonModel::GarfieldVUVPhotonModel(GasModelParameters* gmp, G4String
 }
 
 G4bool GarfieldVUVPhotonModel::IsApplicable(const G4ParticleDefinition& particleType) {
-  //  std::cout << "GarfieldVUVPhotonModel::IsApplicable() particleType is " << particleType.GetParticleName() << std::endl;
+   std::cout << "GarfieldVUVPhotonModel::IsApplicable() particleType is " << particleType.GetParticleName() << std::endl;
   if (particleType.GetParticleName()=="thermalelectron") // || particleType.GetParticleName()=="opticalphoton")
     return true;
   return false;
@@ -73,12 +74,15 @@ G4bool GarfieldVUVPhotonModel::IsApplicable(const G4ParticleDefinition& particle
 
 G4bool GarfieldVUVPhotonModel::ModelTrigger(const G4FastTrack& fastTrack){
   G4double ekin = fastTrack.GetPrimaryTrack()->GetKineticEnergy();
-  //  std::cout << "GarfieldVUVPhotonModel::ModelTrigger() thermalE, ekin is " << thermalE << ",  "<< ekin << std::endl;
+//    std::cout << "GarfieldVUVPhotonModel::ModelTrigger() thermalE, ekin is " << thermalE << ",  "<< ekin << std::endl;
   //  counter[0]++; //maybe not thread safe.
   //  G4cout << "GarfieldVUV: candidate NEST thermales: ekin, thermalE" << ekin << ", " << thermalE  << G4endl;
   S1Fill(fastTrack);
   G4String particleName = fastTrack.GetPrimaryTrack()->GetParticleDefinition()->GetParticleName();
-  if (ekin<thermalE && particleName=="thermalelectron")
+
+	std::cout << particleName << " " << ekin << std::endl;
+
+   if (ekin<thermalE && particleName=="thermalelectron")
     {
       return true;
     }
@@ -150,7 +154,7 @@ void GarfieldVUVPhotonModel::GenerateVUVPhotons(const G4FastTrack& fastTrack, G4
 	// Get zi when in the beginning of the EL region
 	for(unsigned int i=0;i<n;i++){
 	  fAvalancheMC->GetDriftLinePoint(i,xi,yi,zi,ti);
-      //   std::cout << "GVUVPM: positions are " << xi<<"," <<yi<<","<<zi <<"," <<ti<< std::endl;
+        // std::cout << "GVUVPM: positions are " << xi<<"," <<yi<<","<<zi <<"," <<ti<< std::endl;
         
 
 	  // Drift line point entered LEM
@@ -314,11 +318,10 @@ void GarfieldVUVPhotonModel::InitialisePhysics(){
 	fMediumMagboltz->Initialise(true);
 
 	// Print the gas properties
-	fMediumMagboltz->PrintGas();
+	// fMediumMagboltz->PrintGas();
 
 	
-	//  ---- Create the Garfield Field region --- 
-	Garfield::GeometrySimple* geo = new Garfield::GeometrySimple();
+	
 	
 	// Make a box
 	DetChamberR= detCon->GetChamberR(); // cm
@@ -332,43 +335,56 @@ void GarfieldVUVPhotonModel::InitialisePhysics(){
 
     std::cout << "Detector Dimentions: "<< DetChamberR << " " << DetChamberL << "  " << DetActiveR << "  " << DetActiveL << std::endl; 
 
-	// Tube oriented in Y'axis (0.,1.,0.,) The addition of the 1 cm is for making sure it doesnt fail on the boundary
-	Garfield::SolidTube* tube = new Garfield::SolidTube(0.0, 0.0 ,0.0, DetChamberR+1, DetChamberL*0.5, 0.,0.,1.);
+	fSensor = new Garfield::Sensor();
 
-	// Add the solid to the geometry, together with the medium inside
-	geo->AddSolid(tube, fMediumMagboltz);
 
-	// Make a component with analytic electric field
-	Garfield::ComponentUser* componentDriftLEM = new Garfield::ComponentUser();
-	componentDriftLEM->SetGeometry(geo);
-	componentDriftLEM->SetElectricField(ePiecewise);
+	G4bool useComsol = false;
 
-	// Printing pressure and temperature
-	std::cout << "GarfieldVUVPhotonModel::buildBox(): Garfield mass density [g/cm3], pressure [Torr], temp [K]: " <<
-	 	geo->GetMedium(0.,0.,0.)->GetMassDensity() << ", " << geo->GetMedium(0.,0.,0.)->GetPressure()<< ", " 
-	 	<< geo->GetMedium(0.,0.,0.)->GetTemperature() << std::endl;
+	if (!useComsol){
+		Garfield::ComponentUser* componentDriftLEM = CreateSimpleGeometry();
+		fSensor->AddComponent(componentDriftLEM);
+		
+		// Set the region where the sensor is active -- based on the gas volume
+		fSensor->SetArea(-DetChamberR, -DetChamberR, -DetChamberL/2.0, DetChamberR, DetChamberR, DetChamberL/2.0); // cm
+
+	}
+	else {
+		std::cout << "Initialising Garfiled with a COMSOL geometry" << std::endl;
+
+		std::string home = "/Users/mistryk2/OneDrive - University of Texas at Arlington/Projects/CRAB/COMSOL/";
+		std::string gridfile   = "CRAB_Mesh.mphtxt";
+		std::string datafile   = "CRAB_Data.txt";
+		std::string fileconfig = "CRABMaterialProperties.txt";
+
+		// Setup the electric potential map
+		Garfield::ComponentComsol* fm = new Garfield::ComponentComsol(); // Field Map
+		fm->Initialise(home + gridfile ,home + fileconfig, home + datafile, "cm");
+		
+		// Print some information about the cell dimensions.
+		fm->PrintRange();
+
+		// Associate the gas with the corresponding field map material.
+		fm->SetGas(fMediumMagboltz); 
+		fm->PrintMaterials();
+		fm->Check();
+		// fSensor->SetArea(-DetChamberR, -DetChamberR, -DetChamberL/2.0, DetChamberR, DetChamberR, DetChamberL/2.0); // cm
+
+	}
 
 	
+		
 	fAvalanche = new Garfield::AvalancheMicroscopic();
-	fSensor = new Garfield::Sensor();
 	fAvalanche->SetUserHandleInelastic(userHandle);
-	fSensor->AddComponent(componentDriftLEM);
 	fAvalanche->SetSensor(fSensor);
 
 	
 	fAvalancheMC = new Garfield::AvalancheMC(); // drift, not avalanche, to be fair.
 	fAvalancheMC->SetSensor(fSensor);
-	//	fAvalancheMC->SetIons();
 	fAvalancheMC->SetTimeSteps(0.05); // nsec, per example
 	fAvalancheMC->SetDistanceSteps(2.e-2); // cm, 10x example
 	fAvalancheMC->EnableDebugging(false); // way too much information. 
-	//fAvalancheMC->DisableDebugging();
 	fAvalancheMC->EnableAttachment();
-	//    fAvalancheMC->DisableAttachment();
-
-    // Set the region where the sensor is active -- based on the gas volume
-	fSensor->SetArea(-DetChamberR, -DetChamberR, -DetChamberL/2.0, DetChamberR, DetChamberR, DetChamberL/2.0); // cm
-
+    
 }
 
   
@@ -434,4 +450,30 @@ void GarfieldVUVPhotonModel::Reset()
 {
   fSensor->ClearSignal();
   counter[1] = 0;
+}
+
+
+Garfield::ComponentUser* GarfieldVUVPhotonModel::CreateSimpleGeometry(){
+
+	//  ---- Create the Garfield Field region --- 
+	Garfield::GeometrySimple* geo = new Garfield::GeometrySimple();
+
+	// Tube oriented in Y'axis (0.,1.,0.,) The addition of the 1 cm is for making sure it doesnt fail on the boundary
+	Garfield::SolidTube* tube = new Garfield::SolidTube(0.0, 0.0 ,0.0, DetChamberR+1, DetChamberL*0.5, 0.,0.,1.);
+
+	// Add the solid to the geometry, together with the medium inside
+	geo->AddSolid(tube, fMediumMagboltz);
+
+	// Make a component with analytic electric field
+	Garfield::ComponentUser* componentDriftLEM = new Garfield::ComponentUser();
+	componentDriftLEM->SetGeometry(geo);
+	componentDriftLEM->SetElectricField(ePiecewise);
+
+	// Printing pressure and temperature
+	std::cout << "GarfieldVUVPhotonModel::buildBox(): Garfield mass density [g/cm3], pressure [Torr], temp [K]: " <<
+	 	geo->GetMedium(0.,0.,0.)->GetMassDensity() << ", " << geo->GetMedium(0.,0.,0.)->GetPressure()<< ", " 
+	 	<< geo->GetMedium(0.,0.,0.)->GetTemperature() << std::endl;
+
+	return componentDriftLEM;
+
 }

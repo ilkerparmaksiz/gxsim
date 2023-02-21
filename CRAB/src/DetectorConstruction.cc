@@ -44,9 +44,9 @@ DetectorConstruction::DetectorConstruction(GasModelParameters* gmp)
     SourceEn_diam   (1.0 * cm),
     SourceEn_length (1 * cm),
     SourceEn_thickn (2. * mm),
-    SourceEn_holedia (2. * mm),
+    SourceEn_holedia (5. * mm),
     gas_pressure_(10 * bar),
-    vtx_(0,0,0),
+    vtx_(-1.6*cm,0,-5*cm),
     Active_diam(8.6 * cm),
     sc_yield_(25510./MeV),
     e_lifetime_(1000. * ms),
@@ -58,13 +58,13 @@ DetectorConstruction::DetectorConstruction(GasModelParameters* gmp)
     optical_pad_thickness_ (1. * mm), // copied from NEW
     pmt_base_diam_ (47. * mm),
     pmt_base_thickness_ (5. * mm),
-    HideSourceHolder_(true),
+    HideSourceHolder_(false),
     max_step_size_(1.*mm),
     ElGap_(7*mm),
     ELyield_(970/cm),
     PMT1_Pos_(2.32*cm),
     PMT3_Pos_(3.52*cm),
-    HideCollimator_(true)
+    HideCollimator_(false)
 {
   detectorMessenger = new DetectorMessenger(this);
 }
@@ -497,25 +497,27 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
   G4VPhysicalVolume * Needle_Phys;
   if(!HideSourceHolder_){
       // Particle Source Holder
-      //Rotation Matrix
+      // Rotation Matrix
 
       // Needle Solid
 
       G4RotationMatrix* NeedleRotate = new G4RotationMatrix();
       NeedleRotate->rotateY(90.*deg);
       //NeedleRotate->rotateX(+10*deg);
-      G4ThreeVector NeedlePos={vtx_[0]-NeedleOffset,vtx_[1],vtx_[2]-FieldCagePos/2};
+      G4ThreeVector NeedlePos={vtx_[0]-NeedleOffset, vtx_[1], vtx_[2]-FieldCagePos/2};
       G4ThreeVector CollPosition={NeedlePos[0]-5*mm,NeedlePos[1],NeedlePos[2]};
 
       Needle_Phys= new G4PVPlacement(NeedleRotate,NeedlePos,Needle_Logic,Needle->GetName(),FieldCage_Logic,true,0,false);
+     
       if(!HideCollimator_) {
           new G4PVPlacement(NeedleRotate,CollPosition,Coll_Logic,CollimatorWithBlock->GetName(),FieldCage_Logic,true,0,false);
       }
+      
       G4RotationMatrix* rotateHolder = new G4RotationMatrix();
       rotateHolder->rotateY(90.*deg);
 
-      //new G4PVPlacement(rotateHolder, G4ThreeVector(-SourceEn_offset,0,0), SourceHolChamber_logic, SourceHolChamber_solid->GetName(),gas_logic, false, 0, false);
-      //new G4PVPlacement(rotateHolder, G4ThreeVector(-SourceEn_offset-SourceEn_length/2,0,0), SourceHolChamberBlock_logic, SourceHolChamberBlock_solid->GetName(),gas_logic, false, 0, false);
+      // new G4PVPlacement(rotateHolder, G4ThreeVector(-SourceEn_offset,0,0), SourceHolChamber_logic, SourceHolChamber_solid->GetName(),gas_logic, false, 0, false);
+      // new G4PVPlacement(rotateHolder, G4ThreeVector(-SourceEn_offset-SourceEn_length/2,0,0), SourceHolChamberBlock_logic, SourceHolChamberBlock_solid->GetName(),gas_logic, false, 0, false);
 
       // NeedleEyePointSample=new CylinderPointSampler2020(NeedleyepRMin,NeedleyepRMax+2*nm,NeedleyepDz,0,twopi, rotateHolder,G4ThreeVector(NeedlePos[0],NeedlePos[1],NeedlePos[2]+FieldCagePos/2));
 

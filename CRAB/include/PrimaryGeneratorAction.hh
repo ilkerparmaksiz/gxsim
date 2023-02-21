@@ -14,6 +14,7 @@
 #include "DetectorConstruction.hh"
 #include "G4ParticleTable.hh"
 #include "G4GeneralParticleSource.hh"
+#include "PrimaryGenerator.hh"
 
 class G4Event;
 
@@ -35,6 +36,7 @@ public:
 private:
     
     G4GeneralParticleSource* fparticleGun;
+    PrimaryGenerator* fPrimaryGenerator;
     
     
 };

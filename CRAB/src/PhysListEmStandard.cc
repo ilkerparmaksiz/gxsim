@@ -216,7 +216,7 @@ void PhysListEmStandard::ConstructProcess() {
     G4String particleName = particle->GetParticleName();
 
     // td::cout << "PhysicsListEMStandard::ConstructProcess(): pname, pmanager are " << particleName << ", " << pmanager << std::endl;
-    if ( !(particleName.find("e-")!=std::string::npos  || particleName.find("opticalphoton")!=std::string::npos ) )
+    if ( !( particleName.find("e-")!=std::string::npos || particleName.find("alpha")!=std::string::npos  || particleName.find("opticalphoton")!=std::string::npos ) )
       continue;
     if (pmanager) {
 

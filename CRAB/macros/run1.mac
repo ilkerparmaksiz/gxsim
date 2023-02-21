@@ -34,11 +34,16 @@
 
 /tracking/storeTrajectory 1
 
-/gps/particle alpha
-/gps/ene/type Mono
-/gps/ene/mono 1 MeV
-/gps/direction 0 0 1 
-/gps/pos/centre 0 0 0 cm # near mesh surface
+/gps/particle geantino  ## Forces a 133Xe-like vtx: an isotropic 45 keV and a 100.2 keV pair of e-s
+/gps/pos/centre 0 0 -7 cm # near mesh surface
+
+/Generator/SingleParticle/momentum 0 0 1
+
+#/gps/particle alpha
+#/gps/ene/type Mono
+#/gps/ene/mono 1.94 MeV
+#/gps/direction 0 0 1 
+#/gps/pos/centre 0 0 -7 cm # near mesh surface
 #/gps/pos/centre 0 0 0 cm 
 /run/beamOn 1
 

@@ -47,7 +47,7 @@
 ## needed to keep the display from clearing out many drawn objects. EC, 22-June-2022.
 #/vis/ogl/set/displayListLimit 5000000
 #/vis/viewer/set/lightsThetaPhi 90. 0.
-#/vis/viewer/set/viewpointThetaPhi 150. 90.
+/vis/viewer/set/viewpointThetaPhi 90. 0.
 #/vis/viewer/set/viewpointThetaPhi 180. 90.
 #/vis/viewer/set/style surface
 #/vis/viewer/set/hiddenEdge true
@@ -63,26 +63,14 @@
 #/vis/modeling/trajectories/drawByCharge-0/default/setDrawStepPts true
 #/vis/modeling/trajectories/drawByCharge-0/default/setStepPtsSize 6
 
-#/vis/scene/endOfEventAction accumulate 1
-#/vis/scene/endOfRunAction accumulate
-#/vis/geometry/set/forceWireframe collimatorLogical -1 1
-#/vis/geometry/set/forceWireframe collimatorLogical2 -1 1
-#/vis/geometry/set/forceWireframe windowLogical -1 1
-#/vis/geometry/set/forceWireframe detectorLogical -1 1
-#/vis/geometry/set/forceWireframe macorLogical -1 1
-#/vis/geometry/set/forceWireframe lensLogical -1 1
-#/vis/geometry/set/forceWireframe camLogical -1 1
 /tracking/storeTrajectory 1
 
-#/gps/direction 0. 1. 0
-/gps/direction 0 1. 0
+/gps/direction 0 0 1
 /gps/ene/type Mono
 /gps/particle e-
-#/gps/particle gamma
 /gps/ene/mono 100 keV
-#/gps/ene/mono 1592 keV # double esc pk
-#/gps/ene/mono 2.0 MeV
-/gps/position 0 0 5 cm
+#/gps/pos/centre 0 0 -10.4 cm # near mesh surface
+/gps/pos/centre 0 0 0 cm
 #/run/beamOn 1
 
 #/gps/particle opticalphoton
@@ -92,6 +80,7 @@
 #/gps/pos/shape Circle
 #/gps/pos/radius 5 mm
 #/gps/pos/centre 0 20 0 cm
+# /vis/scene/endOfEventAction accumulate 1
 
 #/vis/viewer/panTo -0.0 -.28
 #/vis/viewer/set/viewpointThetaPhi 60. 0.

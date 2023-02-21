@@ -29,6 +29,7 @@ namespace colours {
   inline G4VisAttributes DarkGrey()     { return { { .3 ,  .3 ,  .3 } }; }
   inline G4VisAttributes LightGrey()    { return { { .7 ,  .7 ,  .7 } }; }
   inline G4VisAttributes TitaniumGrey() { return { { .71,  .69,  .66} }; }
+  inline G4VisAttributes Empty()        { return { {  0.,  0. , 0.  } }; }
   
   // Set colours with alpha for transparency
   inline G4VisAttributes YellowAlpha()       { return { {1.0 , 1.0 ,  0.0, .5} }; }

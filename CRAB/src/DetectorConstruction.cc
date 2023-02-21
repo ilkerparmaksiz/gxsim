@@ -74,9 +74,6 @@ DetectorConstruction::~DetectorConstruction() {
 }
 
 G4VPhysicalVolume* DetectorConstruction::Construct(){
-  /* The World volume is a vacuum in which a gastube is placed with the walls made out of Aluminum. The
-  endcaps are Silicon detectors, used as calorimeter 
-  */
     
   //Materials
   G4Material *gxe    = materials::GXe(gas_pressure_,68);
@@ -144,7 +141,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
   G4double EL_OD = 12.0*cm;
   G4double EL_thick = 1.3*cm;
   G4double EL_mesh_thick = 0.1*mm;
-  G4double EL_hex_size = 5*mm;
+  G4double EL_hex_size = 2.5*mm;
 
   G4Tubs* EL_ring_solid = new G4Tubs("EL_Ring", EL_ID/2., EL_OD/2.0, EL_thick/2 , 0., twopi);
   G4LogicalVolume* EL_ring_logic = new G4LogicalVolume(EL_ring_solid, Steel, "EL_Ring");
@@ -152,13 +149,13 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
 
   // EL Mesh
   // Dist from centre of hex to hex vertex, excluding the land width (circumradius)
-  G4double hex_circumR = EL_hex_size/std::sqrt(3)*mm;  
+  G4double hex_circumR = EL_hex_size/std::sqrt(3);  
 
   // Number of hexagons needed -- need to use fixed amount, too many and nexus will crash
-  G4int nHole = 50;
+  G4int nHole = 15;
 
   // Define the Stainless steel mesh cylinder to subtract hex pattern from
-  G4Tubs* Mesh_Solid = new G4Tubs("Mesh", 0., EL_ID/2.0 , EL_mesh_thick/2., 0., twopi);
+  G4Tubs* Mesh_Disk = new G4Tubs("Mesh_Disk", 0., EL_OD/2.0 , EL_mesh_thick/2., 0., twopi); // Use OD so mesh stays within the logical
 
   HexagonMeshTools::HexagonMeshTools* HexCreator; // Hexagonal Mesh Tool
 
@@ -166,17 +163,10 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
   G4ExtrudedSolid* HexPrism = HexCreator->CreateHexagon(EL_mesh_thick, hex_circumR);
   
 
-  // Create the hexagonal mesh
-  G4MultiUnion* MeshUnion = new G4MultiUnion("UnitedMeshPattern");
-  
-  // Crate the Mesh template
-  HexCreator->CreateHexUnion(nHole, EL_ID,  EL_mesh_thick, MeshUnion, HexPrism);
-
-  // Subtract the template from the mesh cylinder
-  G4SubtractionSolid *meshS = new G4SubtractionSolid("Mesh", Mesh_Solid, MeshUnion);  
-
-  // Create the mesh logical volume
-  G4LogicalVolume *EL_Mesh_logic = new G4LogicalVolume(meshS, Steel, "Mesh");
+  G4LogicalVolume *ELP_Disk_logic     = new G4LogicalVolume(Mesh_Disk, Steel, "ELP_Mesh_Logic");
+  G4LogicalVolume *ELPP_Disk_logic    = new G4LogicalVolume(Mesh_Disk, Steel, "ELPP_Mesh_Logic");
+  G4LogicalVolume *Cathode_Disk_logic = new G4LogicalVolume(Mesh_Disk, Steel, "Cathode_Mesh_Logic");
+  G4LogicalVolume *EL_Hex_logic       = new G4LogicalVolume(HexPrism, gxe,    "Mesh_Hex");
 
 
   // FieldCage -- needs to be updated to rings and PEEK rods
@@ -427,15 +417,24 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
   new G4PVPlacement(0, G4ThreeVector(0.,0.,EL_pos),EL_logic,EL_solid->GetName(),gas_logic, 0,0, false);
 
   G4VPhysicalVolume * EL_Ring_Plus        = new G4PVPlacement(0, G4ThreeVector(0.,0., EL_thick/2.0 - FR_thick - 4*(FR_thick + PEEK_Rod_thick) - 2.5*cm - EL_thick), EL_ring_logic, EL_solid->GetName(), gas_logic, 0,0, false);
-  // G4VPhysicalVolume * EL_Mesh_Plus        = new G4PVPlacement(0, G4ThreeVector(0.,0., EL_thick/2.0 - FR_thick - 4*(FR_thick + PEEK_Rod_thick) - 2.5*cm - EL_thick), EL_Mesh_logic, "EL_MeshP", gas_logic, false, 0, false);
+  
+  // Place the Mesh bits
+  new G4PVPlacement(0, G4ThreeVector(0.,0., EL_thick/2.0 - FR_thick - 4*(FR_thick + PEEK_Rod_thick) - 2.5*cm - EL_thick - EL_thick/2.0), ELP_Disk_logic, ELP_Disk_logic->GetName(), gas_logic, 0,0, false);
+  HexCreator->PlaceHexagons(nHole, EL_hex_size,  EL_mesh_thick, ELP_Disk_logic, EL_Hex_logic);
 
   G4VPhysicalVolume * EL_Ring_Plus_plus   = new G4PVPlacement(0, G4ThreeVector(0.,0., EL_thick/2.0 - FR_thick - 4*(FR_thick + PEEK_Rod_thick) - 2.5*cm - EL_thick - ElGap_ - EL_thick), EL_ring_logic, EL_solid->GetName(), gas_logic, 0,0, false);
-  // G4VPhysicalVolume * EL_Mesh_Plus_plus   = new G4PVPlacement(0, G4ThreeVector(0.,0., EL_thick/2.0 - FR_thick - 4*(FR_thick + PEEK_Rod_thick) - 2.5*cm - EL_thick - ElGap_ - EL_thick), EL_Mesh_logic, "EL_MeshPP", gas_logic, false, 1, false);
+  
+  // Place the Mesh bits
+  new G4PVPlacement(0, G4ThreeVector(0.,0.,  EL_thick/2.0 - FR_thick - 4*(FR_thick + PEEK_Rod_thick) - 2.5*cm - EL_thick - ElGap_ - EL_thick + EL_thick/2.0), ELPP_Disk_logic, ELPP_Disk_logic->GetName(), gas_logic, 0,0, false);
+  HexCreator->PlaceHexagons(nHole, EL_hex_size,  EL_mesh_thick, ELPP_Disk_logic, EL_Hex_logic);
 
 
   // Cathode
-  G4VPhysicalVolume * Cathode       = new G4PVPlacement(0, G4ThreeVector(0.,0., EL_thick/2.0 + 1*cm + 5*(FR_thick + PEEK_Rod_thick)), EL_ring_logic, EL_solid->GetName(), gas_logic, 0,0, false);
-  // G4VPhysicalVolume * Cathode_Mesh  = new G4PVPlacement(0, G4ThreeVector(0.,0., EL_thick/2.0 + 1*cm + 5*(FR_thick + PEEK_Rod_thick)), EL_Mesh_logic, "CathodeMesh", gas_logic, false, 1, false);
+  G4VPhysicalVolume * Cathode       = new G4PVPlacement(0, G4ThreeVector(0.,0., EL_thick/2.0 + 1*cm + 5*(FR_thick + PEEK_Rod_thick) + EL_thick/2.0), EL_ring_logic, EL_solid->GetName(), gas_logic, 0,0, false);
+  
+  // Place the Mesh bits
+  new G4PVPlacement(0, G4ThreeVector(0.,0.,  EL_thick/2.0 + 1*cm + 5*(FR_thick + PEEK_Rod_thick )), Cathode_Disk_logic, Cathode_Disk_logic->GetName(), gas_logic, 0,0, false);
+  HexCreator->PlaceHexagons(nHole, EL_hex_size,  EL_mesh_thick, Cathode_Disk_logic, EL_Hex_logic);
 
 
   // MgF2 Windows
@@ -465,7 +464,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
 
   // Place the camera Make camLogical mother and photocathode daughter
   // G4double LensFocalDist = 6.34*cm; // Got from trial and error as calculations not consistent with NEXUS
-  G4double LensFocalDist = 8.11*cm; // Got from trial and error as calculations not consistent with NEXUS
+  G4double LensFocalDist = 7.94*cm; // Got from trial and error as calculations not consistent with NEXUS
   G4VPhysicalVolume* camPhysical= new G4PVPlacement(0,  G4ThreeVector (0,0, (chamber_length/2 + chamber_thickn + LensFocalDist) - PMT_pos-LongPMTTubeOffset),camLogical,"camPhysical",InsideThePMT_Tube_Logic0, false,0,false);  
 
 
@@ -731,10 +730,19 @@ void DetectorConstruction::AssignVisuals() {
       ELLogic->SetVisAttributes(G4VisAttributes::GetInvisible());
 
       // Cathode Grid
-      G4LogicalVolume* Meshlog = lvStore->GetVolume("Mesh");
-      G4VisAttributes mesh_col = colours::DarkGrey();
-      mesh_col.SetForceSolid(true);
-      Meshlog->SetVisAttributes(G4VisAttributes::GetInvisible());
+      // G4VisAttributes mesh_col = colours::DarkGrey();
+      // mesh_col.SetForceSolid(true);
+      // G4LogicalVolume* Meshlog = lvStore->GetVolume("ELP_Mesh_Logic");
+      // Meshlog->SetVisAttributes(G4VisAttributes::GetInvisible());
+      // Meshlog = lvStore->GetVolume("ELPP_Mesh_Logic");
+      // Meshlog->SetVisAttributes(G4VisAttributes::GetInvisible());
+      // Meshlog = lvStore->GetVolume("Cathode_Mesh_Logic");
+      // Meshlog->SetVisAttributes(G4VisAttributes::GetInvisible());
+
+      // mesh_col = colours::Empty();
+      // mesh_col.SetForceSolid(true);
+      // Meshlog = lvStore->GetVolume("Mesh_Hex");
+      // Meshlog->SetVisAttributes(G4VisAttributes::GetInvisible());
 
       // FieldCage
       G4LogicalVolume * FieldCage=lvStore->GetVolume("FIELDCAGE");

@@ -34,30 +34,12 @@
 
 /tracking/storeTrajectory 1
 
-#/gps/position 0. -3.3 0. cm
-#/gps/direction 0. 1. 0 
-
-#/gps/particle gamma
-/gps/particle e-
+/gps/particle alpha
 /gps/ene/type Mono
-#/gps/ene/mono 5.9 keV
-/gps/ene/mono 2.0 MeV
-#/gps/ene/mono 0.1 MeV
-
-/gps/ang/type iso
-/gps/pos/type Point
-#/gps/pos/type Volume
-#/gps/pos/shape Para
-/gps/pos/centre 0. 0. 10. cm
-#/gps/position 0. 30. 0. cm
-
-
-#/gps/pos/halfx 15 cm
-#/gps/pos/halfz 15 cm
-#/gps/pos/halfy 30 cm
-#/gps/pos/confine "detectorLogical" 
-
-/run/initialize
+/gps/ene/mono 1 MeV
+/gps/direction 0 0 1 
+/gps/pos/centre 0 0 0 cm # near mesh surface
+#/gps/pos/centre 0 0 0 cm 
 /run/beamOn 1
 
 

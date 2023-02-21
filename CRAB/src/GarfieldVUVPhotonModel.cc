@@ -76,7 +76,7 @@ G4bool GarfieldVUVPhotonModel::IsApplicable(const G4ParticleDefinition& particle
 
 G4bool GarfieldVUVPhotonModel::ModelTrigger(const G4FastTrack& fastTrack){
   G4double ekin = fastTrack.GetPrimaryTrack()->GetKineticEnergy();
-//    std::cout << "GarfieldVUVPhotonModel::ModelTrigger() thermalE, ekin is " << thermalE << ",  "<< ekin << std::endl;
+//    std::cout << "GarfieldVUVPhotonModel::ModelTrigger() thermalE, ekin is " << thermalE << ",  "<< ekin / MeV << std::endl;
   //  counter[0]++; //maybe not thread safe.
   //  G4cout << "GarfieldVUV: candidate NEST thermales: ekin, thermalE" << ekin << ", " << thermalE  << G4endl;
   S1Fill(fastTrack);
@@ -145,7 +145,17 @@ void GarfieldVUVPhotonModel::GenerateVUVPhotons(const G4FastTrack& fastTrack, G4
 	if (particleName.find("thermalelectron")!=std::string::npos) particleName = "e-";
 
 	garfExcHitsCol = new GarfieldExcitationHitsCollection();
+
 	
+	// Debug the electric field
+	// std::array<double, 3> ef{0,0,0};
+	// std::array<double, 3> bf{0,0,0};
+	// std::vector<double> vf{0,0,0};
+	// Garfield::Medium* medium = nullptr;
+	// int status(0);
+	// fSensor->ElectricField(x0,y0,z0, ef[0], ef[1], ef[2], medium, status);                                        
+	// std::cout << "GVUVPM: E field in medium " << medium << " at " << x0<<","<<y0<<","<<z0 << " is: " << ef[0]<<","<<ef[1]<<","<<ef[2] << std::endl;
+
 	// Need to get the AvalancheMC drift at the High-Field point in z, and then call fAvalanche-AvalancheElectron() to create excitations/VUVphotons.
 	fAvalancheMC->DriftElectron(x0,y0,z0,t0);
 
@@ -282,7 +292,7 @@ void GarfieldVUVPhotonModel::InitialisePhysics(){
 	fSensor = new Garfield::Sensor();
 
 
-	G4bool useComsol = false;
+	G4bool useComsol = true;
 
 	if (!useComsol){
 		Garfield::ComponentUser* componentDriftLEM = CreateSimpleGeometry();
@@ -311,15 +321,17 @@ void GarfieldVUVPhotonModel::InitialisePhysics(){
 		fm->SetGas(fMediumMagboltz); 
 		fm->PrintMaterials();
 		fm->Check();
+
+		fSensor->AddComponent(fm);
 		// fSensor->SetArea(-DetChamberR, -DetChamberR, -DetChamberL/2.0, DetChamberR, DetChamberR, DetChamberL/2.0); // cm
 
 	}
 
 	
 		
-	fAvalanche = new Garfield::AvalancheMicroscopic();
-	fAvalanche->SetUserHandleInelastic(userHandle);
-	fAvalanche->SetSensor(fSensor);
+	// fAvalanche = new Garfield::AvalancheMicroscopic();
+	// fAvalanche->SetUserHandleInelastic(userHandle);
+	// fAvalanche->SetSensor(fSensor);
 
 	
 	fAvalancheMC = new Garfield::AvalancheMC(); // drift, not avalanche, to be fair.
@@ -327,12 +339,12 @@ void GarfieldVUVPhotonModel::InitialisePhysics(){
 	fAvalancheMC->SetTimeSteps(0.05); // nsec, per example
 	fAvalancheMC->SetDistanceSteps(2.e-2); // cm, 10x example
 	fAvalancheMC->EnableDebugging(false); // way too much information. 
-	fAvalancheMC->EnableAttachment();
+	// fAvalancheMC->DisableAttachment(); // Currently getting warning messages about the attachment. You can supress those by switching this on.
 
 
 	// Load in the events
 	if (useEL_File)
-		FileHandler.GetTimeProfileData(gas_path+"data/CRAB_Profiles.csv", EL_profiles, EL_events);
+		FileHandler.GetTimeProfileData(gas_path+"data/CRAB_Profiles_Rotated.csv", EL_profiles, EL_events);
     
 }
 
@@ -433,13 +445,14 @@ void GarfieldVUVPhotonModel::MakeELPhotonsFromFile( G4FastStep& fastStep, G4doub
 
 	// Here we get the photon timing profile from a file
 	G4int EL_event  = round(G4UniformRand()*EL_events.size());
-	G4int index = EL_events[EL_event] - EL_events[0]; // Need to subtract from where the first event is from so the indexes go from zero
-
+	
 	// Get the right EL array
-	std::vector<std::vector<G4double>> EL_profile = EL_profiles[index];
+	std::vector<std::vector<G4double>> EL_profile = EL_profiles[EL_event];
 
 	// Now loop over and make the photons
 	G4int colHitsEntries = EL_profile.size();
+	// std::cout <<  colHitsEntries<< std::endl;
+	// colHitsEntries=1 ;
 
 	G4double tig4(0.);
 	

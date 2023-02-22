@@ -57,6 +57,20 @@ PrimaryGenerator::PrimaryGenerator()
 
   msg_->DeclarePropertyWithUnit("momentum", "mm",  momentum_, "Set particle 3-momentum.");
 
+  //  --- Get Xenon file --- 
+	char* nexus_path = std::getenv("CRABPATH");
+	if (nexus_path == nullptr) {
+		G4Exception("[PrimaryGenerator]", "Constructor()", FatalException,
+					"Environment variable CRABPATH not defined!");
+	}
+
+	std::string crab_path(nexus_path);
+
+
+
+  FileHandler.GetEvent(crab_path + "/data/pb210_electron.csv", electron_data);
+  FileHandler.GetEvent(crab_path + "/data/pb210_alpha.csv",    alpha_data);
+
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -72,8 +86,16 @@ void PrimaryGenerator::GeneratePrimaryVertexOpt(G4Event* event, std::vector<doub
   //
   G4int n_particle = 5;
 
+  G4double KE = 1 * MeV;
+
   G4ThreeVector positionA( xyzb.at(0), xyzb.at(1), xyzb.at(2));
   G4double timeA = 0*s;
+
+  G4ThreeVector e_momentum = {};
+  G4ThreeVector alpha_momentum = {};
+
+  G4double e_Ke = 1.16*MeV;
+  G4double alpha_Ke = 1.16*MeV;
 
   G4bool useNeedle = true; 
 
@@ -103,14 +125,52 @@ void PrimaryGenerator::GeneratePrimaryVertexOpt(G4Event* event, std::vector<doub
     
   }
 
+  G4bool useEventsFromFile = true; 
+
+  if (useEventsFromFile){
+
+    // Get some random index
+    G4int event  = round(G4UniformRand()*electron_data.size());
+    std::vector<G4double> electron_event = electron_data[event];
+    std::vector<G4double> alpha_event = alpha_data[event];
+
+    e_momentum = {electron_event[0], electron_event[1], electron_event[2]};
+    e_momentum = e_momentum.unit();
+
+    alpha_momentum = {alpha_event[0], alpha_event[1], alpha_event[2]};
+    alpha_momentum = alpha_momentum.unit();
+
+    // std::cout << "Sampled electron with px, py, pz, KE:" << electron_event[0] << ", " << electron_event[1] << ", " << electron_event[2] << ", " << electron_event[3] << std::endl;
+    // std::cout << "Sampled alpha with px, py, pz, KE:" << alpha_event[0] << ", " << alpha_event[1] << ", " << alpha_event[2] << ", " << alpha_event[3] << std::endl;
+
+    std::cout << "Sampled electron with px, py, pz, KE:" << e_momentum.x() << ", " << e_momentum.y()  << ", " << e_momentum.z()  << ", " << electron_event[3] << std::endl;
+    std::cout << "Sampled alpha with px, py, pz, KE:" <<alpha_momentum.x()<< ", " << alpha_momentum.y() << ", " << alpha_momentum.z() << ", " << alpha_event[3] << std::endl;
+
+
+    
+
+    e_Ke     = electron_event[3]*MeV;
+    alpha_Ke = alpha_event[3]*MeV;
+
+
+  }
+  else {
+    e_momentum     = momentum_.unit();
+    alpha_momentum = momentum_.unit();
+
+  }
+
 
   // 
   G4PrimaryVertex* vertexA = new G4PrimaryVertex(positionA, timeA);
 
   G4ParticleDefinition* particleDefinition;
   G4PrimaryParticle* particle1;
+  G4double mass;
+  G4double energy;
+  G4double pmod;
+  G4ThreeVector p;
 
-  G4double KE = 1 * MeV;
 
   for (int ii = 0; ii < n_particle; ii++) {
       
@@ -120,29 +180,42 @@ void PrimaryGenerator::GeneratePrimaryVertexOpt(G4Event* event, std::vector<doub
     if (ii == 0){
       particleDefinition = G4ParticleTable::GetParticleTable()->FindParticle("alpha");
       particle1 = new G4PrimaryParticle(particleDefinition);
-      KE = 0.8 * MeV;
+      KE = 0.8*MeV;
+
+      mass   = particleDefinition->GetPDGMass();
+      energy = KE + mass;
+      pmod = std::sqrt(energy*energy - mass*mass);
+      p = pmod * alpha_momentum;
+
+     
     }
     else if (ii == 1 || ii == 2 || ii == 3) {
       particleDefinition = G4ParticleTable::GetParticleTable()->FindParticle("alpha");
       particle1 = new G4PrimaryParticle(particleDefinition);
       KE = 1.5 * MeV;
+
+      mass   = particleDefinition->GetPDGMass();
+      energy = KE + mass;
+      pmod = std::sqrt(energy*energy - mass*mass);
+      p = pmod * alpha_momentum;
     }
     else {
       particleDefinition = G4ParticleTable::GetParticleTable()->FindParticle("e-");
       particle1 = new G4PrimaryParticle(particleDefinition);
-      KE = 1.16 * MeV;
+      KE = e_Ke;
+
+      mass   = particleDefinition->GetPDGMass();
+      energy = KE + mass;
+      pmod = std::sqrt(energy*energy - mass*mass);
+      p = pmod * e_momentum;
     }
 
-    G4double mass   = particleDefinition->GetPDGMass();
-    G4double energy = KE + mass;
-    G4double pmod = std::sqrt(energy*energy - mass*mass);
 
-    G4ThreeVector p = pmod * momentum_;
-    particle1->SetMomentum(p.x(), p.y(), p.z());
     
+    particle1->SetMomentum(p.x(), p.y(), p.z());
     vertexA->SetPrimary(particle1);
     
-    std::cout << "PrimaryGenerator: Adding particle " << ii << " with " << particle1->GetKineticEnergy()/keV << " keV  e- w ux,uy,uz " << momentum_.x() << ", " << momentum_.y() << ", " << momentum_.z()<< " to vertexA."  << std::endl;
+    std::cout << "PrimaryGenerator: Adding particle " << ii << " with " << particle1->GetKineticEnergy()/keV << " keV  e- w ux,uy,uz " << p.x() << ", " << p.y() << ", " << p.z()<< " to vertexA."  << std::endl;
   }
 
   event->AddPrimaryVertex(vertexA);

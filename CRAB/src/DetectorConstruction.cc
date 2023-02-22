@@ -334,7 +334,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
   // G4double EL_pos=-FielCageGap-ElGap_;
   G4double EL_pos=-10.98*cm;
 
-  G4VPhysicalVolume * FieldCage_Phys=new G4PVPlacement(0,G4ThreeVector(0,0,FieldCagePos/2),FieldCage_Logic,FieldCage_Logic->GetName(),gas_logic, 0,0,false);
+  // G4VPhysicalVolume * FieldCage_Phys=new G4PVPlacement(0,G4ThreeVector(0,0,FieldCagePos/2),FieldCage_Logic,FieldCage_Logic->GetName(),gas_logic, 0,0,false);
 
   // Field Cage Rings
   G4VPhysicalVolume * FR_FC_10 = new G4PVPlacement(0, G4ThreeVector(0,0, -FR_thick/2.0 + 5*(FR_thick + PEEK_Rod_thick)), FR_logic, FR_logic->GetName(), gas_logic, 0, 0, false);
@@ -430,10 +430,10 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
 
 
   // Cathode
-  G4VPhysicalVolume * Cathode       = new G4PVPlacement(0, G4ThreeVector(0.,0., EL_thick/2.0 + 1*cm + 5*(FR_thick + PEEK_Rod_thick) + EL_thick/2.0), EL_ring_logic, EL_solid->GetName(), gas_logic, 0,0, false);
+  G4VPhysicalVolume * Cathode       = new G4PVPlacement(0, G4ThreeVector(0.,0., EL_thick/2.0 + 1*cm + 5*(FR_thick + PEEK_Rod_thick)), EL_ring_logic, EL_solid->GetName(), gas_logic, 0,0, false);
   
   // Place the Mesh bits
-  new G4PVPlacement(0, G4ThreeVector(0.,0.,  EL_thick/2.0 + 1*cm + 5*(FR_thick + PEEK_Rod_thick )), Cathode_Disk_logic, Cathode_Disk_logic->GetName(), gas_logic, 0,0, false);
+  new G4PVPlacement(0, G4ThreeVector(0.,0.,  EL_thick/2.0 + 1*cm + 5*(FR_thick + PEEK_Rod_thick ) - EL_thick/2.0), Cathode_Disk_logic, Cathode_Disk_logic->GetName(), gas_logic, 0,0, false);
   HexCreator->PlaceHexagons(nHole, EL_hex_size,  EL_mesh_thick, Cathode_Disk_logic, EL_Hex_logic);
 
 
@@ -507,10 +507,10 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
       G4ThreeVector NeedlePos={vtx_[0]-NeedleOffset, vtx_[1], vtx_[2]-FieldCagePos/2};
       G4ThreeVector CollPosition={NeedlePos[0]-5*mm,NeedlePos[1],NeedlePos[2]};
 
-      Needle_Phys= new G4PVPlacement(NeedleRotate,NeedlePos,Needle_Logic,Needle->GetName(),FieldCage_Logic,true,0,false);
+      Needle_Phys= new G4PVPlacement(NeedleRotate,NeedlePos,Needle_Logic,Needle->GetName(),gas_logic,true,0,false);
      
       if(!HideCollimator_) {
-          new G4PVPlacement(NeedleRotate,CollPosition,Coll_Logic,CollimatorWithBlock->GetName(),FieldCage_Logic,true,0,false);
+          new G4PVPlacement(NeedleRotate,CollPosition,Coll_Logic,CollimatorWithBlock->GetName(),gas_logic,true,0,false);
       }
       
       G4RotationMatrix* rotateHolder = new G4RotationMatrix();
@@ -555,7 +555,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
 
 
   if(!HideSourceHolder_ && !HideCollimator_){
-      new G4LogicalBorderSurface("SteelSurface_Needle",FieldCage_Phys,Needle_Phys,OpSteelSurf);
+      new G4LogicalBorderSurface("SteelSurface_Needle",gas_phys,Needle_Phys,OpSteelSurf);
   }
 
 

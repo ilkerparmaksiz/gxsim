@@ -40,6 +40,8 @@
 
 #include "G4BetaMinusDecay.hh"
 
+#include "FileHandling.hh"
+
 
 class G4Event;
 //class G4DecayProducts;
@@ -66,6 +68,16 @@ class PrimaryGenerator : public G4VPrimaryGenerator
      G4GenericMessenger* msg_;
 
      G4ThreeVector momentum_;
+
+
+    // For reading in files
+    filehandler::FileHandling FileHandler;
+
+    std::vector<std::vector<G4double>> electron_data;
+    std::vector<std::vector<G4double>> alpha_data;
+
+
+
 };
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

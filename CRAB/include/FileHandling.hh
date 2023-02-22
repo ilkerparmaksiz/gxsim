@@ -25,6 +25,9 @@ namespace filehandler{
             // Load in data for photon yields
             void GetTimeProfileData(string filename, vector<vector<vector<G4double>>> &data, vector<G4double> &events);
 
+            // Get event data from csv
+            void GetEvent(string filename, vector<vector<G4double>> &data);
+
 
             // This is for wrting detector counts to a text file
             void SaveToTextFile(string file,string labels, char del, std::vector<vector<G4double>>data);

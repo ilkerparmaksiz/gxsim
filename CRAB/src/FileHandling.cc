@@ -140,7 +140,7 @@ namespace filehandler{
         fstfile.close();
     }
 
-      void FileHandling::GetTimeProfileData(string filename, vector<vector<vector<G4double>>> &data, vector<G4double> &events) {
+    void FileHandling::GetTimeProfileData(string filename, vector<vector<vector<G4double>>> &data, vector<G4double> &events) {
 
         std::cout << "[File Handling] Loading EL timing profiles..." << std::endl;
         
@@ -197,6 +197,52 @@ namespace filehandler{
         FileIn_.close();
 
         std::cout << "[File Handling] Finished loading EL timing profiles..." << std::endl;
+
+
+    }
+
+    void FileHandling::GetEvent(string filename, vector<vector<G4double>> &data) {
+
+        std::cout << "[File Handling] Loading event data..." << std::endl;
+        
+
+        // Open the file
+        std::ifstream FileIn_(filename);
+
+        // Check if file has opened properly
+        if (!FileIn_.is_open()){
+        G4Exception("[FileHandling]", "GetEvent()",
+                    FatalException, " could not read in the CSV file ");
+        }
+
+        // Read the Data from the file as strings
+        std::string s_event, s_x, s_y, s_z, s_e;
+
+        std::vector<G4double> temp_data;
+
+        // Loop over the lines in the file and add the values to a vector
+        while (FileIn_.peek()!=EOF) {
+
+            std::getline(FileIn_, s_event, ',');
+            std::getline(FileIn_, s_x, ',');
+            std::getline(FileIn_, s_y, ',');
+            std::getline(FileIn_, s_z, ',');
+            std::getline(FileIn_, s_e, '\n');
+
+            temp_data.push_back(stod(s_x));
+            temp_data.push_back(stod(s_y));
+            temp_data.push_back(stod(s_z));
+            temp_data.push_back(stod(s_e));
+
+            data.push_back(temp_data);
+
+            temp_data.clear();
+
+        } // END While
+
+        FileIn_.close();
+
+        std::cout << "[File Handling] Finished loading event data..." << std::endl;
 
 
     }

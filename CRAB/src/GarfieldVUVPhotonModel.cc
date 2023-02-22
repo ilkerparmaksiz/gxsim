@@ -41,7 +41,8 @@ const static G4double gapLEM = 0.7; //cm
 const static G4double fieldDrift = 438.0; // V/cm
 const static G4double fieldLEM   = 11400.0; // V/cm higher than 3k (as used for 2 bar) for 10 bar!
 
-G4bool useEL_File = true;
+G4bool useEL_File = false;
+G4bool useComsol = false;
 
 G4double DetChamberL;
 G4double DetChamberR;
@@ -291,9 +292,6 @@ void GarfieldVUVPhotonModel::InitialisePhysics(){
 
 	fSensor = new Garfield::Sensor();
 
-
-	G4bool useComsol = true;
-
 	if (!useComsol){
 		Garfield::ComponentUser* componentDriftLEM = CreateSimpleGeometry();
 		fSensor->AddComponent(componentDriftLEM);
@@ -339,7 +337,7 @@ void GarfieldVUVPhotonModel::InitialisePhysics(){
 	fAvalancheMC->SetTimeSteps(0.05); // nsec, per example
 	fAvalancheMC->SetDistanceSteps(2.e-2); // cm, 10x example
 	fAvalancheMC->EnableDebugging(false); // way too much information. 
-	// fAvalancheMC->DisableAttachment(); // Currently getting warning messages about the attachment. You can supress those by switching this on.
+	fAvalancheMC->DisableAttachment(); // Currently getting warning messages about the attachment. You can supress those by switching this on.
 
 
 	// Load in the events

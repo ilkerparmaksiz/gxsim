@@ -28,14 +28,16 @@ void PlotCrab(){
     tCam->SetBranchAddress("Z",&Cam_Z);
     tCam->SetBranchAddress("Event",&Cam_Ev);
 
+    double SF = 4.1/10; // Converts from mm to cm. Then to the size of the object. M = 4.1
+
     //create two histograms
-    TH2F *hCamXY = new TH2F("hCameraXY","Camera X vs Y",512, -5, 5, 512, -5, 5) ;
+    TH2F *hCamXY = new TH2F("hCameraXY","Camera X vs Y; Object Size X [cm]; Object Size Y [cm]",100, -5*SF, 5*SF, 100, -5*SF, 5*SF) ;
 
     //read all entries and fill the histograms
     Long64_t nCam = tCam->GetEntries();
     for (Long64_t i=0;i<nCam;i++) {
         tCam->GetEntry(i);
-        hCamXY->Fill(-Cam_X, -Cam_Y);
+        hCamXY->Fill(-Cam_X*SF, -Cam_Y*SF);
     }
 
     TCanvas *cCam = new TCanvas();
@@ -86,14 +88,14 @@ void PlotCrab(){
 
     //create two histograms
     TH3F *hS1XYZ = new TH3F("hS1XYZ","S1 XYZ; X [mm]; Y [mm]; Z [mm]",40, -36, 36, 40, -36, 36, 40, -220, 220) ;
-    TH2F *hS1XY = new TH2F("hS1XY","S1 XY; X [mm]; Y [mm]",40, -36, 36, 40, -36, 36) ;
+    TH2F *hS1XY = new TH2F("hS1XY","S1 XY; X [cm]; Y [cm]",80, -3.6, 3.6, 80, -3.6, 3.6) ;
 
     //read all entries and fill the histograms
     Long64_t nS1 = tS1->GetEntries();
     for (Long64_t i=0;i<nS1;i++) {
         tS1->GetEntry(i);
         hS1XYZ->Fill(S1_X, S1_Y, S1_Z);
-        hS1XY->Fill(S1_X, S1_Y);
+        hS1XY->Fill(S1_X/10, S1_Y/10);
     }
 
     // TCanvas *cS1 = new TCanvas();
@@ -115,7 +117,7 @@ void PlotCrab(){
     tS2->SetBranchAddress("Event",&S2_Ev);
 
     //create two histograms
-    TH1F *hS2T = new TH1F("hS2T","S2 Timing; Time [us]; Entries",500, 65, 80) ;
+    TH1F *hS2T = new TH1F("hS2T","S2 Timing; Time [us]; Entries",500, 40, 120) ;
 
     //read all entries and fill the histograms
     Long64_t nS2 = tS2->GetEntries();

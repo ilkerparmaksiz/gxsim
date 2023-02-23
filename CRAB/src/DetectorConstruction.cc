@@ -463,9 +463,9 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
 
 
   // Place the camera Make camLogical mother and photocathode daughter
-  // G4double LensFocalDist = 6.34*cm; // Got from trial and error as calculations not consistent with NEXUS
-  G4double LensFocalDist = 7.94*cm; // Got from trial and error as calculations not consistent with NEXUS
-  G4VPhysicalVolume* camPhysical= new G4PVPlacement(0,  G4ThreeVector (0,0, (chamber_length/2 + chamber_thickn + LensFocalDist) - PMT_pos-LongPMTTubeOffset),camLogical,"camPhysical",InsideThePMT_Tube_Logic0, false,0,false);  
+  // G4double LensFocalDist = 6.34*cm; // Got from trial and erro
+  G4double ImageDist = 7.945*cm; // Got from trial and error
+  G4VPhysicalVolume* camPhysical= new G4PVPlacement(0,  G4ThreeVector (0,0, (chamber_length/2 + chamber_thickn + ImageDist) - PMT_pos-LongPMTTubeOffset),camLogical,"camPhysical",InsideThePMT_Tube_Logic0, false,0,false);  
 
 
   // Define a rotation matrix to orient all detector pieces along y direction

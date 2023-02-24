@@ -7,6 +7,7 @@
 #include "G4OpBoundaryProcess.hh"
 #include "EventAction.hh"
 #include "Analysis.hh"
+#include "G4GenericMessenger.hh"
 
 #include <vector>
 
@@ -15,13 +16,17 @@
 
 class SteppingAction : public G4UserSteppingAction {
  public:
-  SteppingAction(EventAction *eva) : fEventAction(eva) {};
+  SteppingAction(EventAction *eva);
   ~SteppingAction(){};
 
   void UserSteppingAction(const G4Step *);
  
  private:
   EventAction* fEventAction;
+
+  G4GenericMessenger* msg_;
+
+  G4int ev_shift;
   
 };
 

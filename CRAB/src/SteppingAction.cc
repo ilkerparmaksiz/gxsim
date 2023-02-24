@@ -12,6 +12,15 @@
 #include "GasBoxSD.hh"
 
 
+SteppingAction::SteppingAction(EventAction *eva) : fEventAction(eva),  ev_shift(0) {
+
+  msg_ = new G4GenericMessenger(this, "/Action/SteppingAction/",
+    "Control commands of the stepping action.");
+
+  msg_->DeclareProperty("event_shift", ev_shift, "Set the event ID Shift number");
+  
+}
+
 
 
 void SteppingAction::UserSteppingAction(const G4Step *aStep)
@@ -74,7 +83,7 @@ void SteppingAction::UserSteppingAction(const G4Step *aStep)
     // Camera
     if (lVolume->GetName().find("camLogical")!=std::string::npos){
       track->SetTrackStatus(fStopAndKill);
-      analysisManager->FillNtupleDColumn(id,0, event);
+      analysisManager->FillNtupleDColumn(id,0, event+ev_shift);
       analysisManager->FillNtupleDColumn(id,1, pID);
       analysisManager->FillNtupleDColumn(id,2, time/ns);
       analysisManager->FillNtupleDColumn(id,3, pos[0]/mm);
@@ -89,7 +98,7 @@ void SteppingAction::UserSteppingAction(const G4Step *aStep)
     id = 4;
     if (lVolume->GetName().find("Lens")!=std::string::npos)  {
 
-        analysisManager->FillNtupleDColumn(id,0, event);
+        analysisManager->FillNtupleDColumn(id,0, event+ev_shift);
         analysisManager->FillNtupleDColumn(id,1, pID);
         analysisManager->FillNtupleDColumn(id,2, time/ns);
         analysisManager->FillNtupleDColumn(id,3, pos[0]/mm);
@@ -102,7 +111,7 @@ void SteppingAction::UserSteppingAction(const G4Step *aStep)
     // PMT location
     id = 5;
     if (lVolume->GetName().find("S1_WINDOW")!=std::string::npos){
-      analysisManager->FillNtupleDColumn(id,0, event);
+      analysisManager->FillNtupleDColumn(id,0, event+ev_shift);
       analysisManager->FillNtupleDColumn(id,1, pID);
       analysisManager->FillNtupleDColumn(id,2, time/ns);
       analysisManager->FillNtupleDColumn(id,3, pos[0]/mm);

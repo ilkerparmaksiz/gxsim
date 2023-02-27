@@ -210,6 +210,10 @@ void PhysListEmStandard::ConstructProcess() {
   // std::shared_ptr<gasNESTdet> gndet(new gasNESTdet());
   NEST::NESTcalc* calcNEST = new NEST::NESTcalc(gndet);  
 
+   NEST::NESTProc* theNEST2ScintillationProcess = new NEST::NESTProc("S1",fElectromagnetic, calcNEST, gndet); //gndet);
+  theNEST2ScintillationProcess->SetDetailedSecondaries(true);
+  theNEST2ScintillationProcess->SetStackElectrons(true);
+
   while( (*particleIteratorP)() ){
     G4ParticleDefinition* particle = particleIteratorP->value();
     G4ProcessManager* pmanager = particle->GetProcessManager();
@@ -219,11 +223,6 @@ void PhysListEmStandard::ConstructProcess() {
     if ( !( particleName.find("e-")!=std::string::npos || particleName.find("alpha")!=std::string::npos  || particleName.find("opticalphoton")!=std::string::npos ) )
       continue;
     if (pmanager) {
-
-
-      NEST::NESTProc* theNEST2ScintillationProcess = new NEST::NESTProc("S1",fElectromagnetic, calcNEST, gndet); //gndet);
-      theNEST2ScintillationProcess->SetDetailedSecondaries(true);
-      theNEST2ScintillationProcess->SetStackElectrons(true);
 
       if (theNEST2ScintillationProcess->IsApplicable(*particle) && pmanager) {
         std::cout << "PhysicsList::InitialisePhysics(): particleName, pmanager  " << particleName << ", " << pmanager << "." << std::endl;

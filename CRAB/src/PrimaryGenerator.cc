@@ -84,7 +84,7 @@ void PrimaryGenerator::GeneratePrimaryVertexOpt(G4Event* event, std::vector<doub
 {
   //vertex A uniform on a cylinder
   //
-  G4int n_particle = 5;
+  G4int n_particle = 2;
 
   G4double KE = 1 * MeV;
 
@@ -95,7 +95,7 @@ void PrimaryGenerator::GeneratePrimaryVertexOpt(G4Event* event, std::vector<doub
   G4ThreeVector alpha_momentum = {};
 
   G4double e_Ke = 1.16*MeV;
-  G4double alpha_Ke = 1.16*MeV;
+  G4double alpha_Ke = 5*MeV;
 
   G4bool useNeedle = true; 
 
@@ -146,12 +146,8 @@ void PrimaryGenerator::GeneratePrimaryVertexOpt(G4Event* event, std::vector<doub
     std::cout << "Sampled electron with px, py, pz, KE:" << e_momentum.x() << ", " << e_momentum.y()  << ", " << e_momentum.z()  << ", " << electron_event[3] << std::endl;
     std::cout << "Sampled alpha with px, py, pz, KE:" <<alpha_momentum.x()<< ", " << alpha_momentum.y() << ", " << alpha_momentum.z() << ", " << alpha_event[3] << std::endl;
 
-
-    
-
     e_Ke     = electron_event[3]*MeV;
     alpha_Ke = alpha_event[3]*MeV;
-
 
   }
   else {
@@ -176,29 +172,21 @@ void PrimaryGenerator::GeneratePrimaryVertexOpt(G4Event* event, std::vector<doub
       
     // Particle 1 at vertex A
     
-    // Initialise the electron
+    // Initialise the alpha
     if (ii == 0){
       particleDefinition = G4ParticleTable::GetParticleTable()->FindParticle("alpha");
       particle1 = new G4PrimaryParticle(particleDefinition);
-      KE = 0.8*MeV;
+      KE = alpha_Ke;
 
       mass   = particleDefinition->GetPDGMass();
       energy = KE + mass;
       pmod = std::sqrt(energy*energy - mass*mass);
       p = pmod * alpha_momentum;
-
+      particle1->SetMomentum(p.x(), p.y(), p.z());
+      std::cout << "\nPrimaryGenerator: Adding alpha with " << particle1->GetKineticEnergy()/keV << " keV w ux,uy,uz " << p.x() << ", " << p.y() << ", " << p.z()<< " to vertexA."  << std::endl;
      
     }
-    else if (ii == 1 || ii == 2 || ii == 3) {
-      particleDefinition = G4ParticleTable::GetParticleTable()->FindParticle("alpha");
-      particle1 = new G4PrimaryParticle(particleDefinition);
-      KE = 1.5 * MeV;
-
-      mass   = particleDefinition->GetPDGMass();
-      energy = KE + mass;
-      pmod = std::sqrt(energy*energy - mass*mass);
-      p = pmod * alpha_momentum;
-    }
+    // Initalise the electron
     else {
       particleDefinition = G4ParticleTable::GetParticleTable()->FindParticle("e-");
       particle1 = new G4PrimaryParticle(particleDefinition);
@@ -208,14 +196,13 @@ void PrimaryGenerator::GeneratePrimaryVertexOpt(G4Event* event, std::vector<doub
       energy = KE + mass;
       pmod = std::sqrt(energy*energy - mass*mass);
       p = pmod * e_momentum;
+      particle1->SetMomentum(p.x(), p.y(), p.z());
+      std::cout << "PrimaryGenerator: Adding electron with " << particle1->GetKineticEnergy()/keV << " keV  e- w ux,uy,uz " << p.x() << ", " << p.y() << ", " << p.z()<< " to vertexA.\n"  << std::endl;
     }
-
-
     
-    particle1->SetMomentum(p.x(), p.y(), p.z());
+    // Add particle to the vertex
     vertexA->SetPrimary(particle1);
     
-    std::cout << "PrimaryGenerator: Adding particle " << ii << " with " << particle1->GetKineticEnergy()/keV << " keV  e- w ux,uy,uz " << p.x() << ", " << p.y() << ", " << p.z()<< " to vertexA."  << std::endl;
   }
 
   event->AddPrimaryVertex(vertexA);

@@ -87,8 +87,8 @@ file(GLOB headers ${PROJECT_SOURCE_DIR}/include/*.hh)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -g")
 add_executable(CRAB CRAB.cc ${sources} ${headers})
 message(STATUS "GEANT4 libraries libs: ${Geant4_LIBRARIES}")
-#target_link_libraries(CRAB -lGarfield -lgfortran ${ROOT_LIBRARIES} libNESTCore.a  libNESTG4.a ${Geant4_LIBRARIES})
-target_link_libraries(CRAB -lGarfield -lgfortran ${ROOT_LIBRARIES} libNESTCore.dylib  libNESTG4.dylib ${Geant4_LIBRARIES})
+target_link_libraries(CRAB -lGarfield -lgfortran ${ROOT_LIBRARIES} libNESTCore.a  libNESTG4.a ${Geant4_LIBRARIES})
+#target_link_libraries(CRAB -lGarfield -lgfortran ${ROOT_LIBRARIES} libNESTCore.dylib  libNESTG4.dylib ${Geant4_LIBRARIES})
 #----------------------------------------------------------------------------
 # Copy all scripts to the build directory, i.e. the directory in which we
 # build B1. This is so that we can run the executable directly because it

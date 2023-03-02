@@ -36,6 +36,7 @@
 #include "G4OpWLS.hh"
 #include "G4OpBoundaryProcess.hh"
 #include "FileHandling.hh"
+#include "G4GenericMessenger.hh"
 
 #include "G4VFastSimulationModel.hh"
 #include "Medium.hh"
@@ -114,6 +115,13 @@ private:
 
 	// For reading in files
 	filehandler::FileHandling FileHandler;
+
+	G4GenericMessenger* msg_;
+
+	std::string COMSOL_Path_  = "/Users/mistryk2/OneDrive - University of Texas at Arlington/Projects/CRAB/COMSOL/";
+	G4bool 	useEL_File_  = true;
+	G4bool 	useComsol_  = true;
+	
 
   
 };

@@ -98,13 +98,13 @@ void SteppingAction::UserSteppingAction(const G4Step *aStep)
     id = 4;
     if (lVolume->GetName().find("Lens")!=std::string::npos)  {
 
-        analysisManager->FillNtupleDColumn(id,0, event+ev_shift);
-        analysisManager->FillNtupleDColumn(id,1, pID);
-        analysisManager->FillNtupleDColumn(id,2, time/ns);
-        analysisManager->FillNtupleDColumn(id,3, pos[0]/mm);
-        analysisManager->FillNtupleDColumn(id,4, pos[1]/mm);
-        analysisManager->FillNtupleDColumn(id,5, pos[2]/mm);
-        analysisManager->AddNtupleRow(id);
+        // analysisManager->FillNtupleDColumn(id,0, event+ev_shift);
+        // analysisManager->FillNtupleDColumn(id,1, pID);
+        // analysisManager->FillNtupleDColumn(id,2, time/ns);
+        // analysisManager->FillNtupleDColumn(id,3, pos[0]/mm);
+        // analysisManager->FillNtupleDColumn(id,4, pos[1]/mm);
+        // analysisManager->FillNtupleDColumn(id,5, pos[2]/mm);
+        // analysisManager->AddNtupleRow(id);
 
 	  }
 

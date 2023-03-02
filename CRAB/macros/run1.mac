@@ -34,6 +34,10 @@
 
 /tracking/storeTrajectory 1
 
+# /Model/Garfield/COMSOL_Path "/Users/mistryk2/OneDrive - University of Texas at Arlington/Projects/CRAB/COMSOL/"
+# /Model/Garfield/useEL_File false
+# /Model/Garfield/useComsol false
+
 /Action/SteppingAction/event_shift 0
 
 /gps/particle geantino  ## Forces a 133Xe-like vtx: an isotropic 45 keV and a 100.2 keV pair of e-s
@@ -47,6 +51,6 @@
 #/gps/pos/centre -16.3333 0.384785 -50.1684 mm # needle
 #/gps/pos/centre  0 0 0 mm
 
-/run/beamOn 20
+/run/beamOn 1
 
 

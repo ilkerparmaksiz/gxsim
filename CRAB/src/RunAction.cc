@@ -104,6 +104,7 @@ void RunAction::BeginOfRunAction(const G4Run* aRun) {
 
 void RunAction::EndOfRunAction(const G4Run* aRun) {
   auto analysisManager = G4AnalysisManager::Instance();
+  analysisManager->SetCompressionLevel(3);
   analysisManager->Write();
   analysisManager->CloseFile();
 

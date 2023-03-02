@@ -41,9 +41,6 @@ const static G4double gapLEM = 0.7; //cm
 const static G4double fieldDrift = 438.0; // V/cm
 const static G4double fieldLEM   = 11400.0; // V/cm higher than 3k (as used for 2 bar) for 10 bar!
 
-G4bool useEL_File = false;
-G4bool useComsol = false;
-
 G4double DetChamberL;
 G4double DetChamberR;
 G4double DetActiveL; 
@@ -63,6 +60,14 @@ GarfieldVUVPhotonModel::GarfieldVUVPhotonModel(GasModelParameters* gmp, G4String
 	G4OpBoundaryProcess* fBoundaryProcess = new G4OpBoundaryProcess();
 	G4OpAbsorption* fAbsorptionProcess = new G4OpAbsorption();
 	G4OpWLS* fTheWLSProcess = new G4OpWLS();
+
+
+	// msg_ = new G4GenericMessenger(this, "/Model/Garfield/",
+    // "Control commands of garfield.");
+
+	// msg_->DeclareProperty("COMSOL_Path", COMSOL_Path_, "Path to the comsol files");
+	// msg_->DeclareProperty("useEL_File", useEL_File_, "Use EL timing from file");
+  	// msg_->DeclareProperty("useComsol", useComsol_, "Switch on COMSOL");
 
 }
 
@@ -108,6 +113,7 @@ void GarfieldVUVPhotonModel::DoIt(const G4FastTrack& fastTrack, G4FastStep& fast
      EC, 2-Dec-2021.
 
    */
+	//   fastStep.SetNumberOfSecondaryTracks(1E8); 
   
     // G4cout<<"HELLO Garfield"<<G4endl;
     ////The details of the Garfield model are implemented here
@@ -181,7 +187,7 @@ void GarfieldVUVPhotonModel::GenerateVUVPhotons(const G4FastTrack& fastTrack, G4
 
 	// Generate the El photons from a microphys model ran externally in Garfield
 	// We sample the output file which contains the timing profile of emission and diffusion
-	if (useEL_File)
+	if (useEL_File_)
 		MakeELPhotonsFromFile(fastStep, xi, yi, zi, ti);
 	// Use a simpler model
 	else
@@ -292,7 +298,7 @@ void GarfieldVUVPhotonModel::InitialisePhysics(){
 
 	fSensor = new Garfield::Sensor();
 
-	if (!useComsol){
+	if (!useComsol_){
 		Garfield::ComponentUser* componentDriftLEM = CreateSimpleGeometry();
 		fSensor->AddComponent(componentDriftLEM);
 		
@@ -303,7 +309,7 @@ void GarfieldVUVPhotonModel::InitialisePhysics(){
 	else {
 		std::cout << "Initialising Garfiled with a COMSOL geometry" << std::endl;
 
-		std::string home = "/Users/mistryk2/OneDrive - University of Texas at Arlington/Projects/CRAB/COMSOL/";
+		std::string home = COMSOL_Path_;
 		std::string gridfile   = "CRAB_Mesh.mphtxt";
 		std::string datafile   = "CRAB_Data.txt";
 		std::string fileconfig = "CRABMaterialProperties.txt";
@@ -341,7 +347,7 @@ void GarfieldVUVPhotonModel::InitialisePhysics(){
 
 
 	// Load in the events
-	if (useEL_File)
+	if (useEL_File_)
 		FileHandler.GetTimeProfileData(gas_path+"data/CRAB_Profiles_Rotated.csv", EL_profiles, EL_events);
     
 }
@@ -457,6 +463,8 @@ void GarfieldVUVPhotonModel::MakeELPhotonsFromFile( G4FastStep& fastStep, G4doub
 	for (G4int i=0;i<colHitsEntries;i++){
 	  GarfieldExcitationHit* newExcHit=new GarfieldExcitationHit();
 
+
+		// std::cout << xi << ", " <<  EL_profile[i][0]  << std::endl;
 	  G4ThreeVector fakepos ( (xi+ EL_profile[i][0])*10., (yi+ EL_profile[i][1])*10., (zi+ EL_profile[i][2])*10. ); // 0 = x, 1 = y, 2 = z
 	  newExcHit->SetPos(fakepos);
 	 
@@ -488,7 +496,7 @@ void GarfieldVUVPhotonModel::MakeELPhotonsSimple(G4FastStep& fastStep, G4double 
 
 	const G4double YoverP = 140.*fieldLEM/(detCon->GetGasPressure()/torr) - 116.; // yield/cm/bar, with P in Torr ... JINST 2 p05001 (2007).
 	colHitsEntries = YoverP * detCon->GetGasPressure()/bar * gapLEM; // with P in bar this time.
-	// colHitsEntries*=1.7; // Max val before G4 cant handle the memory anymore
+	// colHitsEntries*=2; // Max val before G4 cant handle the memory anymore
 	// colHitsEntries=1; // This is to turn down S2 so the vis doesnt get overwelmed
 
 	colHitsEntries *= (G4RandGauss::shoot(1.0,res));

@@ -55,19 +55,13 @@ const G4double res(0.01); // Estimated fluctuations in EL yield - high? EC, 21-J
 GarfieldVUVPhotonModel::GarfieldVUVPhotonModel(GasModelParameters* gmp, G4String modelName,G4Region* envelope,DetectorConstruction* dc,GasBoxSD* sd) :
 		G4VFastSimulationModel(modelName, envelope),detCon(dc),fGasBoxSD(sd) {
 	thermalE=gmp->GetThermalEnergy();
+	fGasModelParameters = gmp;
 	InitialisePhysics();
 
 	G4OpBoundaryProcess* fBoundaryProcess = new G4OpBoundaryProcess();
 	G4OpAbsorption* fAbsorptionProcess = new G4OpAbsorption();
 	G4OpWLS* fTheWLSProcess = new G4OpWLS();
 
-
-	// msg_ = new G4GenericMessenger(this, "/Model/Garfield/",
-    // "Control commands of garfield.");
-
-	// msg_->DeclareProperty("COMSOL_Path", COMSOL_Path_, "Path to the comsol files");
-	// msg_->DeclareProperty("useEL_File", useEL_File_, "Use EL timing from file");
-  	// msg_->DeclareProperty("useComsol", useComsol_, "Switch on COMSOL");
 
 }
 
@@ -81,14 +75,14 @@ G4bool GarfieldVUVPhotonModel::IsApplicable(const G4ParticleDefinition& particle
 }
 
 G4bool GarfieldVUVPhotonModel::ModelTrigger(const G4FastTrack& fastTrack){
+ 
   G4double ekin = fastTrack.GetPrimaryTrack()->GetKineticEnergy();
-//    std::cout << "GarfieldVUVPhotonModel::ModelTrigger() thermalE, ekin is " << thermalE << ",  "<< ekin / MeV << std::endl;
-  //  counter[0]++; //maybe not thread safe.
-  //  G4cout << "GarfieldVUV: candidate NEST thermales: ekin, thermalE" << ekin << ", " << thermalE  << G4endl;
-  S1Fill(fastTrack);
+  //  std::cout << "GarfieldVUVPhotonModel::ModelTrigger() thermalE, ekin is " << thermalE << ",  "<< ekin / MeV << std::endl;
+  
+  // Fill the S1 track information
+  //   S1Fill(fastTrack);
+  
   G4String particleName = fastTrack.GetPrimaryTrack()->GetParticleDefinition()->GetParticleName();
-
-	// std::cout << particleName << " " << ekin << std::endl;
 
    if (ekin<thermalE && particleName=="thermalelectron")
     {
@@ -187,7 +181,7 @@ void GarfieldVUVPhotonModel::GenerateVUVPhotons(const G4FastTrack& fastTrack, G4
 
 	// Generate the El photons from a microphys model ran externally in Garfield
 	// We sample the output file which contains the timing profile of emission and diffusion
-	if (useEL_File_)
+	if (fGasModelParameters->GetbEL_File())
 		MakeELPhotonsFromFile(fastStep, xi, yi, zi, ti);
 	// Use a simpler model
 	else
@@ -243,7 +237,6 @@ void ePiecewise (const double x, const double y, const double z,
 
 // Selection of Xenon exitations and ionizations
 void GarfieldVUVPhotonModel::InitialisePhysics(){
-	
 	// Set the gas Properties
 	fMediumMagboltz = new Garfield::MediumMagboltz();
 	fMediumMagboltz->SetComposition("Xe", 100.);
@@ -298,7 +291,7 @@ void GarfieldVUVPhotonModel::InitialisePhysics(){
 
 	fSensor = new Garfield::Sensor();
 
-	if (!useComsol_){
+	if (!fGasModelParameters->GetbComsol()){
 		Garfield::ComponentUser* componentDriftLEM = CreateSimpleGeometry();
 		fSensor->AddComponent(componentDriftLEM);
 		
@@ -309,7 +302,7 @@ void GarfieldVUVPhotonModel::InitialisePhysics(){
 	else {
 		std::cout << "Initialising Garfiled with a COMSOL geometry" << std::endl;
 
-		std::string home = COMSOL_Path_;
+		G4String home = fGasModelParameters->GetCOMSOL_Path();
 		std::string gridfile   = "CRAB_Mesh.mphtxt";
 		std::string datafile   = "CRAB_Data.txt";
 		std::string fileconfig = "CRABMaterialProperties.txt";
@@ -347,7 +340,7 @@ void GarfieldVUVPhotonModel::InitialisePhysics(){
 
 
 	// Load in the events
-	if (useEL_File_)
+	if (fGasModelParameters->GetbEL_File())
 		FileHandler.GetTimeProfileData(gas_path+"data/CRAB_Profiles_Rotated.csv", EL_profiles, EL_events);
     
 }

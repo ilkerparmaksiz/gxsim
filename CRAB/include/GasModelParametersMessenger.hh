@@ -30,8 +30,14 @@ class GasModelParametersMessenger : public G4UImessenger {
   GasModelParameters* fGasModelParameters;
   G4UIdirectory* GasModelParametersDir;
   G4UIdirectory* DegradDir;
+  G4UIdirectory* GeomDir;
 
   G4UIcmdWithADoubleAndUnit* thermalEnergyCmd;
+
+  G4UIcmdWithABool* setComsolCmd;
+  G4UIcmdWithABool* setEL_FileCmd;
+
+  G4UIcmdWithAString* setCOMSOL_Path;
   
 };
 

@@ -27,6 +27,15 @@ GasModelParametersMessenger::GasModelParametersMessenger(GasModelParameters* gm)
 
   thermalEnergyCmd = new G4UIcmdWithADoubleAndUnit("/gasModelParameters/degrad/thermalenergy",this);
   thermalEnergyCmd->SetGuidance("Set the thermal energy to be used by degrad");
+
+  GeomDir = new G4UIdirectory("/gasModelParameters/degrad/");
+  setComsolCmd = new G4UIcmdWithABool("/gasModelParameters/geometry/useComsol", this);
+  setComsolCmd->SetDefaultValue(false);
+
+  setEL_FileCmd = new G4UIcmdWithABool("/gasModelParameters/geometry/useEL_File", this);
+  setEL_FileCmd->SetDefaultValue(false);
+
+  setCOMSOL_Path = new G4UIcmdWithAString("/gasModelParameters/geometry/COMSOL_Path", this);
   
 }
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -34,7 +43,11 @@ GasModelParametersMessenger::GasModelParametersMessenger(GasModelParameters* gm)
 GasModelParametersMessenger::~GasModelParametersMessenger() {
   delete GasModelParametersDir;
   delete DegradDir;
+  delete GeomDir;
   delete thermalEnergyCmd;
+  delete setComsolCmd;
+  delete setEL_FileCmd;
+  delete setCOMSOL_Path;
 
 }
 
@@ -44,5 +57,14 @@ void GasModelParametersMessenger::SetNewValue(G4UIcommand* command, G4String new
     if(command == thermalEnergyCmd){
       fGasModelParameters->SetThermalEnergy(thermalEnergyCmd->GetNewDoubleValue(newValues));
     }
+
+    if (command == setComsolCmd)
+      fGasModelParameters->SetComsol(setComsolCmd->GetNewBoolValue(newValues));
+
+    if (command == setEL_FileCmd)
+      fGasModelParameters->SetEL_file(setEL_FileCmd->GetNewBoolValue(newValues));
+
+    if (command == setCOMSOL_Path)
+      fGasModelParameters->SetCOMSOL_Path(newValues);
 
 }

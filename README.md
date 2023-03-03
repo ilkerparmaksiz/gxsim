@@ -15,7 +15,7 @@
  * Dorothea Pfeiffer (Dorothea.Pfeiffer@cern.ch)
 
 
-##INSTALLATION
+## INSTALLATION
 
 In order to run the crab0 code, we need to install several software packages. The following instructions will help with that
 ```
@@ -36,7 +36,7 @@ I think for this to work you need a relatively up-to-date cmake v3 and gcc versi
 
 
 
-Geant4 installtion instructions
+Geant4 installation instructions
 
 Download the geant4 tar file to the machine, you can scp it over to the packages area you just created
 or use the following wget command to download it straight there:
@@ -71,6 +71,7 @@ Sorry, gonna have to refer you this page, we all know how annoying ROOT is to bu
 https://root.cern/install/build_from_source/
 
 Or if the machines have root compiled with c++17 instructions, just use that and life is easy.
+
 ---
 
 
@@ -211,8 +212,6 @@ I have some data files that you need so you can run the comsol modes and particl
 ```
 
 ---
-
-
 
 
 Running CRAB

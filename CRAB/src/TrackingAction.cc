@@ -50,16 +50,16 @@ void TrackingAction::PreUserTrackingAction(const G4Track *aTrack) {
   // Weirdly, S1 is filled in two places. Here for optphotons and in GarfieldVUVPhotons::S1Fill() for thermale's..
   // S2 is only filled here.
   G4int row(0);
-  analysisManager->FillNtupleDColumn(id,row, event); row++;
+  // analysisManager->FillNtupleDColumn(id,row, event); row++;
 
-  analysisManager->FillNtupleDColumn(id,row, (G4double)pID); row++;
-  analysisManager->FillNtupleDColumn(id,row, time/ns); row++;
-  analysisManager->FillNtupleDColumn(id,row, pos[0]/mm); row++;
-  analysisManager->FillNtupleDColumn(id,row, pos[1]/mm); row++;
-  analysisManager->FillNtupleDColumn(id,row, pos[2]/mm); row++;
-  analysisManager->FillNtupleSColumn(id,row, startp); row++;
+  // analysisManager->FillNtupleDColumn(id,row, (G4double)pID); row++;
+  // analysisManager->FillNtupleDColumn(id,row, time/ns); row++;
+  // analysisManager->FillNtupleDColumn(id,row, pos[0]/mm); row++;
+  // analysisManager->FillNtupleDColumn(id,row, pos[1]/mm); row++;
+  // analysisManager->FillNtupleDColumn(id,row, pos[2]/mm); row++;
+  // analysisManager->FillNtupleSColumn(id,row, startp); row++;
 
-  analysisManager->AddNtupleRow(id);
+  // analysisManager->AddNtupleRow(id);
 
 
   

@@ -1,14 +1,23 @@
+
+# Gas Pressure
 /Xenon/geometry/SetGasPressure 10. bar
 
-#/gasModelParameters/degrad/thermalenergy 10. eV
+
+# /gasModelParameters/degrad/thermalenergy 10. eV
 # Lower the threshold to get GarfieldVUVModel to grab up all ionization e's.  EC, 20-Apr-2022
 /gasModelParameters/degrad/thermalenergy 1.3 eV ## 150 gives almost same answer as 450, and 2x nexcitation as with 30. ## NEST e's are 1.13 eV
 
+# For setting the geometry
+/gasModelParameters/geometry/COMSOL_Path /Users/mistryk2/OneDrive - University of Texas at Arlington/Projects/CRAB/COMSOL/
+/gasModelParameters/geometry/useEL_File false
+/gasModelParameters/geometry/useComsol false
+
+# Threading
 #/run/numberOfThreads 1 # Currently hard-wired in CRAB.cc, cuz not evident thisis doing anything.
 #/control/cout/ignoreThreadsExcept 0
 #/control/cout/setCoutFile output.dmp
 
-#/run/initialize
+# Physics lists
 /Xenon/phys/setLowLimitE 50. eV
 /Xenon/phys/InitializePhysics  local # emlivermore #EmStandardPhysics_option4  ## must be local to effect NEST physics
 /Xenon/phys/AddParametrisation
@@ -16,13 +25,9 @@
 
 ##/process/optical/processActivation Scintillation false ### not with NEST. EC, 6-May-2022.
 
-#/random/setSeeds 0 0
 /run/initialize
 
-#/param/InActivateModel DegradModel
-#/param/InActivateModel GarfieldVUVPhotonModel
-
-/analysis/setFileName crab2MeV.root
+/analysis/setFileName eminus.root
 
 ####################################
 ############ Verbosities ###########
@@ -34,23 +39,15 @@
 
 /tracking/storeTrajectory 1
 
-# /Model/Garfield/COMSOL_Path "/Users/mistryk2/OneDrive - University of Texas at Arlington/Projects/CRAB/COMSOL/"
-# /Model/Garfield/useEL_File false
-# /Model/Garfield/useComsol false
-
 /Action/SteppingAction/event_shift 0
 
-/gps/particle geantino  ## Forces a 133Xe-like vtx: an isotropic 45 keV and a 100.2 keV pair of e-s
-/gps/pos/centre 0 0 -5 cm # near mesh surface
-/Generator/SingleParticle/momentum 0 0 1
-
-#/gps/particle alpha
-#/gps/ene/type Mono
-#/gps/ene/mono 5.3 MeV
-#/gps/direction 0.162586 -0.557881 0.170259
+/gps/particle e-
+/gps/ene/type Mono
+/gps/ene/mono 1 MeV
+/gps/direction 0.162586 -0.557881 0.170259
 #/gps/pos/centre -16.3333 0.384785 -50.1684 mm # needle
-#/gps/pos/centre  0 0 0 mm
+/gps/pos/centre  0 0 0 mm
 
-/run/beamOn 1
+/run/beamOn 3
 
 

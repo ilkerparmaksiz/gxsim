@@ -7,3 +7,5 @@ CMakeFiles
 *.png
 *.pdf
 *.gif
+*.csv
+*build*

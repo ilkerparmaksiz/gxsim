@@ -14,13 +14,15 @@ void PlotCrab(){
     // TFile *FileIn = TFile::Open("build/crab50MeVeminus_noref.root", "READ");
     // TFile *FileIn = TFile::Open("build/crab50MeVeminus_withref.root", "READ");
     TFile *FileIn = TFile::Open("macros/crab2MeV_t0.root", "READ");
-    // TFile *FileIn = TFile::Open("build/crab2MeV_noref_S2x10.root", "READ");
+    // TFile *FileIn = TFile::Open("macros/crab2MeV_20events_Pb210.root", "READ");
     
 
 
     // CAM --------------------------------------------------------------------
     
     TTree *tCam = (TTree*)FileIn->Get("ntuple/Camera");
+
+    std::vector<double> LY; // Light yield at the camera
     
     Double_t Cam_X, Cam_Y, Cam_Z, Cam_Ev;
     tCam->SetBranchAddress("X",&Cam_X);
@@ -33,11 +35,28 @@ void PlotCrab(){
     //create two histograms
     TH2F *hCamXY = new TH2F("hCameraXY","Camera X vs Y; Object Size X [cm]; Object Size Y [cm]",100, -5*SF, 5*SF, 100, -5*SF, 5*SF) ;
 
+    double temp_LY = 0;
+    double temp_event = 0;
+
     //read all entries and fill the histograms
     Long64_t nCam = tCam->GetEntries();
     for (Long64_t i=0;i<nCam;i++) {
         tCam->GetEntry(i);
         hCamXY->Fill(-Cam_X*SF, -Cam_Y*SF);
+
+
+        if (temp_event != Cam_Ev){
+            temp_event = Cam_Ev;
+            LY.push_back(temp_LY);
+            std::cout << temp_LY << std::endl;
+            temp_LY = 0;
+        }
+        else {
+             temp_LY+=1;
+        }
+
+       
+
     }
 
     TCanvas *cCam = new TCanvas();
@@ -45,28 +64,28 @@ void PlotCrab(){
 
     // LENS -------------------------------------------------------------------
 
-    TTree *tLens = (TTree*)FileIn->Get("ntuple/Lens");
+    // TTree *tLens = (TTree*)FileIn->Get("ntuple/Lens");
     
-    Double_t Lens_X, Lens_Y, Lens_Z, Lens_Ev, Lens_T;
-    tLens->SetBranchAddress("X",&Lens_X);
-    tLens->SetBranchAddress("Y",&Lens_Y);
-    tLens->SetBranchAddress("Z",&Lens_Z);
-    tLens->SetBranchAddress("Event",&Lens_Ev);
-    tLens->SetBranchAddress("Time",&Lens_T);
+    // Double_t Lens_X, Lens_Y, Lens_Z, Lens_Ev, Lens_T;
+    // tLens->SetBranchAddress("X",&Lens_X);
+    // tLens->SetBranchAddress("Y",&Lens_Y);
+    // tLens->SetBranchAddress("Z",&Lens_Z);
+    // tLens->SetBranchAddress("Event",&Lens_Ev);
+    // tLens->SetBranchAddress("Time",&Lens_T);
 
-    //create two histograms
-    TH2F *hLensXY = new TH2F("hLensXY","Lens X vs Y",10, -5, 5, 10, -5, 5) ;
+    // //create two histograms
+    // TH2F *hLensXY = new TH2F("hLensXY","Lens X vs Y",10, -5, 5, 10, -5, 5) ;
 
-    // XZ vs T
-    TH3F *hLensXYT = new TH3F("hLensXXT","Lens XY vs T",50, 80e3, 130e3, 10, -5, 5, 10, -5, 5 ) ;
+    // // XZ vs T
+    // TH3F *hLensXYT = new TH3F("hLensXXT","Lens XY vs T",50, 80e3, 130e3, 10, -5, 5, 10, -5, 5 ) ;
 
-    //read all entries and fill the histograms
-    Long64_t nLens = tLens->GetEntries();
-    for (Long64_t i=0;i<nLens;i++) {
-        tLens->GetEntry(i);
-        hLensXY->Fill(Lens_X, Lens_Y);
-        hLensXYT->Fill(Lens_T, Lens_X, Lens_Y);
-    }
+    // //read all entries and fill the histograms
+    // Long64_t nLens = tLens->GetEntries();
+    // for (Long64_t i=0;i<nLens;i++) {
+    //     tLens->GetEntry(i);
+    //     hLensXY->Fill(Lens_X, Lens_Y);
+    //     hLensXYT->Fill(Lens_T, Lens_X, Lens_Y);
+    // }
 
     // TCanvas *cLens = new TCanvas();
     // hLensXY->Draw("colz");

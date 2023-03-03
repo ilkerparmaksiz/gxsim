@@ -20,45 +20,48 @@
 
 DegradModel::DegradModel(GasModelParameters* gmp, G4String modelName, G4Region* envelope,DetectorConstruction* dc, GasBoxSD* sd)
     : G4VFastSimulationModel(modelName, envelope),detCon(dc), fGasBoxSD(sd){
-        thermalE=gmp->GetThermalEnergy();
-        processOccured = false;
+    
+    thermalE=gmp->GetThermalEnergy();
+    processOccured = false;
 
-        // Get the path to crab
-        crab_path = std::getenv("CRABPATH");
-        if (crab_path == nullptr) {
-          G4Exception("[DegradModel]", "DegradModel()", FatalException,
-                        "Environment variable CRABPATH not defined!");
-        }
-
-        G4String path(crab_path);
-
+    // Get the path to crab
+    crab_path = std::getenv("CRABPATH");
+    if (crab_path == nullptr) {
+        G4Exception("[DegradModel]", "DegradModel()", FatalException,
+                    "Environment variable CRABPATH not defined!");
     }
+
+    G4String path(crab_path);
+
+}
 
 DegradModel::~DegradModel() {}
 
 G4bool DegradModel::IsApplicable(const G4ParticleDefinition& particleType) {
-  if (particleType.GetParticleName()=="e-")
-    return true;
-  return false;
+    if (particleType.GetParticleName()=="e-")
+        return true;
+    
+    return false;
 }
 
 G4bool DegradModel::ModelTrigger(const G4FastTrack& fastTrack) {
-  G4int id = fastTrack.GetPrimaryTrack()->GetParentID();
+    G4int id = fastTrack.GetPrimaryTrack()->GetParentID();
+    
     if (id == 1){
-      //  also require that only photoelectric effect electrons are tracked here.
-      if ((fastTrack.GetPrimaryTrack()->GetCreatorProcess()->GetProcessName().find("phot") != std::string::npos) ||
-	  (fastTrack.GetPrimaryTrack()->GetCreatorProcess()->GetProcessName().find("comp") != std::string::npos)
-	  )
-	return true;
+        //  also require that only photoelectric effect electrons are tracked here.
+        if ( (fastTrack.GetPrimaryTrack()->GetCreatorProcess()->GetProcessName().find("phot") != std::string::npos) ||
+             (fastTrack.GetPrimaryTrack()->GetCreatorProcess()->GetProcessName().find("comp") != std::string::npos))
+            return true;
     }
-  return false;
+  
+    return false;
 
 }
 
 void DegradModel::DoIt(const G4FastTrack& fastTrack, G4FastStep& fastStep) {
 
-  // Here we start by killing G4's naive little one photo-electron.
-  // Then we run degrad with a photon of desired energy. Then we read up all the electrons it produces.
+    // Here we start by killing G4's naive little one photo-electron.
+    // Then we run degrad with a photon of desired energy. Then we read up all the electrons it produces.
     fastStep.KillPrimaryTrack();
     if(!processOccured){
         G4ThreeVector degradPos =fastTrack.GetPrimaryTrack()->GetVertexPosition();
@@ -90,9 +93,9 @@ void DegradModel::DoIt(const G4FastTrack& fastTrack, G4FastStep& fastStep) {
         stdout=system("/convertDegradFile.py");
 
         GetElectronsFromDegrad(fastStep,degradPos,degradTime);
-	// We call Degrad only once, which now that we have the x,y,z location of our primary Xray interaction, re-simulates that interaction. 
-	// Note the 5900 in the Degrad config file. The above system() line forces the single Degrad execution. EC, 2-Dec-2021.
-	processOccured=true; 
+        // We call Degrad only once, which now that we have the x,y,z location of our primary Xray interaction, re-simulates that interaction. 
+        // Note the 5900 in the Degrad config file. The above system() line forces the single Degrad execution. EC, 2-Dec-2021.
+        processOccured=true; 
     }
 
 }
@@ -117,28 +120,29 @@ void DegradModel::GetElectronsFromDegrad(G4FastStep& fastStep,G4ThreeVector degr
     
     nline=1;
     electronNumber=0;
-    while (getline(inFile, line,'\n'))//o '\n' indica o caracter para delimitaro fim de linha
-    {
+    while (getline(inFile, line,'\n')) {
+        
         std::istringstream iss(line);//stream de strings
-        if (nline ==1) //resumo
-        {
-            while (iss >> n) //cada stream ira atribuir o valor a n
-            {
-                v.push_back(n); //o n é adicionado ao vector
+        
+        if (nline ==1) {
+            while (iss >> n) {
+                v.push_back(n);
             }
             
             eventNumber=v[0];
             Nep=v[1];
-            //                            Nexc=v[2];
+            //  Nexc=v[2];
             v.clear();
         }
-        if (nline ==2) //Ionizations
-        {
-	  fastStep.SetNumberOfSecondaryTracks(1E6); // reasonable max # of electrons created by degrad
-	  while (iss >> n) //cada stream ira atribuir o valor a n
-            {
+        //Ionizations
+        if (nline ==2)  {
+            
+            fastStep.SetNumberOfSecondaryTracks(1E6); // reasonable max # of electrons created by degrad
+            
+            while (iss >> n) {
                 v.push_back(n); //o n é adicionado ao vector
             }
+            
             for (i=0;i<v.size();i=i+7){
                 posXDegrad=v[i];
                 posYDegrad=v[i+1];
@@ -149,9 +153,9 @@ void DegradModel::GetElectronsFromDegrad(G4FastStep& fastStep,G4ThreeVector degr
                 posX=posXDegrad*0.001+posXInitial;
                 posY=posZDegrad*0.001+posYInitial;
                 posZ=posYDegrad*0.001+posZInitial;
-		//		std::cout << "DegradModel::DoIt(): v[i-4]" << v[i] << "," << v[i+1] << "," << v[i+2] << "," << v[i+3] << "," << v[i+4]   << std::endl;
-		//		std::cout << "DegradModel::DoIt(): xinitial, poxXDegrad [mm]" << posXInitial << ", " << posXDegrad*0.001 << std::endl;
-		
+                //std::cout << "DegradModel::DoIt(): v[i-4]" << v[i] << "," << v[i+1] << "," << v[i+2] << "," << v[i+3] << "," << v[i+4]   << std::endl;
+                //std::cout << "DegradModel::DoIt(): xinitial, poxXDegrad [mm]" << posXInitial << ", " << posXDegrad*0.001 << std::endl;
+    
                 //convert ps to ns
                 time=timeDegrad*0.001+timeInitial;
                 
@@ -165,26 +169,25 @@ void DegradModel::GetElectronsFromDegrad(G4FastStep& fastStep,G4ThreeVector degr
                 G4Navigator* theNavigator= G4TransportationManager::GetTransportationManager()->GetNavigatorForTracking();
                 
                 G4VPhysicalVolume* myVolume = theNavigator->LocateGlobalPointAndSetup(myPoint);
-                
+              
                 G4String solidName=myVolume->GetName();
                 
-                if (solidName.contains("FIELDCAGE") || solidName.contains("GAS")){//AROUCA: APENAS PARA LIMITAR O NUMERO DE ELECTROES EM TESTES
-                    //G4cout<<"INSIDE"<<G4endl;
-                    
-                    //AROUCA: METER AQUI O ESPECTRO DE EMISSAO DO XENON
+                if (G4StrUtil::contains(solidName,"FIELDCAGE") || G4StrUtil::contains(solidName,"GAS") ){
+
                     electronNumber++;
                     XenonHit* xh = new XenonHit();
                     xh->SetPos(myPoint);
                     xh->SetTime(time);
                     fGasBoxSD->InsertXenonHit(xh);
-		    // Create secondary electron
-		    //if(electronNumber % 50 == 0){     // comment this condition, EC, 2-Dec-2021.
-		    //		    G4DynamicParticle electron(G4Electron::ElectronDefinition(),G4RandomDirection(), 7.0*eV);
+                    
+                    // Create secondary electron
+                    //if(electronNumber % 50 == 0){     // comment this condition, EC, 2-Dec-2021.
+                    // G4DynamicParticle electron(G4Electron::ElectronDefinition(),G4RandomDirection(), 7.0*eV);
 
-		    G4DynamicParticle electron(NEST::NESTThermalElectron::ThermalElectronDefinition(),G4RandomDirection(), 1.13*eV);
-		    G4Track *newTrack=fastStep.CreateSecondaryTrack(electron, myPoint, time,false);
+                    G4DynamicParticle electron(NEST::NESTThermalElectron::ThermalElectronDefinition(),G4RandomDirection(), 1.13*eV);
+                    G4Track *newTrack=fastStep.CreateSecondaryTrack(electron, myPoint, time,false);
 
-		    //		    }
+                    // }
                 }
             }
             v.clear(); //Faz reset ao vector senão vai continuar a adicionar os dadosadicionar os dados

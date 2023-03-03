@@ -57,69 +57,68 @@ public:
   //-------------------------
   // Constructor, destructor
   //-------------------------
-	GarfieldVUVPhotonModel(GasModelParameters*, G4String, G4Region*,DetectorConstruction*,GasBoxSD*);
-  ~GarfieldVUVPhotonModel (){};
+    GarfieldVUVPhotonModel(GasModelParameters*, G4String, G4Region*,DetectorConstruction*,GasBoxSD*);
+    ~GarfieldVUVPhotonModel (){};
 
-  //void SetPhysics(degradPhysics* fdegradPhysics);
-  //void WriteGeometryToGDML(G4VPhysicalVolume* physicalVolume);
+    //void SetPhysics(degradPhysics* fdegradPhysics);
+    //void WriteGeometryToGDML(G4VPhysicalVolume* physicalVolume);
 
-	virtual G4bool IsApplicable(const G4ParticleDefinition&);
-	virtual G4bool ModelTrigger(const G4FastTrack &);
-	virtual void DoIt(const G4FastTrack&, G4FastStep&);
-	void GenerateVUVPhotons(const G4FastTrack& fastTrack, G4FastStep& fastStep,G4ThreeVector garfPos,G4double garfTime);
+    virtual G4bool IsApplicable(const G4ParticleDefinition&);
+    virtual G4bool ModelTrigger(const G4FastTrack &);
+    virtual void DoIt(const G4FastTrack&, G4FastStep&);
+    void GenerateVUVPhotons(const G4FastTrack& fastTrack, G4FastStep& fastStep,G4ThreeVector garfPos,G4double garfTime);
         void Reset();
-	G4ThreeVector garfPos;
-	G4double garfTime;
-	
-	// Function to create simple geometry for field
-	Garfield::ComponentUser* CreateSimpleGeometry();
+    G4ThreeVector garfPos;
+    G4double garfTime;
+    
+    // Function to create simple geometry for field
+    Garfield::ComponentUser* CreateSimpleGeometry();
 
-	// Generate EL photons in the gap according to Garfield Microphysical Model
-	void MakeELPhotonsFromFile(G4FastStep& fastStep, G4double xi, G4double yi, G4double zi, G4double ti);
-	
-	// Generate EL photons in the gap according to a simple model
-	void MakeELPhotonsSimple(G4FastStep& fastStep, G4double xi, G4double yi, G4double zi, G4double ti);
-	
-	
+    // Generate EL photons in the gap according to Garfield Microphysical Model
+    void MakeELPhotonsFromFile(G4FastStep& fastStep, G4double xi, G4double yi, G4double zi, G4double ti);
+    
+    // Generate EL photons in the gap according to a simple model
+    void MakeELPhotonsSimple(G4FastStep& fastStep, G4double xi, G4double yi, G4double zi, G4double ti);
+    
+    
 private:
-	void InitialisePhysics();
-        void S1Fill(const G4FastTrack& );
+
+    void InitialisePhysics();
+    void S1Fill(const G4FastTrack& );
+
+    G4String gasFile;
+    G4String ionMobFile;
   
-        G4String gasFile;
-        G4String ionMobFile;
-  
-	DetectorConstruction* detCon;
-	G4ThreeVector myPoint;
-	G4double time;
-	G4double thermalE;
-   //degradPhysics* fdegradPhysics;
+    DetectorConstruction* detCon;
+    G4ThreeVector myPoint;
+    G4double time;
+    G4double thermalE;
+    //degradPhysics* fdegradPhysics;
 
-	Garfield::MediumMagboltz* fMediumMagboltz;
-	Garfield::AvalancheMicroscopic* fAvalanche;
-  	Garfield::AvalancheMC* fAvalancheMC;
+    Garfield::MediumMagboltz* fMediumMagboltz;
+    Garfield::AvalancheMicroscopic* fAvalanche;
+    Garfield::AvalancheMC* fAvalancheMC;
 
-  	Garfield::Sensor* fSensor = new Garfield::Sensor();
+    Garfield::Sensor* fSensor = new Garfield::Sensor();
 
-	GasBoxSD* fGasBoxSD;
-        Garfield::TrackHeed* fTrackHeed;
-        std::vector<uint> counter {0,0,0,0};
+    GasBoxSD* fGasBoxSD;
+    Garfield::TrackHeed* fTrackHeed;
+    std::vector<uint> counter {0,0,0,0};
 
-	// Variable to store the EL timing profiles to sample from
-	// <event> <photon> <x,y,z,t of photon>
-	std::vector<std::vector<std::vector<G4double>>> EL_profiles;
-	
-	// Vector consisting of the event numbers from the simulated Garfield using 
-	// COMSOL geometry
-	std::vector<G4double> EL_events; 
+    // Variable to store the EL timing profiles to sample from
+    // <event> <photon> <x,y,z,t of photon>
+    std::vector<std::vector<std::vector<G4double>>> EL_profiles;
+    
+    // Vector consisting of the event numbers from the simulated Garfield using 
+    // COMSOL geometry
+    std::vector<G4double> EL_events; 
 
-	// For reading in files
-	filehandler::FileHandling FileHandler;
+    // For reading in files
+    filehandler::FileHandling FileHandler;
 
-	GasModelParameters* fGasModelParameters;
+    GasModelParameters* fGasModelParameters;
 
-	
 
-  
 };
 
 void userHandle(double x, double y, double z, double t, int type, int level,Garfield::Medium * m);

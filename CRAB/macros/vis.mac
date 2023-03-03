@@ -79,12 +79,21 @@
 
 #/gps/particle opticalphoton
 #/gps/ene/mono 7.2 eV
-#/gps/direction 0 1 0
+
+#/gps/direction 0 0 1
 #/gps/pos/type Plane
 #/gps/pos/shape Circle
 #/gps/pos/radius 5 mm
-#/gps/pos/centre 0 20 0 cm
-# /vis/scene/endOfEventAction accumulate 1
+#/gps/pos/centre 0 0 -11 cm
+
+#/gps/pos/centre 0 0 -11 cm
+#/gps/ang/type iso
+#/gps/ang/mintheta 179.5 deg
+#/gps/ang/maxtheta 180.5 deg
+#/gps/ang/minphi 0 deg
+#/gps/ang/maxphi 360 deg
+
+#/vis/scene/endOfEventAction accumulate 1
 
 #/vis/viewer/panTo -0.0 -.28
 #/vis/viewer/set/viewpointThetaPhi 60. 0.

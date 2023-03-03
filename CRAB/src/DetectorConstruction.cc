@@ -418,13 +418,13 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
     G4VPhysicalVolume * EL_Ring_Plus        = new G4PVPlacement(0, G4ThreeVector(0.,0., EL_thick/2.0 - FR_thick - 4*(FR_thick + PEEK_Rod_thick) - 2.5*cm - EL_thick), EL_ring_logic, EL_solid->GetName(), gas_logic, 0,0, false);
 
     // Place the Mesh bits
-    new G4PVPlacement(0, G4ThreeVector(0.,0., EL_thick/2.0 - FR_thick - 4*(FR_thick + PEEK_Rod_thick) - 2.5*cm - EL_thick - EL_thick/2.0), ELP_Disk_logic, ELP_Disk_logic->GetName(), gas_logic, 0,0, false);
+    G4VPhysicalVolume * EL_Mesh_Plus_plus = new G4PVPlacement(0, G4ThreeVector(0.,0., EL_thick/2.0 - FR_thick - 4*(FR_thick + PEEK_Rod_thick) - 2.5*cm - EL_thick - EL_thick/2.0), ELP_Disk_logic, ELP_Disk_logic->GetName(), gas_logic, 0,0, false);
     HexCreator->PlaceHexagons(nHole, EL_hex_size,  EL_mesh_thick, ELP_Disk_logic, EL_Hex_logic);
 
     G4VPhysicalVolume * EL_Ring_Plus_plus   = new G4PVPlacement(0, G4ThreeVector(0.,0., EL_thick/2.0 - FR_thick - 4*(FR_thick + PEEK_Rod_thick) - 2.5*cm - EL_thick - ElGap_ - EL_thick), EL_ring_logic, EL_solid->GetName(), gas_logic, 0,0, false);
 
     // Place the Mesh bits
-    new G4PVPlacement(0, G4ThreeVector(0.,0.,  EL_thick/2.0 - FR_thick - 4*(FR_thick + PEEK_Rod_thick) - 2.5*cm - EL_thick - ElGap_ - EL_thick + EL_thick/2.0), ELPP_Disk_logic, ELPP_Disk_logic->GetName(), gas_logic, 0,0, false);
+    G4VPhysicalVolume * EL_Mesh_Plus = new G4PVPlacement(0, G4ThreeVector(0.,0.,  EL_thick/2.0 - FR_thick - 4*(FR_thick + PEEK_Rod_thick) - 2.5*cm - EL_thick - ElGap_ - EL_thick + EL_thick/2.0), ELPP_Disk_logic, ELPP_Disk_logic->GetName(), gas_logic, 0,0, false);
     HexCreator->PlaceHexagons(nHole, EL_hex_size,  EL_mesh_thick, ELPP_Disk_logic, EL_Hex_logic);
 
 
@@ -432,7 +432,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
     G4VPhysicalVolume * Cathode       = new G4PVPlacement(0, G4ThreeVector(0.,0., EL_thick/2.0 + 1*cm + 5*(FR_thick + PEEK_Rod_thick)), EL_ring_logic, EL_solid->GetName(), gas_logic, 0,0, false);
 
     // Place the Mesh bits
-    new G4PVPlacement(0, G4ThreeVector(0.,0.,  EL_thick/2.0 + 1*cm + 5*(FR_thick + PEEK_Rod_thick ) - EL_thick/2.0), Cathode_Disk_logic, Cathode_Disk_logic->GetName(), gas_logic, 0,0, false);
+    G4VPhysicalVolume * Cathode_EL_Mesh = new G4PVPlacement(0, G4ThreeVector(0.,0.,  EL_thick/2.0 + 1*cm + 5*(FR_thick + PEEK_Rod_thick ) - EL_thick/2.0), Cathode_Disk_logic, Cathode_Disk_logic->GetName(), gas_logic, 0,0, false);
     HexCreator->PlaceHexagons(nHole, EL_hex_size,  EL_mesh_thick, Cathode_Disk_logic, EL_Hex_logic);
 
 
@@ -543,6 +543,11 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
     new G4LogicalBorderSurface("SteelSurfaceELRing1",gas_phys,EL_Ring_Plus,OpSteelSurf);
     new G4LogicalBorderSurface("SteelSurfaceELRing2",gas_phys,EL_Ring_Plus_plus,OpSteelSurf);
     new G4LogicalBorderSurface("SteelSurfaceCathodeRing",gas_phys,Cathode,OpSteelSurf);
+
+
+    new G4LogicalBorderSurface("SteelSurfaceELMesh",gas_phys,EL_Mesh_Plus_plus,OpSteelSurf);
+    new G4LogicalBorderSurface("SteelSurfaceELMesh",gas_phys,EL_Mesh_Plus,OpSteelSurf);
+    new G4LogicalBorderSurface("SteelSurfaceCathodeMesh",gas_phys,Cathode_EL_Mesh,OpSteelSurf);
 
 
     if(!HideSourceHolder_ && !HideCollimator_){

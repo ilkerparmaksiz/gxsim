@@ -151,10 +151,9 @@ export DEGRAD_HOME=/Users/mistryk2/Packages/Degrad
 
 ---
 
-The main repository can be downloaded from this github page and checking out the crab0 branch:
+The main repository can be downloaded from this github page and checking out the master branch:
 ```
 git clone https://github.com/kvjmistry/gxsim.git
-git checkout crab0
 
 # Set the path to the CRAB directory e.g.
 export CRABPATH=/Users/mistryk2/Packages/GXeTPCSim/gxsim/CRAB/

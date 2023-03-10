@@ -37,6 +37,7 @@ void PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent) {
   if (fparticleGun->GetParticleDefinition() == G4Geantino::Geantino()) {
     std::cout << "GeneratePrimaries: detect that a vertex event is to be created." << std::endl;
     fPrimaryGenerator->GeneratePrimaryVertexOpt(anEvent,xyzbounds);
+    // fPrimaryGenerator->GeneratePrimaryVertexIon(anEvent,xyzbounds);
     return;
   }
 

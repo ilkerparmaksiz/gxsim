@@ -57,6 +57,7 @@ class PrimaryGenerator : public G4VPrimaryGenerator
   public:
   virtual void GeneratePrimaryVertex(G4Event*) {};
   virtual void GeneratePrimaryVertexOpt(G4Event*,std::vector<double> &);
+  virtual void GeneratePrimaryVertexIon(G4Event*,std::vector<double> &);
     
 
   private:

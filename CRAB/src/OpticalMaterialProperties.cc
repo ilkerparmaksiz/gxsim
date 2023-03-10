@@ -272,9 +272,8 @@ namespace opticalprops {
       std::vector<G4double> ENERGIES = {
               optPhotMinE_, 7.29 * eV,  optPhotMaxE_
       };
-      std::vector<G4double> REFLECTIVITY = {
-              0.20,0.20,0.20
-      };
+      std::vector<G4double> REFLECTIVITY = { 0.20,0.20,0.20};
+      // std::vector<G4double> REFLECTIVITY = { 0.00,0.00,0.00};
 
       // REFLEXION BEHAVIOR
       std::vector<G4double> ENERGIES_2    = {optPhotMinE_, optPhotMaxE_};

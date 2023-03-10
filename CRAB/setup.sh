@@ -1,5 +1,5 @@
 # Set the path to the Geant4 Installation
-export G4INSTALL=/Users/mistryk2/Packages/geant4-v11/geant4-v11.1.0/install;
+export G4INSTALL=/Users/mistryk2/Packages/geant4-v11/geant4-v11.1.1/install;
 export PATH=$G4INSTALL/bin:$PATH;
 export DYLD_LIBRARY_PATH=$G4INSTALL/lib:$DYLD_LIBRARY_PATH;
 export LD_LIBRARY_PATH=$G4INSTALL/lib:$LD_LIBRARY_PATH;

@@ -29,8 +29,8 @@ void TrackingAction::PreUserTrackingAction(const G4Track *aTrack) {
 
   G4int id(12);
   // The 120.075 is a hardcoded number for the position of the EL top in mm
-  if (pos[1]/mm>120.975) id = 1; // S1 optphotons
-  if (pos[1]/mm<120.975) id = 2; // S2 optphotons
+  if (pos[2]/mm>-106.3) id = 1; // S1 optphotons
+  if (pos[2]/mm<=-106.3) id = 2; // S2 optphotons
 
   /*
   G4ProcessManager* pmanager = particle->GetProcessManager();
@@ -50,16 +50,16 @@ void TrackingAction::PreUserTrackingAction(const G4Track *aTrack) {
   // Weirdly, S1 is filled in two places. Here for optphotons and in GarfieldVUVPhotons::S1Fill() for thermale's..
   // S2 is only filled here.
   G4int row(0);
-  // analysisManager->FillNtupleDColumn(id,row, event); row++;
+  analysisManager->FillNtupleDColumn(id,row, event); row++;
 
-  // analysisManager->FillNtupleDColumn(id,row, (G4double)pID); row++;
-  // analysisManager->FillNtupleDColumn(id,row, time/ns); row++;
-  // analysisManager->FillNtupleDColumn(id,row, pos[0]/mm); row++;
-  // analysisManager->FillNtupleDColumn(id,row, pos[1]/mm); row++;
-  // analysisManager->FillNtupleDColumn(id,row, pos[2]/mm); row++;
-  // analysisManager->FillNtupleSColumn(id,row, startp); row++;
+  analysisManager->FillNtupleDColumn(id,row, (G4double)pID); row++;
+  analysisManager->FillNtupleDColumn(id,row, time/ns); row++;
+  analysisManager->FillNtupleDColumn(id,row, pos[0]/mm); row++;
+  analysisManager->FillNtupleDColumn(id,row, pos[1]/mm); row++;
+  analysisManager->FillNtupleDColumn(id,row, pos[2]/mm); row++;
+  analysisManager->FillNtupleSColumn(id,row, startp); row++;
 
-  // analysisManager->AddNtupleRow(id);
+  analysisManager->AddNtupleRow(id);
 
 
   

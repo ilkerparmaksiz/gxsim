@@ -13,7 +13,7 @@
 #include <G4THitsCollection.hh>
 #include <G4Allocator.hh>
 #include <G4ThreeVector.hh>
-
+#include "tls.hh"
 
 namespace sensorhit {
 
@@ -73,7 +73,7 @@ namespace sensorhit {
 
 
 typedef G4THitsCollection<sensorhit::SensorHit> SensorHitsCollection;
-extern G4Allocator<sensorhit::SensorHit> SensorHitAllocator;
+extern G4ThreadLocal G4Allocator<sensorhit::SensorHit>* SensorHitAllocator;
 
 
 // INLINE DEFINITIONS ////////////////////////////////////////////////
@@ -81,10 +81,14 @@ extern G4Allocator<sensorhit::SensorHit> SensorHitAllocator;
 namespace sensorhit {
 
   inline void* SensorHit::operator new(size_t)
-  { return ((void*) SensorHitAllocator.MallocSingle()); }
+  { 
+    if(!SensorHitAllocator)
+      SensorHitAllocator = new G4Allocator<sensorhit::SensorHit>;
+    
+    return ((void*) SensorHitAllocator->MallocSingle()); }
 
   inline void SensorHit::operator delete(void* hit)
-  { SensorHitAllocator.FreeSingle((SensorHit*) hit); }
+  { SensorHitAllocator->FreeSingle((SensorHit*) hit); }
 
   inline G4int SensorHit::GetPmtID() const { return pmt_id_; }
   inline void SensorHit::SetPmtID(G4int id) { pmt_id_ = id; }

@@ -12,7 +12,7 @@
 using namespace sensorhit;
 
 
-G4Allocator<SensorHit> SensorHitAllocator;
+G4ThreadLocal G4Allocator<SensorHit>* SensorHitAllocator = 0;
 
 
 

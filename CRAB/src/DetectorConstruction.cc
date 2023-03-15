@@ -45,7 +45,7 @@ DetectorConstruction::DetectorConstruction(GasModelParameters* gmp) :
     SourceEn_thickn (2. * mm),
     SourceEn_holedia (5. * mm),
     gas_pressure_(10 * bar),
-    vtx_(-1.6*cm,0,-5*cm),
+    vtx_(0*cm,-1.6*cm,-5.25*cm),
     Active_diam(8.6 * cm),
     sc_yield_(25510./MeV),
     e_lifetime_(1000. * ms),
@@ -506,9 +506,11 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
 
         G4RotationMatrix* NeedleRotate = new G4RotationMatrix();
         NeedleRotate->rotateY(90.*deg);
+        NeedleRotate->rotateX(90.*deg);
+        NeedleRotate->rotateY(180.*deg);
         //NeedleRotate->rotateX(+10*deg);
-        G4ThreeVector NeedlePos={vtx_[0]-NeedleOffset, vtx_[1], vtx_[2]-FieldCagePos/2};
-        G4ThreeVector CollPosition={NeedlePos[0]-5*mm,NeedlePos[1],NeedlePos[2]};
+        G4ThreeVector NeedlePos={vtx_[0], vtx_[1]-NeedleOffset, vtx_[2]-FieldCagePos/2};
+        G4ThreeVector CollPosition={NeedlePos[0],NeedlePos[1]-5*mm,NeedlePos[2]};
 
         Needle_Phys= new G4PVPlacement(NeedleRotate,NeedlePos,Needle_Logic,Needle->GetName(),gas_logic,true,0,false);
         

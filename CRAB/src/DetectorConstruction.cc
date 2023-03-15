@@ -151,7 +151,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
     G4double hex_circumR = EL_hex_size/std::sqrt(3);  
 
     // Number of hexagons needed -- need to use fixed amount, too many and nexus will crash
-    G4int nHole = 15;
+    G4int nHole = 16;
 
     // Define the Stainless steel mesh cylinder to subtract hex pattern from
     G4Tubs* Mesh_Disk = new G4Tubs("Mesh_Disk", 0., EL_OD/2.0 , EL_mesh_thick/2., 0., twopi); // Use OD so mesh stays within the logical
@@ -306,6 +306,10 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
     G4RotationMatrix* rotateX = new G4RotationMatrix();
     rotateX->rotateX(90.*deg);
 
+    // Define a rotation matrix for the meshes so they point in the right direction
+    G4RotationMatrix* rotateMesh = new G4RotationMatrix();
+    rotateMesh->rotateZ(30.*deg);
+
 
     // LAB
     auto labPhysical = new G4PVPlacement(0, G4ThreeVector(),lab_logic_volume,lab_logic_volume->GetName(),0, false,0, false);
@@ -418,7 +422,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
     G4VPhysicalVolume * EL_Ring_Plus        = new G4PVPlacement(0, G4ThreeVector(0.,0., EL_thick/2.0 - FR_thick - 4*(FR_thick + PEEK_Rod_thick) - 2.5*cm - EL_thick), EL_ring_logic, EL_solid->GetName(), gas_logic, 0,0, false);
 
     // Place the Mesh bits
-    G4VPhysicalVolume * EL_Mesh_Plus_plus = new G4PVPlacement(0, G4ThreeVector(0.,0., EL_thick/2.0 - FR_thick - 4*(FR_thick + PEEK_Rod_thick) - 2.5*cm - EL_thick - EL_thick/2.0), ELP_Disk_logic, ELP_Disk_logic->GetName(), gas_logic, 0,0, false);
+    G4VPhysicalVolume * EL_Mesh_Plus_plus = new G4PVPlacement(rotateMesh, G4ThreeVector(0.,0., EL_thick/2.0 - FR_thick - 4*(FR_thick + PEEK_Rod_thick) - 2.5*cm - EL_thick - EL_thick/2.0), ELP_Disk_logic, ELP_Disk_logic->GetName(), gas_logic, 0,0, false);
     HexCreator->PlaceHexagons(nHole, EL_hex_size,  EL_mesh_thick, ELP_Disk_logic, EL_Hex_logic);
 
     G4VPhysicalVolume * EL_Ring_Plus_plus   = new G4PVPlacement(0, G4ThreeVector(0.,0., EL_thick/2.0 - FR_thick - 4*(FR_thick + PEEK_Rod_thick) - 2.5*cm - EL_thick - ElGap_ - EL_thick), EL_ring_logic, EL_solid->GetName(), gas_logic, 0,0, false);
@@ -432,7 +436,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
     G4VPhysicalVolume * Cathode       = new G4PVPlacement(0, G4ThreeVector(0.,0., EL_thick/2.0 + 1*cm + 5*(FR_thick + PEEK_Rod_thick)), EL_ring_logic, EL_solid->GetName(), gas_logic, 0,0, false);
 
     // Place the Mesh bits
-    G4VPhysicalVolume * Cathode_EL_Mesh = new G4PVPlacement(0, G4ThreeVector(0.,0.,  EL_thick/2.0 + 1*cm + 5*(FR_thick + PEEK_Rod_thick ) - EL_thick/2.0), Cathode_Disk_logic, Cathode_Disk_logic->GetName(), gas_logic, 0,0, false);
+    G4VPhysicalVolume * Cathode_EL_Mesh = new G4PVPlacement(rotateMesh, G4ThreeVector(0.,0.,  EL_thick/2.0 + 1*cm + 5*(FR_thick + PEEK_Rod_thick ) - EL_thick/2.0), Cathode_Disk_logic, Cathode_Disk_logic->GetName(), gas_logic, 0,0, false);
     HexCreator->PlaceHexagons(nHole, EL_hex_size,  EL_mesh_thick, Cathode_Disk_logic, EL_Hex_logic);
 
 

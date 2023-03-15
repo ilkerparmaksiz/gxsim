@@ -127,7 +127,7 @@ namespace HexagonMeshTools {
 
         G4double R = std::sqrt(x*x + y*y);
         
-        if (R > 7.2/2.0*cm)
+        if (R > 8/2.0*cm)
           continue;
 
         

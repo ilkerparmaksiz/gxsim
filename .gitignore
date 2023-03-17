@@ -9,3 +9,6 @@ CMakeFiles
 *.gif
 *.csv
 *build*
+*vscode*
+*DS_Store*
+

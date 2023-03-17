@@ -49,14 +49,20 @@
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 PrimaryGenerator::PrimaryGenerator()
-  : G4VPrimaryGenerator(), momentum_{}
+  : G4VPrimaryGenerator(), momentum_(1,1,1),energy_(0),ParticleType_("opticalphoton"),Position_(0),Iso_(true),useNeedle(true)
 {
 
   msg_ = new G4GenericMessenger(this, "/Generator/SingleParticle/",
     "Control commands of single-particle generator.");
 
-  msg_->DeclarePropertyWithUnit("momentum", "mm",  momentum_, "Set particle 3-momentum.");
+  msg_->DeclareProperty("momentum",  momentum_, "Set particle 3-momentum.");
+  msg_->DeclareProperty("energy",  energy_, "Set particle energy");
+  msg_->DeclareProperty("ParticleType",  ParticleType_, "Set particle type alpha,e- or etc");
+  msg_->DeclarePropertyWithUnit("pos", "cm",  Position_, "Set Position x,y,z");
+  msg_->DeclareProperty("Isotropic",  Iso_, "Isotropic Distribution");
+  msg_->DeclareProperty("useNeedle",  useNeedle, "Isotropic Distribution");
 
+    //msg_->DeclareProperty("pos", "cm",  Position_, "Set Position x,y,z");
   //  --- Get Xenon file --- 
 	char* nexus_path = std::getenv("CRABPATH");
 	if (nexus_path == nullptr) {
@@ -68,8 +74,8 @@ PrimaryGenerator::PrimaryGenerator()
 
 
 
-  FileHandler.GetEvent(crab_path + "/data/pb210_electron.csv", electron_data);
-  FileHandler.GetEvent(crab_path + "/data/pb210_alpha.csv",    alpha_data);
+  //FileHandler.GetEvent(crab_path + "/data/pb210_electron.csv", electron_data);
+  //FileHandler.GetEvent(crab_path + "/data/pb210_alpha.csv",    alpha_data);
 
 }
 
@@ -97,7 +103,6 @@ void PrimaryGenerator::GeneratePrimaryVertexOpt(G4Event* event, std::vector<doub
   G4double e_Ke = 1.16*MeV;
   G4double alpha_Ke = 5*MeV;
 
-  G4bool useNeedle = true; 
 
   // Generate events off the surface of the needle
   if (useNeedle){
@@ -125,7 +130,7 @@ void PrimaryGenerator::GeneratePrimaryVertexOpt(G4Event* event, std::vector<doub
     
   }
 
-  G4bool useEventsFromFile = true; 
+  G4bool useEventsFromFile = false;
 
   if (useEventsFromFile){
 
@@ -230,7 +235,7 @@ void PrimaryGenerator::GeneratePrimaryVertexIon(G4Event* event, std::vector<doub
     G4double halfLength = 1 * mm;
     G4double iniPhi_ = 0;
     G4double deltaPhi_ = twopi;
-    G4ThreeVector origin_ = {-1.6*cm - 1*mm, 0, - 5*cm };
+    G4ThreeVector origin_ = {0 , -1.6*cm-1*mm, - 5.25*cm };
     
     G4RotationMatrix* rotateHolder = new G4RotationMatrix();
     rotateHolder->rotateY(90.*deg);
@@ -268,7 +273,90 @@ void PrimaryGenerator::GeneratePrimaryVertexIon(G4Event* event, std::vector<doub
   vertexA->Print();
 }
 
+void PrimaryGenerator::GenerateSingleParticle(G4Event * event) {
 
+
+    G4double NeedleOffset=1*mm;
+    G4ThreeVector positionA( Position_[0], Position_[1]-NeedleOffset, Position_[2]);
+    energy_=energy_*MeV;
+    G4bool useNeedle = true;
+    G4ParticleDefinition* particleDefinition;
+    G4PrimaryParticle* particle1;
+    G4double mass;
+    G4double energy;
+    G4double pmod;
+    G4ThreeVector p;
+
+
+
+    // Particle 1 at vertex A
+
+    // Initialise the alpha
+
+    particleDefinition = G4ParticleTable::GetParticleTable()->FindParticle(ParticleType_);
+    particle1 = new G4PrimaryParticle(particleDefinition);
+
+    mass   = particleDefinition->GetPDGMass();
+    energy = energy_ + mass;
+    pmod = std::sqrt(energy*energy - mass*mass);
+
+    if(Iso_){
+        G4ThreeVector SphericalCoord;
+        G4double iniPhi=0;
+        G4double deltaPhi_=pi;
+        G4double deltatheta=twopi;
+
+        G4double phi = (iniPhi + (G4UniformRand() * deltaPhi_));
+        G4double theta=(iniPhi+(G4UniformRand() * deltatheta));
+        G4double rad = 1;
+        SphericalCoord ={rad*sin(phi)*cos(theta),rad*sin(phi)*sin(theta),rad*cos(phi)};
+        p=SphericalCoord*pmod;
+
+    }else{
+        p = pmod * momentum_;
+
+    }
+
+    particle1->SetMomentum(p.x(), p.y(), p.z());
+    std::cout << "\nPrimaryGenerator: Adding particle with " << particle1->GetKineticEnergy()/keV << " keV w ux,uy,uz " << p.x() << ", " << p.y() << ", " << p.z()<< " to vertexA."  << std::endl;
+
+
+
+    // Generate events off the surface of the needle
+    if (useNeedle){
+
+
+        G4double maxRad_ = (0.42)*mm + 2*nm;
+        G4double halfLength = 1 * mm;
+        G4double iniPhi_ = 0;
+        G4double deltaPhi_ = twopi;
+        G4ThreeVector origin_ = {0 , -1.6*cm-1*mm, - 5.25*cm };
+
+        G4RotationMatrix* rotateHolder = new G4RotationMatrix();
+        rotateHolder->rotateY(90.*deg);
+
+
+        G4double phi = (iniPhi_ + (G4UniformRand() * deltaPhi_));
+        G4double rad = maxRad_;
+
+        positionA = {rad * cos(phi), rad * sin(phi), (G4UniformRand() * 2.0 - 1.0) * halfLength  };
+
+        positionA *= *rotateHolder;
+
+        // Translating
+        positionA += origin_;
+
+    }
+
+    G4PrimaryVertex* vertexA = new G4PrimaryVertex(positionA,0);
+
+
+
+    // Add particle to the vertex
+    vertexA->SetPrimary(particle1);
+    event->AddPrimaryVertex(vertexA);
+    vertexA->Print();
+}
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 

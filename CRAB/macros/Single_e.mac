@@ -10,7 +10,7 @@
 # For setting the geometry
 /gasModelParameters/geometry/COMSOL_Path /Users/mistryk2/OneDrive - University of Texas at Arlington/Projects/CRAB/COMSOL/
 /gasModelParameters/geometry/useEL_File false
-/gasModelParameters/geometry/useComsol false
+/gasModelParameters/geometry/useComsol true
 
 # Threading
 #/run/numberOfThreads 1 # Currently hard-wired in CRAB.cc, cuz not evident thisis doing anything.
@@ -27,7 +27,7 @@
 
 /run/initialize
 
-/analysis/setFileName eminus.root
+/analysis/setFileName electron.root
 
 ####################################
 ############ Verbosities ###########
@@ -41,13 +41,11 @@
 
 /Action/SteppingAction/event_shift 0
 
-/gps/particle e-
-/gps/ene/type Mono
-/gps/ene/mono 1 MeV
-/gps/direction 0.162586 -0.557881 0.170259
-#/gps/pos/centre -16.3333 0.384785 -50.1684 mm # needle
-/gps/pos/centre  0 0 0 mm
-
-/run/beamOn 3
+/Generator/SingleParticle/ParticleType e-
+/Generator/SingleParticle/energy 1 MeV
+/Generator/SingleParticle/pos 0 -1.6 -5.25 cm
+#/Generator/SingleParticle/pos  -1.6 0 -5 cm
+/Generator/SingleParticle/Isotropic true
+/run/beamOn 1
 
 

@@ -58,9 +58,10 @@ class PrimaryGenerator : public G4VPrimaryGenerator
   virtual void GeneratePrimaryVertex(G4Event*) {};
   virtual void GeneratePrimaryVertexOpt(G4Event*,std::vector<double> &);
   virtual void GeneratePrimaryVertexIon(G4Event*,std::vector<double> &);
-    
+  virtual void GenerateSingleParticle(G4Event*);
 
-  private:
+
+private:
     bool fFSNeutrino;
     G4IonTable* fIonTable;
     G4ParticleDefinition *fParentNucleus;
@@ -76,6 +77,11 @@ class PrimaryGenerator : public G4VPrimaryGenerator
 
     std::vector<std::vector<G4double>> electron_data;
     std::vector<std::vector<G4double>> alpha_data;
+    G4String ParticleType_;
+    G4ThreeVector Position_;
+    G4double energy_;
+    G4bool Iso_;
+    G4bool useNeedle;
 
 
 

@@ -99,7 +99,7 @@ private:
     Garfield::AvalancheMicroscopic* fAvalanche;
     Garfield::AvalancheMC* fAvalancheMC;
 
-    Garfield::Sensor* fSensor = new Garfield::Sensor();
+    Garfield::Sensor* fSensor;
 
     GasBoxSD* fGasBoxSD;
     Garfield::TrackHeed* fTrackHeed;

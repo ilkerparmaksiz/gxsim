@@ -11,18 +11,16 @@ void PlotCrab(){
 
 
 
-    // TFile *FileIn = TFile::Open("build/crab50MeVeminus_noref.root", "READ");
-    // TFile *FileIn = TFile::Open("build/crab50MeVeminus_withref.root", "READ");
-    TFile *FileIn = TFile::Open("macros/crab2MeV_t0.root", "READ");
-    // TFile *FileIn = TFile::Open("macros/crab2MeV_20events_Pb210.root", "READ");
+    // TFile *FileIn = TFile::Open("macros/alpha_merge.root", "READ");
+    TFile *FileIn = TFile::Open("macros/alpha_e_t0.root", "READ");
+    // TFile *FileIn = TFile::Open("macros/eminus_t0.root", "READ");
+    // TFile *FileIn = TFile::Open("macros/eminus_Kr_t0.root", "READ");
     
 
 
     // CAM --------------------------------------------------------------------
     
     TTree *tCam = (TTree*)FileIn->Get("ntuple/Camera");
-
-    std::vector<double> LY; // Light yield at the camera
     
     Double_t Cam_X, Cam_Y, Cam_Z, Cam_Ev;
     tCam->SetBranchAddress("X",&Cam_X);
@@ -35,32 +33,16 @@ void PlotCrab(){
     //create two histograms
     TH2F *hCamXY = new TH2F("hCameraXY","Camera X vs Y; Object Size X [cm]; Object Size Y [cm]",100, -5*SF, 5*SF, 100, -5*SF, 5*SF) ;
 
-    double temp_LY = 0;
-    double temp_event = 0;
-
     //read all entries and fill the histograms
     Long64_t nCam = tCam->GetEntries();
     for (Long64_t i=0;i<nCam;i++) {
         tCam->GetEntry(i);
-        hCamXY->Fill(-Cam_X*SF, -Cam_Y*SF);
-
-
-        if (temp_event != Cam_Ev){
-            temp_event = Cam_Ev;
-            LY.push_back(temp_LY);
-            std::cout << temp_LY << std::endl;
-            temp_LY = 0;
-        }
-        else {
-             temp_LY+=1;
-        }
-
-       
-
+        if (Cam_Ev ==0 ) hCamXY->Fill(-Cam_X*SF, -Cam_Y*SF);
     }
 
     TCanvas *cCam = new TCanvas();
     hCamXY->Draw("colz");
+
 
     // LENS -------------------------------------------------------------------
 
@@ -113,12 +95,12 @@ void PlotCrab(){
     Long64_t nS1 = tS1->GetEntries();
     for (Long64_t i=0;i<nS1;i++) {
         tS1->GetEntry(i);
-        hS1XYZ->Fill(S1_X, S1_Y, S1_Z);
-        hS1XY->Fill(S1_X/10, S1_Y/10);
+        if (S1_Ev == 0)hS1XYZ->Fill(S1_X, S1_Y, S1_Z);
+        if (S1_Ev == 0)hS1XY->Fill(S1_X/10, S1_Y/10);
     }
 
-    // TCanvas *cS1 = new TCanvas();
-    // hS1XYZ->Draw("lego2");
+    TCanvas *cS1 = new TCanvas();
+    hS1XYZ->Draw("lego2");
     
     TCanvas *cS12 = new TCanvas();
     hS1XY->Draw("colz");
@@ -136,7 +118,8 @@ void PlotCrab(){
     tS2->SetBranchAddress("Event",&S2_Ev);
 
     //create two histograms
-    TH1F *hS2T = new TH1F("hS2T","S2 Timing; Time [us]; Entries",500, 40, 120) ;
+    // TH1F *hS2T = new TH1F("hS2T","S2 Timing; Time [us]; Entries",500, 40, 120) ;
+    TH1F *hS2T = new TH1F("hS2T","S2 Timing; Time [us]; Entries",500, 110, 130) ;
 
     //read all entries and fill the histograms
     Long64_t nS2 = tS2->GetEntries();
@@ -144,7 +127,7 @@ void PlotCrab(){
     for (Long64_t i=0;i<nS2;i++) {
         tS2->GetEntry(i);
 
-        hS2T->Fill(S2_t/1000.);
+        if (S2_Ev == 0) hS2T->Fill(S2_t/1000.);
 
     }
 
@@ -153,26 +136,37 @@ void PlotCrab(){
 
     // PMT --------------------------------------------------------------------
     
+    double QE = 0.18; // PMT QE
+
     TTree *tPMT= (TTree*)FileIn->Get("ntuple/PMT");
     
-    Double_t PMT_X, PMT_Y, PMT_Z, PMT_Ev;
+    Double_t PMT_X, PMT_Y, PMT_Z, PMT_t, PMT_Ev;
     tPMT->SetBranchAddress("X",&PMT_X);
     tPMT->SetBranchAddress("Y",&PMT_Y);
     tPMT->SetBranchAddress("Z",&PMT_Z);
+    tPMT->SetBranchAddress("Time",&PMT_t);
     tPMT->SetBranchAddress("Event",&PMT_Ev);
 
     //create two histograms
-    TH2F *hPMTXY = new TH2F("hPMTXY","PMT X vs Y",50, -12.7, 12.7, 50, -12.7, 12.7) ;
+    TH2F *hPMTXY = new TH2F("hPMTXY","PMT X vs Y",100, -12.7, 12.7, 50, -12.7, 12.7) ;
+
+    //create two histograms
+    // TH1F *hPMT = new TH1F("hPMT","PMT Timing; Time [us]; Entries",500, 70, 90) ;
+    TH1F *hPMT = new TH1F("hPMT","PMT Timing; Time [us]; Entries",200, 76, 84) ;
 
     //read all entries and fill the histograms
     Long64_t nPMT= tPMT->GetEntries();
     for (Long64_t i=0;i<nPMT;i++) {
         tPMT->GetEntry(i);
-        hPMTXY->Fill(-PMT_X, -PMT_Y);
+        if (PMT_Ev == 2) hPMTXY->Fill(-PMT_X, -PMT_Y);
+       hPMT->Fill(PMT_t/1000., QE);
     }
 
     TCanvas *cPMT= new TCanvas();
     hPMTXY->Draw("colz");
+
+    TCanvas *cPMT_t= new TCanvas();
+    hPMT->Draw("hist");
 
 
 

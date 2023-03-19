@@ -26,7 +26,7 @@ endif()
 # Setup include directory for this project
 #
 
-include_directories ("./include")
+include_directories ("./include/CRAB/")
 include(${Geant4_USE_FILE})
 list(APPEND CMAKE_PREFIX_PATH $ENV{ROOTSYS})
 #----------------------------------------------------------------------------
@@ -38,7 +38,6 @@ if(NOT ROOT_FOUND)
   return()
 endif()
 include(${ROOT_USE_FILE})
-
 
 # Setup Geant4 include directories and compile definitions
 include_directories($ENV{PROJECT_SOURCE_DIR}/include)
@@ -76,10 +75,11 @@ ENDIF()
 # Locate sources and headers for this project
 # NB: headers are included so they will show up in IDEs
 #
-file(GLOB sources ${PROJECT_SOURCE_DIR}/src/*.cc)
-file(GLOB headers ${PROJECT_SOURCE_DIR}/include/*.hh)
-#file(GLOB headers $ENV{GARFIELD_HOME}/include/*.hh)
-#file(GLOB headers $ENV{GARFIELD_HOME}/heed/*.hh)
+file(GLOB sources ${PROJECT_SOURCE_DIR}/src/*/*.cc)
+file(GLOB headers ${PROJECT_SOURCE_DIR}/src/*/*.hh)
+
+# Copy header files to the 'include' binary folder
+file(COPY ${headers} DESTINATION ${PROJECT_SOURCE_DIR}/include/${PROJECT_NAME})
 
 #----------------------------------------------------------------------------
 # Add the executable, and link it to the Geant4 and GARFIELD++ libraries

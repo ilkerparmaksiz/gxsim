@@ -73,12 +73,11 @@
 
 #include "gasNESTdet.hh"
 #include "G4/NESTProc.hh"
-#include "G4OpAbsorption.hh"
 #include "G4OpRayleigh.hh"
-#include "G4OpWLS.hh"
-#include "G4OpBoundaryProcess.hh"
-
-
+#include "OpAbsorption.hh"
+#include "OpWLS.hh"
+#include "OpBoundaryProcess.hh"
+#include "S2Photon.h"
 #ifdef theParticleIterator
 #undef theParticleIterator
 #endif
@@ -170,6 +169,10 @@ void PhysListEmStandard::ConstructProcess() {
             // all others charged particles except geantino
             ph->RegisterProcess(new G4hMultipleScattering(), particle);
             ph->RegisterProcess(new G4hIonisation(), particle);
+        }else if (particleName=="S2Photon"){
+            ph->RegisterProcess(new OpAbsorption(),particle);
+            ph->RegisterProcess(new OpWLS(),particle);
+            ph->RegisterProcess(new OpBoundaryProcess(),particle);
         }
     }
     
@@ -222,17 +225,16 @@ void PhysListEmStandard::ConstructProcess() {
     // td::cout << "PhysicsListEMStandard::ConstructProcess(): pname, pmanager are " << particleName << ", " << pmanager << std::endl;
     if ( !( particleName.find("e-")!=std::string::npos || particleName.find("alpha")!=std::string::npos  || particleName.find("opticalphoton")!=std::string::npos ) )
       continue;
-    if (pmanager) {
-
-      if (theNEST2ScintillationProcess->IsApplicable(*particle) && pmanager) {
+      if (pmanager) {
+        if (theNEST2ScintillationProcess->IsApplicable(*particle) && pmanager) {
         std::cout << "PhysicsList::InitialisePhysics(): particleName, pmanager  " << particleName << ", " << pmanager << "." << std::endl;
         std::cout << "ordDefault, ordInActive " << ordDefault << ", " << ordInActive  << std::endl;
         pmanager->AddProcess(theNEST2ScintillationProcess, ordDefault + 1, ordInActive, ordDefault + 1);
       }
 
-      G4OpBoundaryProcess* fBoundaryProcess = new G4OpBoundaryProcess();
-      G4OpAbsorption* fAbsorptionProcess = new G4OpAbsorption();
-      G4OpWLS* fTheWLSProcess = new G4OpWLS();
+      G4OpBoundaryProcess* fBoundaryProcess = new OpBoundaryProcess();
+      G4OpAbsorption* fAbsorptionProcess = new OpAbsorption();
+      G4OpWLS* fTheWLSProcess = new OpWLS();
 
     if (particleName == "opticalphoton" && pmanager) {
             G4cout << " AddDiscreteProcess to OpticalPhoton " << G4endl;

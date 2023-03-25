@@ -11,6 +11,7 @@
 #include "G4DecayPhysics.hh"
 #include "G4RadioactiveDecayPhysics.hh"
 #include "G4StepLimiterPhysics.hh"
+#include "S2Photon.h"
 //#include "G4QStoppingPhysics.hh"//not in g4 10
 #include "G4HadronElasticPhysics.hh"
 #include "G4HadronDElasticPhysics.hh"
@@ -89,7 +90,8 @@ PhysicsList::PhysicsList()
 // EM physics
   NEST::NESTThermalElectron::Definition();
   G4OpticalPhoton::Definition();
-  
+  S2Photon::Definition();
+
   RegisterPhysics(new G4EmLivermorePhysics(1));
 
   // Add General Decay

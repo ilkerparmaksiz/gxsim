@@ -10,7 +10,7 @@
 #include "G4Run.hh"
 #include "G4EventManager.hh"
 #include "GasBoxSD.hh"
-
+#include "S2Photon.h"
 
 void TrackingAction::PreUserTrackingAction(const G4Track *aTrack) {
   auto const* evt = G4EventManager::GetEventManager()->GetConstCurrentEvent();
@@ -23,14 +23,22 @@ void TrackingAction::PreUserTrackingAction(const G4Track *aTrack) {
   G4int pID       = particle->GetPDGEncoding();
   G4double time   = aTrack->GetGlobalTime();
 
-  
-  if (!(particle->GetParticleName().find("photon")!=std::string::npos))
-    return;
+
+    // Do not Store Trajectories to help on memory
+    fpTrackingManager->SetStoreTrajectory(false);
+
 
   G4int id(12);
+
+    if(aTrack->GetParticleDefinition()==S2Photon::OpticalPhoton())
+        id=2;
+    else if(aTrack->GetParticleDefinition()==G4OpticalPhoton::OpticalPhoton())
+        id=1;
+    else
+        return;
   // The 120.075 is a hardcoded number for the position of the EL top in mm
-  if (pos[2]/mm>-106.3) id = 1; // S1 optphotons
-  if (pos[2]/mm<=-106.3) id = 2; // S2 optphotons
+  //if (pos[2]/mm>-106.3) id = 1; // S1 optphotons
+  //if (pos[2]/mm<=-106.3) id = 2; // S2 optphotons
 
   /*
   G4ProcessManager* pmanager = particle->GetProcessManager();

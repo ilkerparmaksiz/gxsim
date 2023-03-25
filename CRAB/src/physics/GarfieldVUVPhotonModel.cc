@@ -31,7 +31,7 @@
 #include "G4EventManager.hh"
 #include "Analysis.hh"
 #include "ComponentComsol.hh"
-
+#include "S2Photon.h"
 
 #include "G4AutoLock.hh"
 namespace{G4Mutex aMutex = G4MUTEX_INITIALIZER;}
@@ -66,7 +66,7 @@ GarfieldVUVPhotonModel::GarfieldVUVPhotonModel(GasModelParameters* gmp, G4String
 }
 
 G4bool GarfieldVUVPhotonModel::IsApplicable(const G4ParticleDefinition& particleType) {
-   std::cout << "GarfieldVUVPhotonModel::IsApplicable() particleType is " << particleType.GetParticleName() << std::endl;
+   //std::cout << "GarfieldVUVPhotonModel::IsApplicable() particleType is " << particleType.GetParticleName() << std::endl;
   if (particleType.GetParticleName()=="thermalelectron") // || particleType.GetParticleName()=="opticalphoton")
     return true;
   return false;
@@ -80,7 +80,7 @@ G4bool GarfieldVUVPhotonModel::ModelTrigger(const G4FastTrack& fastTrack){
   //  std::cout << "GarfieldVUVPhotonModel::ModelTrigger() thermalE, ekin is " << thermalE << ",  "<< ekin / MeV << std::endl;
   
   // Fill the S1 track information
-  S1Fill(fastTrack);
+  //S1Fill(fastTrack);
   
   G4String particleName = fastTrack.GetPrimaryTrack()->GetParticleDefinition()->GetParticleName();
 
@@ -107,11 +107,13 @@ void GarfieldVUVPhotonModel::DoIt(const G4FastTrack& fastTrack, G4FastStep& fast
      EC, 2-Dec-2021.
 
    */
-    //   fastStep.SetNumberOfSecondaryTracks(1E8); 
+    fastStep.SetNumberOfSecondaryTracks(1E3);
   
     // G4cout<<"HELLO Garfield"<<G4endl;
     ////The details of the Garfield model are implemented here
-     fastStep.KillPrimaryTrack();//KILL NEST/DEGRAD/G4 TRACKS
+     //fastStep.KillPrimaryTrack();//KILL NEST/DEGRAD/G4 TRACKS
+     fastStep.ProposeTrackStatus(fSuspend);
+
      garfPos = fastTrack.GetPrimaryTrack()->GetVertexPosition();
      garfTime = fastTrack.GetPrimaryTrack()->GetGlobalTime();
      //G4cout<<"GLOBAL TIME "<<G4BestUnit(garfTime,"Time")<<" POSITION "<<G4BestUnit(garfPos,"Length")<<G4endl;
@@ -119,8 +121,11 @@ void GarfieldVUVPhotonModel::DoIt(const G4FastTrack& fastTrack, G4FastStep& fast
      if (!(counter[1]%10000))
        G4cout << "GarfieldVUV: actual NEST thermales: " << counter[1] << G4endl;
 
+     if (!(counter[3]%10000))
+        G4cout << "GarfieldVUV: S2 OpticalPhotons: " << counter[3] << G4endl;
 
-     //     if (!(counter[1]%1000)) // uncomment! 
+
+    //     if (!(counter[1]%1000)) // uncomment!
        GenerateVUVPhotons(fastTrack,fastStep,garfPos,garfTime);
 
 }
@@ -464,7 +469,7 @@ void GarfieldVUVPhotonModel::MakeELPhotonsFromFile( G4FastStep& fastStep, G4doub
       
       if (i % (colHitsEntries/colHitsEntries ) == 0){ // 50. Need to uncomment this condition, along with one in degradmodel.cc. EC, 2-Dec-2021.
       
-        auto* optphot = G4OpticalPhoton::OpticalPhotonDefinition();
+        auto* optphot = S2Photon::OpticalPhotonDefinition();
         
         G4DynamicParticle VUVphoton(optphot,G4RandomDirection(), 7.2*eV);
        
@@ -479,6 +484,7 @@ void GarfieldVUVPhotonModel::MakeELPhotonsFromFile( G4FastStep& fastStep, G4doub
         //	G4ProcessVectorfAtRestDoItVector = pm->GetAtRestProcessVector(typeDoIt);
       }
     }
+    fastStep.KillPrimaryTrack();
 }
 
 
@@ -505,7 +511,7 @@ void GarfieldVUVPhotonModel::MakeELPhotonsSimple(G4FastStep& fastStep, G4double 
       
       if (i % (colHitsEntries/colHitsEntries ) == 0){ // 50. Need to uncomment this condition, along with one in degradmodel.cc. EC, 2-Dec-2021.
       
-        auto* optphot = G4OpticalPhoton::OpticalPhotonDefinition();
+        auto* optphot = S2Photon::OpticalPhotonDefinition();
         
         G4DynamicParticle VUVphoton(optphot,G4RandomDirection(), 7.2*eV);
        
@@ -523,6 +529,8 @@ void GarfieldVUVPhotonModel::MakeELPhotonsSimple(G4FastStep& fastStep, G4double 
         //	G4ProcessManager* pm= newTrack->GetDefinition()->GetProcessManager();
         //	G4ProcessVectorfAtRestDoItVector = pm->GetAtRestProcessVector(typeDoIt);
       }
+      counter[3]++;
     }
+    fastStep.KillPrimaryTrack();
 
 }

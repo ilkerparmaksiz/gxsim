@@ -86,6 +86,7 @@ int main(int argc, char** argv) {
 
   } else  //! batch mode:
   {
+    auto start=std::chrono::high_resolution_clock::now();
     G4String command = "/control/execute ";
     G4String fileName = argv[1];
   
@@ -96,11 +97,9 @@ int main(int argc, char** argv) {
     }
     G4cout << "About to launch: " << command << " " << fileName << G4endl;
     UImanager->ApplyCommand(command + fileName);
-
-    time_t start=time(0);
-
-    double duration = difftime(time(0),start);
-    cout << "Simulation Time: " << duration << endl;
+      auto end=std::chrono::high_resolution_clock::now();
+      auto duration = std::chrono::duration_cast<std::chrono::minutes>(end-start);
+      cout << "Simulation Time: " << duration.count() <<" Min" <<endl;
   }
 
   if (visManager)

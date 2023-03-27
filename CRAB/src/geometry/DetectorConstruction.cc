@@ -144,6 +144,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
 
     G4Tubs* EL_ring_solid = new G4Tubs("EL_Ring", EL_ID/2., EL_OD/2.0, EL_thick/2 , 0., twopi);
     G4LogicalVolume* EL_ring_logic = new G4LogicalVolume(EL_ring_solid, Steel, "EL_Ring");
+    G4LogicalVolume* Cathode_ring_logic = new G4LogicalVolume(EL_ring_solid, Steel, "Cathode_Ring");
 
 
     // EL Mesh
@@ -433,7 +434,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
 
 
     // Cathode
-    G4VPhysicalVolume * Cathode       = new G4PVPlacement(0, G4ThreeVector(0.,0., EL_thick/2.0 + 1*cm + 5*(FR_thick + PEEK_Rod_thick)), EL_ring_logic, EL_solid->GetName(), gas_logic, 0,0, false);
+    G4VPhysicalVolume * Cathode       = new G4PVPlacement(0, G4ThreeVector(0.,0., EL_thick/2.0 + 1*cm + 5*(FR_thick + PEEK_Rod_thick)), Cathode_ring_logic, EL_solid->GetName(), gas_logic, 0,0, false);
 
     // Place the Mesh bits
     G4VPhysicalVolume * Cathode_EL_Mesh = new G4PVPlacement(rotateMesh, G4ThreeVector(0.,0.,  EL_thick/2.0 + 1*cm + 5*(FR_thick + PEEK_Rod_thick ) - EL_thick/2.0), Cathode_Disk_logic, Cathode_Disk_logic->GetName(), gas_logic, 0,0, false);
@@ -567,7 +568,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
     opXenon_Glass->SetType(dielectric_dielectric);   // SetType
     opXenon_Glass->SetFinish(ground);                 // SetFinish
     opXenon_Glass->SetPolish(0.0);
-    new G4LogicalBorderSurface("XenonCamSurface",gas_phys, camPhysical,opXenon_Glass);
+    new G4LogicalBorderSurface("XenonCamSurface",PMT_Tube_Vacuum_Phys0, camPhysical,opXenon_Glass);
 
     // Lens
     G4OpticalSurface* opXenon_Glass2 = new G4OpticalSurface("XenonLensSurface");

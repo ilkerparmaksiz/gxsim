@@ -77,7 +77,7 @@
 #include "OpAbsorption.hh"
 #include "OpWLS.hh"
 #include "OpBoundaryProcess.hh"
-#include "S2Photon.h"
+#include "S2Photon.hh"
 #ifdef theParticleIterator
 #undef theParticleIterator
 #endif
@@ -223,8 +223,8 @@ void PhysListEmStandard::ConstructProcess() {
     G4String particleName = particle->GetParticleName();
 
     // td::cout << "PhysicsListEMStandard::ConstructProcess(): pname, pmanager are " << particleName << ", " << pmanager << std::endl;
-    if ( !( particleName.find("e-")!=std::string::npos || particleName.find("alpha")!=std::string::npos  || particleName.find("opticalphoton")!=std::string::npos ) )
-      continue;
+    // if ( !( particleName.find("e-")!=std::string::npos || particleName.find("alpha")!=std::string::npos  || particleName.find("opticalphoton")!=std::string::npos ) )
+    //   continue;
       if (pmanager) {
         if (theNEST2ScintillationProcess->IsApplicable(*particle) && pmanager) {
         std::cout << "PhysicsList::InitialisePhysics(): particleName, pmanager  " << particleName << ", " << pmanager << "." << std::endl;

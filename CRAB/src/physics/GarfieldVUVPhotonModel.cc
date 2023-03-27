@@ -31,7 +31,7 @@
 #include "G4EventManager.hh"
 #include "Analysis.hh"
 #include "ComponentComsol.hh"
-#include "S2Photon.h"
+#include "S2Photon.hh"
 
 #include "G4AutoLock.hh"
 namespace{G4Mutex aMutex = G4MUTEX_INITIALIZER;}
@@ -413,6 +413,7 @@ void GarfieldVUVPhotonModel::Reset()
 {
   fSensor->ClearSignal();
   counter[1] = 0;
+  counter[3] = 0;
 }
 
 

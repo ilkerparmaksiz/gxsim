@@ -27,25 +27,35 @@
 
 /run/initialize
 
-/analysis/setFileName alpha.root
+/analysis/setFileName electron.root
 
 ####################################
 ############ Verbosities ###########
 ####################################
-/control/verbose 1
+/control/verbose 0
 /tracking/verbose 0
 /run/verbose 0
 /event/verbose 0
-/process/optical/verbose 0
 
 /tracking/storeTrajectory 1
 
 /Action/SteppingAction/event_shift 0
-/Generator/SingleParticle/ParticleType alpha
-/Generator/SingleParticle/energy 5.3 MeV
-/Generator/SingleParticle/pos 0 -1.6 -5.25 cm
-#/Generator/SingleParticle/pos  -1.6 0 -5 cm
-/Generator/SingleParticle/Isotropic true
-/run/beamOn 1
+
+#/Generator/SingleParticle/ParticleType opticalphoton
+#/Generator/SingleParticle/energy 7.0 eV
+#/Generator/SingleParticle/pos 0 -1.6 150 cm
+##/Generator/SingleParticle/pos  -1.6 0 -5 cm
+#/Generator/SingleParticle/momentum 0 0 1
+##/Generator/SingleParticle/Isotropic false
+
+
+/gps/particle opticalphoton
+/gps/ene/type Mono
+/gps/ene/mono 7 eV
+/gps/direction 0 0 1
+/gps/pos/centre -5 -5 15 cm
+/gps/polarization 0 0 1
+
+/run/beamOn 5
 
 

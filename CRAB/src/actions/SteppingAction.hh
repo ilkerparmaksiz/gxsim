@@ -27,6 +27,10 @@ class SteppingAction : public G4UserSteppingAction {
   G4GenericMessenger* msg_;
 
   G4int ev_shift;
+
+  G4bool reflected;
+  G4int trackID = -99;
+  G4String Material_Store;
   
 };
 

@@ -10,7 +10,7 @@
 #include "G4Run.hh"
 #include "G4EventManager.hh"
 #include "GasBoxSD.hh"
-#include "S2Photon.h"
+#include "S2Photon.hh"
 
 void TrackingAction::PreUserTrackingAction(const G4Track *aTrack) {
   auto const* evt = G4EventManager::GetEventManager()->GetConstCurrentEvent();
@@ -58,16 +58,19 @@ void TrackingAction::PreUserTrackingAction(const G4Track *aTrack) {
   // Weirdly, S1 is filled in two places. Here for optphotons and in GarfieldVUVPhotons::S1Fill() for thermale's..
   // S2 is only filled here.
   G4int row(0);
-  analysisManager->FillNtupleDColumn(id,row, event); row++;
 
-  analysisManager->FillNtupleDColumn(id,row, (G4double)pID); row++;
-  analysisManager->FillNtupleDColumn(id,row, time/ns); row++;
-  analysisManager->FillNtupleDColumn(id,row, pos[0]/mm); row++;
-  analysisManager->FillNtupleDColumn(id,row, pos[1]/mm); row++;
-  analysisManager->FillNtupleDColumn(id,row, pos[2]/mm); row++;
-  analysisManager->FillNtupleSColumn(id,row, startp); row++;
+  // Turn off the S2 fill since its heavy!
 
-  analysisManager->AddNtupleRow(id);
+  // analysisManager->FillNtupleDColumn(id,row, event); row++;
+
+  // analysisManager->FillNtupleDColumn(id,row, (G4double)pID); row++;
+  // analysisManager->FillNtupleDColumn(id,row, time/ns); row++;
+  // analysisManager->FillNtupleDColumn(id,row, pos[0]/mm); row++;
+  // analysisManager->FillNtupleDColumn(id,row, pos[1]/mm); row++;
+  // analysisManager->FillNtupleDColumn(id,row, pos[2]/mm); row++;
+  // analysisManager->FillNtupleSColumn(id,row, startp); row++;
+
+  // analysisManager->AddNtupleRow(id);
 
 
   

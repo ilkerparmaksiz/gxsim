@@ -11,7 +11,7 @@
 #include "G4DecayPhysics.hh"
 #include "G4RadioactiveDecayPhysics.hh"
 #include "G4StepLimiterPhysics.hh"
-#include "S2Photon.h"
+#include "S2Photon.hh"
 //#include "G4QStoppingPhysics.hh"//not in g4 10
 #include "G4HadronElasticPhysics.hh"
 #include "G4HadronDElasticPhysics.hh"

@@ -48,11 +48,39 @@ void SteppingAction::UserSteppingAction(const G4Step *aStep)
   G4Track* track = aStep->GetTrack();
   G4double tID = track->GetTrackID();
 
+  if (trackID != track->GetTrackID()){
+    trackID =  track->GetTrackID();
+    reflected = false;
+  }
+
   const G4ParticleDefinition* particle = track->GetParticleDefinition();
   G4int pID       = particle->GetPDGEncoding();
   G4double time   = aStep->GetPreStepPoint()->GetGlobalTime();
 
-  
+  G4OpBoundaryProcess* boundary = 0;
+  if (!boundary &&  particle->GetParticleName() == "S2Photon") {
+      
+      G4ProcessVector* pv = particle->GetProcessManager()->GetProcessList();
+      for (size_t i=0; i<pv->size(); i++) {
+          
+          if ((*pv)[i]->GetProcessName() == "OpBoundary") {
+              boundary = (G4OpBoundaryProcess*) (*pv)[i];
+              
+              // This is a reflection on the SS
+              if(aStep->GetPreStepPoint()->GetMaterial()->GetName() == "GXe" && aStep->GetPostStepPoint()->GetMaterial()->GetName() == "Steel" && boundary->GetStatus() == SpikeReflection){
+                  reflected = true;
+               }
+
+              // This gives the material that we just reflected off
+              if(aStep->GetPreStepPoint()->GetMaterial()->GetName() == "Steel" && aStep->GetPostStepPoint()->GetMaterial()->GetName() == "GXe" && boundary->GetStatus() == StepTooSmall){
+                Material_Store = aStep->GetPreStepPoint()->GetTouchableHandle()->GetVolume()->GetLogicalVolume()->GetName();
+              }
+
+              break;
+          }
+      }
+  }
+
   G4int id(0);
 
   
@@ -89,7 +117,21 @@ void SteppingAction::UserSteppingAction(const G4Step *aStep)
       analysisManager->FillNtupleDColumn(id,3, pos[0]/mm);
       analysisManager->FillNtupleDColumn(id,4, pos[1]/mm);
       analysisManager->FillNtupleDColumn(id,5, pos[2]/mm);
+      
+      // Reflected photon
+      if (reflected){
+        analysisManager->FillNtupleIColumn(id,6, 1);
+        analysisManager->FillNtupleSColumn(id,7, Material_Store);
+      }
+      else {
+        analysisManager->FillNtupleIColumn(id,6, 0);
+        analysisManager->FillNtupleSColumn(id,7, "None");
+      }
+      
       analysisManager->AddNtupleRow(id);
+
+      // if (reflected) std::cout << "Parent ID from reflected photon Detected: " << track->GetTrackID() << "  Material:  " << Material_Store << std::endl;
+      // else  std::cout << "Photon arrived but was not reflected: " << track->GetTrackID() << std::endl;
 
     }
     
@@ -117,6 +159,17 @@ void SteppingAction::UserSteppingAction(const G4Step *aStep)
       analysisManager->FillNtupleDColumn(id,3, pos[0]/mm);
       analysisManager->FillNtupleDColumn(id,4, pos[1]/mm);
       analysisManager->FillNtupleDColumn(id,5, pos[2]/mm);	  
+      
+      // Reflected photon
+      if (reflected){
+        analysisManager->FillNtupleIColumn(id,6, 1);
+        analysisManager->FillNtupleSColumn(id,7, Material_Store);
+      }
+      else {
+        analysisManager->FillNtupleIColumn(id,6, 0);
+        analysisManager->FillNtupleSColumn(id,7, "None");
+      }
+      
       analysisManager->AddNtupleRow(id);
     
     }

@@ -34,21 +34,16 @@ void PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent) {
   std::cout << "GeneratePrimaries() particle requested is " << fparticleGun->GetParticleDefinition()->GetParticleName() << std::endl;
   std::cout << "GeneratePrimaries() vtx bounds:  " << xyzbounds[0] << ", " << xyzbounds[1] << ", " << xyzbounds[2] << std::endl;
   
-  G4bool SingleParticle=true;
-  
-  if(SingleParticle && fparticleGun->GetParticleDefinition() == G4Geantino::Geantino() ){
-      fPrimaryGenerator->GenerateSingleParticle(anEvent);
-      return;
-  }
 
   if (fparticleGun->GetParticleDefinition() == G4Geantino::Geantino()) {
-    std::cout << "GeneratePrimaries: detect that a vertex event is to be created." << std::endl;
-    fPrimaryGenerator->GeneratePrimaryVertexOpt(anEvent,xyzbounds);
-    // fPrimaryGenerator->GeneratePrimaryVertexIon(anEvent,xyzbounds);
-    return;
+    std::cout << "Using custom generator of choice" << std::endl;
+    fPrimaryGenerator->Generate(anEvent, xyzbounds);
+  }
+  else {
+    fparticleGun->GeneratePrimaryVertex(anEvent);
   }
 
-    fparticleGun->GeneratePrimaryVertex(anEvent);
+    
 
 }
 

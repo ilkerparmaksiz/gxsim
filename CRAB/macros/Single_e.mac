@@ -46,6 +46,7 @@
 /Generator/SingleParticle/pos 0 -1.6 -5.25 cm
 #/Generator/SingleParticle/pos  -1.6 0 -5 cm
 /Generator/SingleParticle/Isotropic true
+/Generator/SingleParticle/Mode Single
 /run/beamOn 1
 
 

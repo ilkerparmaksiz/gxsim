@@ -56,9 +56,9 @@ class PrimaryGenerator : public G4VPrimaryGenerator
 
   public:
   virtual void GeneratePrimaryVertex(G4Event*) {};
-  virtual void GeneratePrimaryVertexOpt(G4Event*,std::vector<double> &);
   virtual void GeneratePrimaryVertexIon(G4Event*,std::vector<double> &);
   virtual void GenerateSingleParticle(G4Event*);
+  virtual void Generate(G4Event* event, std::vector<double> &xyz); // Choose which generator to launch
 
 
 private:
@@ -82,6 +82,7 @@ private:
     G4double energy_;
     G4bool Iso_;
     G4bool useNeedle;
+    G4String GeneratorMode_;
 
 
 

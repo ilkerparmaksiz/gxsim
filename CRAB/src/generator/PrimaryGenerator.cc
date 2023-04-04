@@ -61,6 +61,7 @@ PrimaryGenerator::PrimaryGenerator()
   msg_->DeclarePropertyWithUnit("pos", "cm",  Position_, "Set Position x,y,z");
   msg_->DeclareProperty("Isotropic",  Iso_, "Isotropic Distribution");
   msg_->DeclareProperty("useNeedle",  useNeedle, "Isotropic Distribution");
+  msg_->DeclareProperty("Mode",  GeneratorMode_, "The mode of the generator to run");
 
     //msg_->DeclareProperty("pos", "cm",  Position_, "Set Position x,y,z");
   //  --- Get Xenon file --- 
@@ -84,140 +85,23 @@ PrimaryGenerator::PrimaryGenerator()
 PrimaryGenerator::~PrimaryGenerator()
 { }
 
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-
-void PrimaryGenerator::GeneratePrimaryVertexOpt(G4Event* event, std::vector<double> &xyzb)
-{
-  //vertex A uniform on a cylinder
-  //
-  G4int n_particle = 1;
-
-  G4double KE = 1 * MeV;
-
-  G4ThreeVector positionA( xyzb.at(0), xyzb.at(1), xyzb.at(2));
-  G4double timeA = 0*s;
-
-  G4ThreeVector e_momentum = {};
-  G4ThreeVector alpha_momentum = {};
-
-  G4double e_Ke = 1.16*MeV;
-  G4double alpha_Ke = 5*MeV;
+// -------------------
+void PrimaryGenerator::Generate(G4Event* event, std::vector<double> &xyz){
 
 
-  // Generate events off the surface of the needle
-  if (useNeedle){
-
-    
-    G4double maxRad_ = (0.42)*mm + 2*nm;
-    G4double halfLength = 1 * mm;
-    G4double iniPhi_ = 0;
-    G4double deltaPhi_ = twopi;
-    G4ThreeVector origin_ = {-1.6*cm - 1*mm, 0, - 5*cm };
-    
-    G4RotationMatrix* rotateHolder = new G4RotationMatrix();
-    rotateHolder->rotateY(90.*deg);
-
-
-    G4double phi = (iniPhi_ + (G4UniformRand() * deltaPhi_));
-    G4double rad = maxRad_;
-
-    positionA = {rad * cos(phi), rad * sin(phi), (G4UniformRand() * 2.0 - 1.0) * halfLength  };
-  
-    positionA *= *rotateHolder;
-    
-    // Translating
-    positionA += origin_;
-    
-  }
-
-  G4bool useEventsFromFile = false;
-
-  if (useEventsFromFile){
-
-    // Get some random index
-    G4int event  = round(G4UniformRand()*electron_data.size());
-    std::vector<G4double> electron_event = electron_data[event];
-    std::vector<G4double> alpha_event = alpha_data[event];
-
-    e_momentum = {electron_event[0], electron_event[1], electron_event[2]};
-    e_momentum = e_momentum.unit();
-
-    alpha_momentum = {alpha_event[0], alpha_event[1], alpha_event[2]};
-    alpha_momentum = alpha_momentum.unit();
-
-    // std::cout << "Sampled electron with px, py, pz, KE:" << electron_event[0] << ", " << electron_event[1] << ", " << electron_event[2] << ", " << electron_event[3] << std::endl;
-    // std::cout << "Sampled alpha with px, py, pz, KE:" << alpha_event[0] << ", " << alpha_event[1] << ", " << alpha_event[2] << ", " << alpha_event[3] << std::endl;
-
-    std::cout << "Sampled electron with px, py, pz, KE:" << e_momentum.x() << ", " << e_momentum.y()  << ", " << e_momentum.z()  << ", " << electron_event[3] << std::endl;
-    std::cout << "Sampled alpha with px, py, pz, KE:" <<alpha_momentum.x()<< ", " << alpha_momentum.y() << ", " << alpha_momentum.z() << ", " << alpha_event[3] << std::endl;
-
-    e_Ke     = electron_event[3]*MeV;
-    alpha_Ke = alpha_event[3]*MeV;
-
+  if (GeneratorMode_ == "Single"){
+    std::cout <<"Generating with Single Particle Mode for event: " << event->GetEventID() << std::endl;
+    GenerateSingleParticle(event);
   }
   else {
-    e_momentum     = momentum_.unit();
-    alpha_momentum = momentum_.unit();
-
+    std::cout <<"Generating with Ion Mode for event: " << event->GetEventID() << std::endl;
+    GeneratePrimaryVertexIon(event, xyz);
   }
 
-
-  // 
-  G4PrimaryVertex* vertexA = new G4PrimaryVertex(positionA, timeA);
-
-  G4ParticleDefinition* particleDefinition;
-  G4PrimaryParticle* particle1;
-  G4double mass;
-  G4double energy;
-  G4double pmod;
-  G4ThreeVector p;
-
-
-  for (int ii = 0; ii < n_particle; ii++) {
-      
-    // Particle 1 at vertex A
-    
-    // Initialise the alpha
-    if (ii == 0){
-      particleDefinition = G4ParticleTable::GetParticleTable()->FindParticle("alpha");
-      particle1 = new G4PrimaryParticle(particleDefinition);
-      KE = alpha_Ke;
-
-      mass   = particleDefinition->GetPDGMass();
-      energy = KE + mass;
-      pmod = std::sqrt(energy*energy - mass*mass);
-      p = pmod * alpha_momentum;
-      particle1->SetMomentum(p.x(), p.y(), p.z());
-      std::cout << "\nPrimaryGenerator: Adding alpha with " << particle1->GetKineticEnergy()/keV << " keV w ux,uy,uz " << p.x() << ", " << p.y() << ", " << p.z()<< " to vertexA."  << std::endl;
-     
-    }
-    // Initalise the electron
-    else {
-      particleDefinition = G4ParticleTable::GetParticleTable()->FindParticle("e-");
-      particle1 = new G4PrimaryParticle(particleDefinition);
-      KE = e_Ke;
-
-      mass   = particleDefinition->GetPDGMass();
-      energy = KE + mass;
-      pmod = std::sqrt(energy*energy - mass*mass);
-      p = pmod * e_momentum;
-      particle1->SetMomentum(p.x(), p.y(), p.z());
-      std::cout << "PrimaryGenerator: Adding electron with " << particle1->GetKineticEnergy()/keV << " keV  e- w ux,uy,uz " << p.x() << ", " << p.y() << ", " << p.z()<< " to vertexA.\n"  << std::endl;
-    }
-    
-    // Add particle to the vertex
-    vertexA->SetPrimary(particle1);
-    
-  }
-
-  event->AddPrimaryVertex(vertexA);
-  //  SetParticlePosition(positionA);
-  //  std::cout << "PrimaryGenerator: Added " << n_particle << " isotropic electrons as primaries at " << x/1000. <<", " << y/1000. << ", " << z/1000. << " [m]. "  << std::endl;
-  vertexA->Print();
 }
 
-// -------------------
 
+// -------------------
 
 void PrimaryGenerator::GeneratePrimaryVertexIon(G4Event* event, std::vector<double> &xyzb){
 
@@ -225,7 +109,7 @@ void PrimaryGenerator::GeneratePrimaryVertexIon(G4Event* event, std::vector<doub
   G4ThreeVector positionA( xyzb.at(0), xyzb.at(1), xyzb.at(2));
   G4double timeA = 0*s;
 
-  G4bool useNeedle = true; 
+  G4bool useNeedle = false; 
 
   // Generate events off the surface of the needle
   if (useNeedle){
@@ -262,10 +146,14 @@ void PrimaryGenerator::GeneratePrimaryVertexIon(G4Event* event, std::vector<doub
   G4double pmod;
   G4ThreeVector p;
 
+  pmod = 500*keV;
+  p = pmod * momentum_;
+
   // Initialise the alpha
-  particleDefinition = G4IonTable::GetIonTable()->GetIon(82, 210, 0.);
+  particleDefinition = G4IonTable::GetIonTable()->GetIon(84, 210, 0.); // Po210 decay of 5.3 MeV alpha
   particleDefinition->SetPDGLifeTime(1.*ps); 
   G4PrimaryParticle* ion = new G4PrimaryParticle(particleDefinition);
+  ion->SetMomentum(p.x(), p.y(), p.z());
   
   // Add particle to the vertex
   vertexA->SetPrimary(ion);

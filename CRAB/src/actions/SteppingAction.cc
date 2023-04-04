@@ -10,6 +10,7 @@
 #include "G4Run.hh"
 #include "G4EventManager.hh"
 #include "GasBoxSD.hh"
+#include "S2Photon.hh"
 
 
 SteppingAction::SteppingAction(EventAction *eva) : fEventAction(eva),  ev_shift(0) {
@@ -100,6 +101,17 @@ void SteppingAction::UserSteppingAction(const G4Step *aStep)
 
   if (pID==11 && track->GetKineticEnergy()/keV>0.100 && (lVolume->GetName().find("GAS")!=std::string::npos)) // don't count the thermale's, just G4 e's
     fEventAction->EDepPrim(aStep->GetTotalEnergyDeposit());
+
+
+  // Here we select if we got an S1 photon or S2 photon
+  // S1  = 1, S2 = 2
+  G4int PhotonType = 2;
+  if(track->GetParticleDefinition()==S2Photon::OpticalPhoton()){
+    PhotonType = 2;
+  }
+  else if(track->GetParticleDefinition()==G4OpticalPhoton::OpticalPhoton()){
+    PhotonType = 1;
+  }
  
  
 
@@ -127,7 +139,9 @@ void SteppingAction::UserSteppingAction(const G4Step *aStep)
         analysisManager->FillNtupleIColumn(id,6, 0);
         analysisManager->FillNtupleSColumn(id,7, "None");
       }
-      
+
+      analysisManager->FillNtupleIColumn(id,8, PhotonType);
+    
       analysisManager->AddNtupleRow(id);
 
       // if (reflected) std::cout << "Parent ID from reflected photon Detected: " << track->GetTrackID() << "  Material:  " << Material_Store << std::endl;
@@ -169,7 +183,9 @@ void SteppingAction::UserSteppingAction(const G4Step *aStep)
         analysisManager->FillNtupleIColumn(id,6, 0);
         analysisManager->FillNtupleSColumn(id,7, "None");
       }
-      
+
+      analysisManager->FillNtupleIColumn(id,8, PhotonType);
+
       analysisManager->AddNtupleRow(id);
     
     }

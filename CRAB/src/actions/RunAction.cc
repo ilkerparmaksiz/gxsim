@@ -53,6 +53,7 @@ void RunAction::BeginOfRunAction(const G4Run* aRun) {
   analysisManager->CreateNtupleDColumn("Z");         //column 5
   analysisManager->CreateNtupleIColumn("Reflected"); //column 6
   analysisManager->CreateNtupleSColumn("Boundary");  //column 7
+  analysisManager->CreateNtupleIColumn("SID");       //column 8
 
   analysisManager->FinishNtuple();
 
@@ -101,6 +102,7 @@ void RunAction::BeginOfRunAction(const G4Run* aRun) {
   analysisManager->CreateNtupleDColumn("Z");         //column 5
   analysisManager->CreateNtupleIColumn("Reflected"); //column 6
   analysisManager->CreateNtupleSColumn("Boundary");  //column 7
+  analysisManager->CreateNtupleIColumn("SID");       //column 8
   analysisManager->FinishNtuple();
 
   analysisManager->SetNtupleActivation(true);

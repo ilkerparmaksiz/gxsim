@@ -66,7 +66,7 @@ GarfieldVUVPhotonModel::GarfieldVUVPhotonModel(GasModelParameters* gmp, G4String
 }
 
 G4bool GarfieldVUVPhotonModel::IsApplicable(const G4ParticleDefinition& particleType) {
-   //std::cout << "GarfieldVUVPhotonModel::IsApplicable() particleType is " << particleType.GetParticleName() << std::endl;
+  //  std::cout << "GarfieldVUVPhotonModel::IsApplicable() particleType is " << particleType.GetParticleName() << std::endl;
   if (particleType.GetParticleName()=="thermalelectron") // || particleType.GetParticleName()=="opticalphoton")
     return true;
   return false;
@@ -445,9 +445,8 @@ Garfield::ComponentUser* GarfieldVUVPhotonModel::CreateSimpleGeometry(){
 
 void GarfieldVUVPhotonModel::MakeELPhotonsFromFile( G4FastStep& fastStep, G4double xi, G4double yi, G4double zi, G4double ti){
 
-
     // Here we get the photon timing profile from a file
-    G4int EL_event  = round(G4UniformRand()*EL_events.size());
+    G4int EL_event  = round(G4UniformRand()* (EL_events.size() - 1) );
     
     // Get the right EL array
     std::vector<std::vector<G4double>> EL_profile = EL_profiles[EL_event];
@@ -484,6 +483,7 @@ void GarfieldVUVPhotonModel::MakeELPhotonsFromFile( G4FastStep& fastStep, G4doub
         //	G4ProcessManager* pm= newTrack->GetDefinition()->GetProcessManager();
         //	G4ProcessVectorfAtRestDoItVector = pm->GetAtRestProcessVector(typeDoIt);
       }
+      counter[3]++;
     }
     fastStep.KillPrimaryTrack();
 }

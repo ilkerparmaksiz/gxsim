@@ -109,8 +109,6 @@ void PrimaryGenerator::GeneratePrimaryVertexIon(G4Event* event, std::vector<doub
   G4ThreeVector positionA( xyzb.at(0), xyzb.at(1), xyzb.at(2));
   G4double timeA = 0*s;
 
-  G4bool useNeedle = false; 
-
   // Generate events off the surface of the needle
   if (useNeedle){
 
@@ -165,9 +163,8 @@ void PrimaryGenerator::GenerateSingleParticle(G4Event * event) {
 
 
     G4double NeedleOffset=1*mm;
-    G4ThreeVector positionA( Position_[0], Position_[1]-NeedleOffset, Position_[2]);
+    G4ThreeVector positionA( Position_[0], Position_[1], Position_[2]);
     energy_=energy_*MeV;
-    G4bool useNeedle = true;
     G4ParticleDefinition* particleDefinition;
     G4PrimaryParticle* particle1;
     G4double mass;
@@ -212,6 +209,9 @@ void PrimaryGenerator::GenerateSingleParticle(G4Event * event) {
 
     // Generate events off the surface of the needle
     if (useNeedle){
+
+        // Shift y position
+        positionA = {Position_[0], Position_[1]- NeedleOffset, Position_[2]};
 
 
         G4double maxRad_ = (0.42)*mm + 2*nm;

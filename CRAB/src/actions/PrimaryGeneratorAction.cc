@@ -40,6 +40,7 @@ void PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent) {
     fPrimaryGenerator->Generate(anEvent, xyzbounds);
   }
   else {
+    std::cout << "Using gps generator" << std::endl;
     fparticleGun->GeneratePrimaryVertex(anEvent);
   }
 

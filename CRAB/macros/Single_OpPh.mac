@@ -53,9 +53,9 @@
 /gps/ene/type Mono
 /gps/ene/mono 7 eV
 /gps/direction 0 0 1
-/gps/pos/centre -5 -5 15 cm
+/gps/pos/centre 0 0 0 cm
 /gps/polarization 0 0 1
 
-/run/beamOn 5
+/run/beamOn 5000
 
 

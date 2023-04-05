@@ -59,7 +59,8 @@ void SteppingAction::UserSteppingAction(const G4Step *aStep)
   G4double time   = aStep->GetPreStepPoint()->GetGlobalTime();
 
   G4OpBoundaryProcess* boundary = 0;
-  if (!boundary &&  particle->GetParticleName() == "S2Photon") {
+  // if (!boundary &&  particle->GetParticleName() == "S2Photon") {
+  if (!boundary){
       
       G4ProcessVector* pv = particle->GetProcessManager()->GetProcessList();
       for (size_t i=0; i<pv->size(); i++) {
@@ -74,6 +75,18 @@ void SteppingAction::UserSteppingAction(const G4Step *aStep)
 
               // This gives the material that we just reflected off
               if(aStep->GetPreStepPoint()->GetMaterial()->GetName() == "Steel" && aStep->GetPostStepPoint()->GetMaterial()->GetName() == "GXe" && boundary->GetStatus() == StepTooSmall){
+                Material_Store = aStep->GetPreStepPoint()->GetTouchableHandle()->GetVolume()->GetLogicalVolume()->GetName();
+              }
+
+              // This gives the material that we just reflected off
+              if(aStep->GetPostStepPoint()->GetMaterial()->GetName() == "MgF2" && boundary->GetStatus() == FresnelReflection){
+                reflected = true;
+                Material_Store = aStep->GetPostStepPoint()->GetTouchableHandle()->GetVolume()->GetLogicalVolume()->GetName();
+              }
+
+              // Total internal reflection from MgF2
+              if(aStep->GetPreStepPoint()->GetMaterial()->GetName() == "MgF2" && boundary->GetStatus() == TotalInternalReflection){
+                reflected = true;
                 Material_Store = aStep->GetPreStepPoint()->GetTouchableHandle()->GetVolume()->GetLogicalVolume()->GetName();
               }
 

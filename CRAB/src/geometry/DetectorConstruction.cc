@@ -27,7 +27,7 @@
 #include "G4MultiUnion.hh"
 #include "Visibilities.hh"
 #include "HexagonMeshTools.hh"
-
+#include "CADMesh.hh"
 
 
 
@@ -81,6 +81,15 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
     G4Material *PEEK  = materials::PEEK();
     G4Material *vacuum = G4NistManager::Instance()->FindOrBuildMaterial("G4_Galactic");
     G4Material *teflon = G4NistManager::Instance()->FindOrBuildMaterial("G4_TEFLON");
+    std::string crabpath= getenv("CRABPATH");
+
+    //std::cout<<filename<<std::endl;
+
+    // Import Needles using CADMesh
+    auto Needle5=CADMesh::TessellatedMesh::FromSTL(crabpath+"/data/Needle_5.stl");
+    auto Needle10=CADMesh::TessellatedMesh::FromSTL(crabpath+"/data/Needle_10.stl");
+    auto Needle15=CADMesh::TessellatedMesh::FromSTL(crabpath+"/data/Needle_15v2.stl");
+
 
     // Optical Properties Assigned here
     MgF2->SetMaterialPropertiesTable(opticalprops::MgF2());
@@ -93,7 +102,6 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
     G4LogicalVolume * lab_logic_volume = new G4LogicalVolume(lab_solid_volume,G4NistManager::Instance()->FindOrBuildMaterial("G4_AIR"),lab_name) ;
 
     // Creating the Steel Cylinder that we need
-
     /// First Creating the Ends of the Cylinder with Proper Holes
     G4Tubs* chamber_flange_solid = new G4Tubs("CHAMBER_FLANGE", MgF2_window_diam_/2, (chamber_diam/2. + chamber_thickn), chamber_thickn/2.0, 0., twopi);
     G4LogicalVolume* chamber_flange_logic =new G4LogicalVolume(chamber_flange_solid,materials::Steel(), "CHAMBER_FLANGE");
@@ -227,6 +235,18 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
 
     G4LogicalVolume * Needle_Logic = new G4LogicalVolume(Needle,materials::Steel(),"Needle");
     G4LogicalVolume * Coll_Logic = new G4LogicalVolume(CollimatorWithBlock,materials::PEEK(),"CollimatorWithBlock");
+
+
+
+    // Needles
+    auto Needle_5_Solid=Needle5->GetSolid();
+    auto Needle_10_Solid=Needle10->GetSolid();
+    auto Needle_15_Solid=Needle15->GetSolid();
+
+    G4LogicalVolume * Needle_5_logical= new G4LogicalVolume(Needle_5_Solid,Steel,"Needle_5cm");
+    G4LogicalVolume * Needle_10_logical= new G4LogicalVolume(Needle_10_Solid,Steel,"Needle_10cm");
+    G4LogicalVolume * Needle_15_logical= new G4LogicalVolume(Needle_15_Solid,Steel,"Needle_15cm");
+
 
 
     ///
@@ -518,6 +538,36 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
         if(!HideCollimator_) {
             new G4PVPlacement(NeedleRotate,CollPosition,Coll_Logic,CollimatorWithBlock->GetName(),gas_logic,true,0,false);
         }
+
+        G4RotationMatrix* Needle5cmRotate = new G4RotationMatrix();
+        Needle5cmRotate->rotateY(90.*deg);
+        Needle5cmRotate->rotateX(90.*deg);
+        Needle5cmRotate->rotateY(180.*deg);
+        Needle5cmRotate->rotateZ(90*deg);
+        new G4PVPlacement(Needle5cmRotate, G4ThreeVector(NeedlePos[0],NeedlePos[1],NeedlePos[2]),Needle_5_logical,Needle_5_logical->GetName(),gas_logic, false,0, false);
+
+        G4RotationMatrix* Needle10cmRotate = new G4RotationMatrix();
+        Needle10cmRotate->rotateY(90.*deg);
+        Needle10cmRotate->rotateX(90.*deg);
+        Needle10cmRotate->rotateY(180.*deg);
+        //Needle10cmRotate->rotateZ(90*deg);
+        new G4PVPlacement(Needle10cmRotate, G4ThreeVector(NeedlePos[0],NeedlePos[1],NeedlePos[2]+2*cm),Needle_10_logical,Needle_10_logical->GetName(),gas_logic, false,0, false);
+
+
+        G4RotationMatrix* Needle15cmRotate = new G4RotationMatrix();
+        Needle15cmRotate->rotateY(90.*deg);
+        Needle15cmRotate->rotateX(90.*deg);
+        Needle15cmRotate->rotateY(180.*deg);
+        //Needle15cmRotate->rotateZ(90*deg);
+
+        new G4PVPlacement(Needle15cmRotate, G4ThreeVector(NeedlePos[0],NeedlePos[1],NeedlePos[2]+3*cm),Needle_15_logical,Needle_15_logical->GetName(),gas_logic, false,0, false);
+
+
+        G4VisAttributes *needlevis=new G4VisAttributes(G4Colour(1,1,1));
+        needlevis->SetForceSolid(true);
+        Needle_5_logical->SetVisAttributes(needlevis);
+        Needle_10_logical->SetVisAttributes(needlevis);
+        //Needle_15_logical->SetVisAttributes(needlevis);
         
     }
 
@@ -579,9 +629,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
     new G4LogicalBorderSurface("XenonLensSurface",gas_phys,lensPhysical,opXenon_Glass2);
 
     // Visuals
-
     AssignVisuals();
-
     //Construct a G4Region, connected to the logical volume in which you want to use the G4FastSimulationModel
     G4Region* regionGas = new G4Region("GasRegion");
     regionGas->AddRootLogicalVolume(gas_logic);

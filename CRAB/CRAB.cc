@@ -72,7 +72,7 @@ int main(int argc, char** argv) {
     visManager = new G4VisExecutive();
     visManager->Initialize();
     //#ifdef G4UI_USE
-
+    std::cout << argc<<std::endl;
     //#ifdef G4VIS_USE
     UImanager->ApplyCommand("/control/execute vis.mac");
     //#endif
@@ -89,7 +89,7 @@ int main(int argc, char** argv) {
     auto start=std::chrono::high_resolution_clock::now();
     G4String command = "/control/execute ";
     G4String fileName = argv[1];
-  
+
     if (argc < 3) {
       G4cout << "No random seed has been provided" << G4endl;
       delete runManager;

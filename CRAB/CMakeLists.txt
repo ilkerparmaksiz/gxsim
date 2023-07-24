@@ -48,9 +48,9 @@ include_directories($ENV{GARFIELD_HOME}/Heed)
 # Add additional libraries needed for GARFIELD++
 #link_directories($ENV{GARFIELD_LIB})
 link_directories($ENV{GARFIELD_HOME}/install/lib)
-link_directories(/opt/homebrew/Cellar/gcc/12.2.0/lib/gcc/12/)
+#link_directories(/opt/homebrew/Cellar/gcc/12.2.0/lib/gcc/12/)
 link_directories($ENV{G4INSTALL}/lib)
-link_directories(/opt/homebrew/lib/)
+#link_directories(/opt/homebrew/lib/)
 
 # NEST
 find_package(NEST REQUIRED)
@@ -64,7 +64,8 @@ IF(APPLE)
     # Fix linking on 10.14+. See https://stackoverflow.com/questions/54068035
     LINK_DIRECTORIES(/usr/local/lib)
 ENDIF()
-#---------------------------------------------------------------------------
+#-------------------------------home/argon/Projects/gxsim/CRAB/cmake-build-debug/CMakeFiles/CMakeOutput.log".
+
 #include the macro for generating dictionaries
 
 

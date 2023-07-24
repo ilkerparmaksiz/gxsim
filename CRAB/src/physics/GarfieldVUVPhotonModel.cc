@@ -165,15 +165,16 @@ void GarfieldVUVPhotonModel::GenerateVUVPhotons(const G4FastTrack& fastTrack, G4
     // Need to get the AvalancheMC drift at the High-Field point in z, and then call fAvalanche-AvalancheElectron() to create excitations/VUVphotons.
     fAvalancheMC->DriftElectron(x0,y0,z0,t0);
 
-    unsigned int n = fAvalancheMC->GetNumberOfDriftLinePoints();
+    unsigned int n = fAvalancheMC->GetNumberOfElectronEndpoints();
     double xi,yi,zi,ti;
+    int status;
     //	std::cout << "Drift(): avalanchetracking, n DLTs is " << n << std::endl;
 
     // Get zi when in the beginning of the EL region
     for(unsigned int i=0;i<n;i++){
-      fAvalancheMC->GetDriftLinePoint(i,xi,yi,zi,ti);
+        fAvalancheMC->GetElectronEndpoint(i,x0,y0,z0,t0,xi,yi,zi,ti,status);
         // std::cout << "GVUVPM: positions are " << xi<<"," <<yi<<","<<zi <<"," <<ti<< std::endl;
-        
+
 
       // Drift line point entered LEM
       if (zi < ELPos && ( std::sqrt(xi*xi + yi*yi) < DetActiveR/2.0) )

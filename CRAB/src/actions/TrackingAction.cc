@@ -25,7 +25,7 @@ void TrackingAction::PreUserTrackingAction(const G4Track *aTrack) {
 
 
     // Do not Store Trajectories to help on memory
-    fpTrackingManager->SetStoreTrajectory(false);
+    fpTrackingManager->SetStoreTrajectory(true);
 
 
   G4int id(12);

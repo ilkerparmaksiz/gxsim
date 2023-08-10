@@ -218,6 +218,7 @@ void PrimaryGenerator::GenerateSingleParticle(G4Event * event) {
         G4double halfLength = 1 * mm;
         G4double iniPhi_ = 0;
         G4double deltaPhi_ = twopi;
+
         G4ThreeVector origin_ = {0 , -1.6*cm-1*mm, - 5.25*cm };
 
         G4RotationMatrix* rotateHolder = new G4RotationMatrix();

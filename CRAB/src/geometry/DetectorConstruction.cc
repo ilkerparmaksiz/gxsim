@@ -89,6 +89,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
     auto Needle5=CADMesh::TessellatedMesh::FromSTL(crabpath+"/data/Needle_5.stl");
     auto Needle10=CADMesh::TessellatedMesh::FromSTL(crabpath+"/data/Needle_10.stl");
     auto Needle15=CADMesh::TessellatedMesh::FromSTL(crabpath+"/data/Needle_15v2.stl");
+    auto Needles=CADMesh::TessellatedMesh::FromOBJ(crabpath+"/data/Needles.obj");
 
 
     // Optical Properties Assigned here
@@ -242,10 +243,12 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
     auto Needle_5_Solid=Needle5->GetSolid();
     auto Needle_10_Solid=Needle10->GetSolid();
     auto Needle_15_Solid=Needle15->GetSolid();
+    auto Needles_solid=Needles->GetSolid();
 
     G4LogicalVolume * Needle_5_logical= new G4LogicalVolume(Needle_5_Solid,Steel,"Needle_5cm");
     G4LogicalVolume * Needle_10_logical= new G4LogicalVolume(Needle_10_Solid,Steel,"Needle_10cm");
     G4LogicalVolume * Needle_15_logical= new G4LogicalVolume(Needle_15_Solid,Steel,"Needle_15cm");
+    G4LogicalVolume * Needles_logic= new G4LogicalVolume(Needles_solid,Steel,"Needles");
 
 
 
@@ -544,14 +547,14 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
         Needle5cmRotate->rotateX(90.*deg);
         Needle5cmRotate->rotateY(180.*deg);
         Needle5cmRotate->rotateZ(90*deg);
-        new G4PVPlacement(Needle5cmRotate, G4ThreeVector(NeedlePos[0],NeedlePos[1],NeedlePos[2]),Needle_5_logical,Needle_5_logical->GetName(),gas_logic, false,0, false);
+        //new G4PVPlacement(Needle5cmRotate, G4ThreeVector(NeedlePos[0],NeedlePos[1],NeedlePos[2]),Needle_5_logical,Needle_5_logical->GetName(),gas_logic, false,0, false);
 
         G4RotationMatrix* Needle10cmRotate = new G4RotationMatrix();
         Needle10cmRotate->rotateY(90.*deg);
         Needle10cmRotate->rotateX(90.*deg);
         Needle10cmRotate->rotateY(180.*deg);
-        //Needle10cmRotate->rotateZ(90*deg);
-        new G4PVPlacement(Needle10cmRotate, G4ThreeVector(NeedlePos[0],NeedlePos[1],NeedlePos[2]+2*cm),Needle_10_logical,Needle_10_logical->GetName(),gas_logic, false,0, false);
+        Needle10cmRotate->rotateZ(90*deg);
+        //new G4PVPlacement(Needle10cmRotate, G4ThreeVector(NeedlePos[0],NeedlePos[1],NeedlePos[2]+2*cm),Needle_10_logical,Needle_10_logical->GetName(),gas_logic, false,0, false);
 
 
         G4RotationMatrix* Needle15cmRotate = new G4RotationMatrix();
@@ -560,15 +563,25 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
         Needle15cmRotate->rotateY(180.*deg);
         //Needle15cmRotate->rotateZ(90*deg);
 
-        new G4PVPlacement(Needle15cmRotate, G4ThreeVector(NeedlePos[0],NeedlePos[1],NeedlePos[2]+3*cm),Needle_15_logical,Needle_15_logical->GetName(),gas_logic, false,0, false);
+        //new G4PVPlacement(Needle15cmRotate, G4ThreeVector(NeedlePos[0],NeedlePos[1],NeedlePos[2]+3*cm),Needle_15_logical,Needle_15_logical->GetName(),gas_logic, false,0, false);
+
+        G4RotationMatrix* Needles = new G4RotationMatrix();
+        Needles->rotateZ(-90*deg);
+        Needles->rotateY(0*deg);
+        Needles->rotateX(-90*deg);
+        Needles->rotateY(220*deg);
+
+
+        new G4PVPlacement(Needles, G4ThreeVector(0,0,-5.9*cm),Needles_logic,Needles_logic->GetName(),gas_logic, false,0, false);
 
 
         G4VisAttributes *needlevis=new G4VisAttributes(G4Colour(1,1,1));
         needlevis->SetForceSolid(true);
-        Needle_5_logical->SetVisAttributes(needlevis);
-        Needle_10_logical->SetVisAttributes(needlevis);
-        //Needle_15_logical->SetVisAttributes(needlevis);
-        
+        Needle_5_logical->SetVisAttributes(G4VisAttributes::GetInvisible());
+        Needle_10_logical->SetVisAttributes(G4VisAttributes::GetInvisible());
+        Needle_15_logical->SetVisAttributes(G4VisAttributes::GetInvisible());
+        Needles_logic->SetVisAttributes(needlevis);
+
     }
 
 
@@ -698,7 +711,7 @@ void DetectorConstruction::AssignVisuals() {
     G4VisAttributes flangeVis=colours::DarkGreyAlpha();
     flangeVis.SetForceSolid(true);
     flangeLog->SetVisAttributes(ChamberVa);
-
+    flangeLog->SetVisAttributes(G4VisAttributes::GetInvisible());
 
     // Field Rings
     G4LogicalVolume* FRLog = lvStore->GetVolume("FR");

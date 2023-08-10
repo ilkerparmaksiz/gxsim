@@ -59,11 +59,13 @@
 
 # Draw smooth trajectories at end of event.
 # Gamma-rays represented in red.
-#/vis/modeling/trajectories/create/drawByParticleID
-#/vis/modeling/trajectories/drawByParticleID-0/set e- green
+/vis/modeling/trajectories/create/drawByParticleID
+/vis/modeling/trajectories/drawByParticleID-0/set e- red
 #/vis/modeling/trajectories/drawByParticleID-0/verbose 1
-/vis/modeling/trajectories/create/drawByCharge
-/vis/modeling/trajectories/drawByCharge-0/set 0 green
+/vis/modeling/trajectories/drawByParticleID-0/set opticalphoton green
+
+#/vis/modeling/trajectories/create/drawByCharge
+#/vis/modeling/trajectories/drawByCharge-0/set 0 green
 #/vis/modeling/trajectories/drawByCharge-0/verbose 1
 #/vis/modeling/trajectories/drawByCharge-0/default/setDrawStepPts true
 #/vis/modeling/trajectories/drawByCharge-0/default/setStepPtsSize 6
@@ -71,8 +73,11 @@
 /tracking/storeTrajectory 1
 
 
-/gps/particle e-
-/gps/ene/type Mono
-/gps/ene/mono 20 keV
-/gps/direction 1 1 1
-/gps/pos/centre -16.3333 0.384785 -50.1684 mm # needle
+/Action/SteppingAction/event_shift 0
+/Generator/SingleParticle/ParticleType opticalphoton
+/Generator/SingleParticle/energy 2 eV
+/Generator/SingleParticle/pos 0 0 -3 cm
+#/Generator/SingleParticle/pos -1.6 0 -3 cm
+/Generator/SingleParticle/Isotropic true
+/Generator/SingleParticle/Mode Single
+/Generator/SingleParticle/useNeedle true

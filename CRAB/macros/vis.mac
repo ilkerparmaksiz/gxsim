@@ -63,6 +63,7 @@
 /vis/modeling/trajectories/drawByParticleID-0/set e- red
 #/vis/modeling/trajectories/drawByParticleID-0/verbose 1
 /vis/modeling/trajectories/drawByParticleID-0/set opticalphoton green
+/vis/modeling/trajectories/drawByParticleID-0/set S2Photon green
 
 #/vis/modeling/trajectories/create/drawByCharge
 #/vis/modeling/trajectories/drawByCharge-0/set 0 green
@@ -74,11 +75,11 @@
 
 
 /Action/SteppingAction/event_shift 0
-/Generator/SingleParticle/ParticleType opticalphoton
+/Generator/SingleParticle/ParticleType S2Photon
 /Generator/SingleParticle/energy 7 eV
 /Generator/SingleParticle/pos 0 0 0 cm
 #/Generator/SingleParticle/pos -1.6 0 -3 cm
 /Generator/SingleParticle/Isotropic true
 /Generator/SingleParticle/Mode Single
-/Generator/SingleParticle/Amount 10
+/Generator/SingleParticle/Amount 10000
 /Generator/SingleParticle/useNeedle false

@@ -137,7 +137,7 @@ void SteppingAction::UserSteppingAction(const G4Step *aStep)
 
     // Camera
     if (lVolume->GetName().find("camLogical")!=std::string::npos){
-      track->SetTrackStatus(fStopAndKill);
+      //track->SetTrackStatus(fStopAndKill);
       analysisManager->FillNtupleDColumn(id,0, event+ev_shift);
       analysisManager->FillNtupleDColumn(id,1, pID);
       analysisManager->FillNtupleDColumn(id,2, time/ns);
@@ -207,7 +207,7 @@ void SteppingAction::UserSteppingAction(const G4Step *aStep)
       // Keep
       id=6;
       if(eVolume->GetName().find("Needles")!=std::string::npos){
-          track->SetTrackStatus(fStopAndKill);
+          //track->SetTrackStatus(fStopAndKill);
           analysisManager->FillNtupleDColumn(id,0, event+ev_shift);
           analysisManager->FillNtupleDColumn(id,1, pID);
           analysisManager->FillNtupleDColumn(id,2, time/ns);

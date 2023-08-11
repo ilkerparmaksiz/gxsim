@@ -49,7 +49,7 @@
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 PrimaryGenerator::PrimaryGenerator()
-  : G4VPrimaryGenerator(), momentum_(1,1,1),energy_(0),ParticleType_("opticalphoton"),Position_(0),Iso_(true),useNeedle(true)
+  : G4VPrimaryGenerator(),momentum_(1,1,1), ParticleType_("opticalphoton"),Position_(0),energy_(0),Iso_(true),useNeedle(true),fAmount_(1),GeneratorMode_("Single")
 {
 
   msg_ = new G4GenericMessenger(this, "/Generator/SingleParticle/",
@@ -62,6 +62,7 @@ PrimaryGenerator::PrimaryGenerator()
   msg_->DeclareProperty("Isotropic",  Iso_, "Isotropic Distribution");
   msg_->DeclareProperty("useNeedle",  useNeedle, "Isotropic Distribution");
   msg_->DeclareProperty("Mode",  GeneratorMode_, "The mode of the generator to run");
+  msg_->DeclareProperty("Amount",  fAmount_, "Amount of particles at a time");
 
     //msg_->DeclareProperty("pos", "cm",  Position_, "Set Position x,y,z");
   //  --- Get Xenon file --- 
@@ -72,7 +73,6 @@ PrimaryGenerator::PrimaryGenerator()
 	}
 
 	std::string crab_path(nexus_path);
-
 
 
   //FileHandler.GetEvent(crab_path + "/data/pb210_electron.csv", electron_data);
@@ -91,7 +91,8 @@ void PrimaryGenerator::Generate(G4Event* event, std::vector<double> &xyz){
 
   if (GeneratorMode_ == "Single"){
     std::cout <<"Generating with Single Particle Mode for event: " << event->GetEventID() << std::endl;
-    GenerateSingleParticle(event);
+      if (fAmount_==0) fAmount_=1;
+      for (int i=0; i<fAmount_;i++) GenerateSingleParticle(event);
   }
   else {
     std::cout <<"Generating with Ion Mode for event: " << event->GetEventID() << std::endl;
@@ -176,7 +177,7 @@ void PrimaryGenerator::GenerateSingleParticle(G4Event * event) {
 
     // Particle 1 at vertex A
 
-    // Initialise the alpha
+    // Initialise the Single Particle
 
     particleDefinition = G4ParticleTable::GetParticleTable()->FindParticle(ParticleType_);
     particle1 = new G4PrimaryParticle(particleDefinition);
@@ -203,7 +204,7 @@ void PrimaryGenerator::GenerateSingleParticle(G4Event * event) {
     }
 
     particle1->SetMomentum(p.x(), p.y(), p.z());
-    std::cout << "\nPrimaryGenerator: Adding particle with " << particle1->GetKineticEnergy()/keV << " keV w ux,uy,uz " << p.x() << ", " << p.y() << ", " << p.z()<< " to vertexA."  << std::endl;
+    //std::cout << "\nPrimaryGenerator: Adding particle with " << particle1->GetKineticEnergy()/keV << " keV w ux,uy,uz " << p.x() << ", " << p.y() << ", " << p.z()<< " to vertexA."  << std::endl;
 
 
 
@@ -244,7 +245,7 @@ void PrimaryGenerator::GenerateSingleParticle(G4Event * event) {
     // Add particle to the vertex
     vertexA->SetPrimary(particle1);
     event->AddPrimaryVertex(vertexA);
-    vertexA->Print();
+    //vertexA->Print();
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

@@ -75,9 +75,10 @@
 
 /Action/SteppingAction/event_shift 0
 /Generator/SingleParticle/ParticleType opticalphoton
-/Generator/SingleParticle/energy 2 eV
-/Generator/SingleParticle/pos 0 0 -3 cm
+/Generator/SingleParticle/energy 7 eV
+/Generator/SingleParticle/pos 0 0 0 cm
 #/Generator/SingleParticle/pos -1.6 0 -3 cm
 /Generator/SingleParticle/Isotropic true
 /Generator/SingleParticle/Mode Single
-/Generator/SingleParticle/useNeedle true
+/Generator/SingleParticle/Amount 10
+/Generator/SingleParticle/useNeedle false

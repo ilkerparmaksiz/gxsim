@@ -86,10 +86,10 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
     //std::cout<<filename<<std::endl;
 
     // Import Needles using CADMesh
-    auto Needle5=CADMesh::TessellatedMesh::FromSTL(crabpath+"/data/Needle_5.stl");
-    auto Needle10=CADMesh::TessellatedMesh::FromSTL(crabpath+"/data/Needle_10.stl");
-    auto Needle15=CADMesh::TessellatedMesh::FromSTL(crabpath+"/data/Needle_15v2.stl");
-    auto Needles=CADMesh::TessellatedMesh::FromOBJ(crabpath+"/data/Needles.obj");
+    //auto Needle5=CADMesh::TessellatedMesh::FromSTL(crabpath+"/data/Needle_5.stl");
+    //auto Needle10=CADMesh::TessellatedMesh::FromSTL(crabpath+"/data/Needle_10.stl");
+    //auto Needle15=CADMesh::TessellatedMesh::FromSTL(crabpath+"/data/Needle_15v2.stl");
+    auto Needles=CADMesh::TessellatedMesh::FromOBJ("/home/ilker/Projects/Diffusion_gxsim/CRAB/data/Needles.obj");
 
 
     // Optical Properties Assigned here
@@ -240,14 +240,14 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
 
 
     // Needles
-    auto Needle_5_Solid=Needle5->GetSolid();
-    auto Needle_10_Solid=Needle10->GetSolid();
-    auto Needle_15_Solid=Needle15->GetSolid();
+   // auto Needle_5_Solid=Needle5->GetSolid();
+    //auto Needle_10_Solid=Needle10->GetSolid();
+    //auto Needle_15_Solid=Needle15->GetSolid();
     auto Needles_solid=Needles->GetSolid();
 
-    G4LogicalVolume * Needle_5_logical= new G4LogicalVolume(Needle_5_Solid,Steel,"Needle_5cm");
-    G4LogicalVolume * Needle_10_logical= new G4LogicalVolume(Needle_10_Solid,Steel,"Needle_10cm");
-    G4LogicalVolume * Needle_15_logical= new G4LogicalVolume(Needle_15_Solid,Steel,"Needle_15cm");
+    //G4LogicalVolume * Needle_5_logical= new G4LogicalVolume(Needle_5_Solid,Steel,"Needle_5cm");
+    //G4LogicalVolume * Needle_10_logical= new G4LogicalVolume(Needle_10_Solid,Steel,"Needle_10cm");
+    //G4LogicalVolume * Needle_15_logical= new G4LogicalVolume(Needle_15_Solid,Steel,"Needle_15cm");
     G4LogicalVolume * Needles_logic= new G4LogicalVolume(Needles_solid,Steel,"Needles");
 
 
@@ -536,7 +536,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
         G4ThreeVector NeedlePos={vtx_[0], vtx_[1]-NeedleOffset, vtx_[2]-FieldCagePos/2};
         G4ThreeVector CollPosition={NeedlePos[0],NeedlePos[1]-5*mm,NeedlePos[2]};
 
-        Needle_Phys= new G4PVPlacement(NeedleRotate,NeedlePos,Needle_Logic,Needle->GetName(),gas_logic,true,0,false);
+        //Needle_Phys= new G4PVPlacement(NeedleRotate,NeedlePos,Needle_Logic,Needle->GetName(),gas_logic,true,0,false);
         
         if(!HideCollimator_) {
             new G4PVPlacement(NeedleRotate,CollPosition,Coll_Logic,CollimatorWithBlock->GetName(),gas_logic,true,0,false);
@@ -572,14 +572,14 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
         Needles->rotateY(220*deg);
 
 
-        new G4PVPlacement(Needles, G4ThreeVector(0,0,-5.9*cm),Needles_logic,Needles_logic->GetName(),gas_logic, false,0, false);
+        new G4PVPlacement(Needles, G4ThreeVector(0,0,-5.9*cm),Needles_logic,Needles_logic->GetName(),gas_logic, true,0, false);
 
 
         G4VisAttributes *needlevis=new G4VisAttributes(G4Colour(1,1,1));
         needlevis->SetForceSolid(true);
-        Needle_5_logical->SetVisAttributes(G4VisAttributes::GetInvisible());
-        Needle_10_logical->SetVisAttributes(G4VisAttributes::GetInvisible());
-        Needle_15_logical->SetVisAttributes(G4VisAttributes::GetInvisible());
+        //Needle_5_logical->SetVisAttributes(G4VisAttributes::GetInvisible());
+        // Needle_10_logical->SetVisAttributes(G4VisAttributes::GetInvisible());
+        //Needle_15_logical->SetVisAttributes(G4VisAttributes::GetInvisible());
         Needles_logic->SetVisAttributes(needlevis);
 
     }

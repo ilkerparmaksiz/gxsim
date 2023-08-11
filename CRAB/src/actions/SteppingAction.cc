@@ -130,8 +130,10 @@ void SteppingAction::UserSteppingAction(const G4Step *aStep)
 
   
   if (eVolume){
-    
-    eVname = eVolume->GetName();
+    //G4cout<<"Volume -->"<<eVolume->GetName()<<G4endl;
+    //G4cout<<"Logical Volume -->"<<lVolume->GetName()<<G4endl;
+
+      eVname = eVolume->GetName();
 
     // Camera
     if (lVolume->GetName().find("camLogical")!=std::string::npos){
@@ -161,7 +163,7 @@ void SteppingAction::UserSteppingAction(const G4Step *aStep)
       // else  std::cout << "Photon arrived but was not reflected: " << track->GetTrackID() << std::endl;
 
     }
-    
+
 
     // Lens
     id = 4;
@@ -202,6 +204,31 @@ void SteppingAction::UserSteppingAction(const G4Step *aStep)
       analysisManager->AddNtupleRow(id);
     
     }
+      // Keep
+      id=6;
+      if(eVolume->GetName().find("Needles")!=std::string::npos){
+          track->SetTrackStatus(fStopAndKill);
+          analysisManager->FillNtupleDColumn(id,0, event+ev_shift);
+          analysisManager->FillNtupleDColumn(id,1, pID);
+          analysisManager->FillNtupleDColumn(id,2, time/ns);
+          analysisManager->FillNtupleDColumn(id,3, pos[0]/mm);
+          analysisManager->FillNtupleDColumn(id,4, pos[1]/mm);
+          analysisManager->FillNtupleDColumn(id,5, pos[2]/mm);
+
+          // Reflected photon
+          if (reflected){
+              analysisManager->FillNtupleIColumn(id,6, 1);
+              analysisManager->FillNtupleSColumn(id,7, Material_Store);
+          }
+          else {
+              analysisManager->FillNtupleIColumn(id,6, 0);
+              analysisManager->FillNtupleSColumn(id,7, "None");
+          }
+
+          analysisManager->FillNtupleIColumn(id,8, PhotonType);
+
+          analysisManager->AddNtupleRow(id);
+      }
 
   }
   

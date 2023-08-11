@@ -1,4 +1,1 @@
-cd ${CRABPATH}/build
-make -j20
-cd ${CRABPATH}/macros
-../build/CRAB
+../build/CRAB Single_OpticalPhoton.mac 100

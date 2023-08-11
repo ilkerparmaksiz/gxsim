@@ -27,35 +27,29 @@
 
 /run/initialize
 
-/analysis/setFileName electron.root
+/analysis/setFileName needles.root
 
 ####################################
 ############ Verbosities ###########
 ####################################
-/control/verbose 0
+/control/verbose 1
 /tracking/verbose 0
 /run/verbose 0
 /event/verbose 0
+/process/optical/verbose 0
 
 /tracking/storeTrajectory 1
 
 /Action/SteppingAction/event_shift 0
-
+/Generator/SingleParticle/ParticleType S2Photon
 #/Generator/SingleParticle/ParticleType opticalphoton
-#/Generator/SingleParticle/energy 7.0 eV
-#/Generator/SingleParticle/pos 0 -1.6 150 cm
-##/Generator/SingleParticle/pos  -1.6 0 -5 cm
-#/Generator/SingleParticle/momentum 0 0 1
-##/Generator/SingleParticle/Isotropic false
-
-
-/gps/particle opticalphoton
-/gps/ene/type Mono
-/gps/ene/mono 7 eV
-/gps/direction 0 0 1
-/gps/pos/centre 0 0 0 cm
-/gps/polarization 0 0 1
-
-/run/beamOn 100
+/Generator/SingleParticle/energy 7 eV
+/Generator/SingleParticle/pos 0 0 0 cm
+#/Generator/SingleParticle/pos -1.6 0 -3 cm
+/Generator/SingleParticle/Isotropic true
+/Generator/SingleParticle/Mode Single
+/Generator/SingleParticle/useNeedle true
+/Generator/SingleParticle/Amount 10000000
+/run/beamOn 1
 
 

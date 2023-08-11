@@ -82,9 +82,8 @@ private:
     G4double energy_;
     G4bool Iso_;
     G4bool useNeedle;
+    G4int fAmount_;
     G4String GeneratorMode_;
-
-
 
 };
 

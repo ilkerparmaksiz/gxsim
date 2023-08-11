@@ -88,27 +88,6 @@ int main(int argc, char** argv) {
     G4String command = "/control/execute ";
     G4String fileName = argv[1];
 
-    if (argc < 3) {
-      //G4cout << "No random seed has been provided" << G4endl;
-      //delete runManager;
-      //return 0;
-        //fileName=argv[2];
-
-        ui = new G4UIExecutive(argc, argv);
-        visManager = new G4VisExecutive();
-        visManager->Initialize();
-        //#ifdef G4UI_USE
-        std::cout << argc<<std::endl;
-        //#ifdef G4VIS_USE
-        UImanager->ApplyCommand("/control/execute vis.mac");
-        UImanager->ApplyCommand(command + argv[2]);
-
-        G4cout<<"Running FileName "<<fileName<< " in visual mode" <<G4endl;
-        //#endif
-
-        ui->SessionStart();
-        delete ui;
-    }
     G4cout << "About to launch: " << command << " " << fileName << G4endl;
     UImanager->ApplyCommand(command + fileName);
       auto end=std::chrono::high_resolution_clock::now();

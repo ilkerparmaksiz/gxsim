@@ -162,10 +162,10 @@ namespace pmt {
   }
 
   G4String path(crab_path);
-  G4String filename = path + "/data/PMTR7378A_Efficiency.txt";
+  /*G4String filename = path + "/data/PMTR7378A_Efficiency.txt";
     
     t=f1->GetData(filename,',',1);
-    //t=f1->GetData("data/test.txt",',',1);
+    t=f1->GetData("data/test.txt",',',1);
     const G4int entries = t[0].size();
     G4double ENERGIES[entries];
     G4double EFFICIENCY[entries];
@@ -179,7 +179,7 @@ namespace pmt {
         //G4cout<<ENERGIES[kk]<<" "<<EFFICIENCY[kk]<<G4endl;
     }
 
-    /*
+    */
       const G4int entries = 31;
       G4double ENERGIES[entries] =
       {1.72194*eV, 1.77114*eV, 1.82324*eV, 1.87848*eV, 1.93719*eV,
@@ -205,8 +205,6 @@ namespace pmt {
   0., 0., 0., 0., 0.,
   0., 0., 0., 0., 0.,
   0., 0., 0., 0., 0.,0 };
-
-    */
 
 
     phcath_mpt->AddProperty("EFFICIENCY", ENERGIES, EFFICIENCY, entries);

@@ -60,21 +60,24 @@ void TrackingAction::PreUserTrackingAction(const G4Track *aTrack) {
   G4int row(0);
 
   // Turn off the S2 fill since its heavy!
+  analysisManager->FillNtupleDColumn(id,row, event); row++;
 
-  // analysisManager->FillNtupleDColumn(id,row, event); row++;
+  analysisManager->FillNtupleDColumn(id,row, (G4double)pID); row++;
+  analysisManager->FillNtupleDColumn(id,row, time/ns); row++;
+  analysisManager->FillNtupleDColumn(id,row, pos[0]/mm); row++;
+  analysisManager->FillNtupleDColumn(id,row, pos[1]/mm); row++;
+  analysisManager->FillNtupleDColumn(id,row, pos[2]/mm); row++;
+  analysisManager->FillNtupleSColumn(id,row, startp); row++;
 
-  // analysisManager->FillNtupleDColumn(id,row, (G4double)pID); row++;
-  // analysisManager->FillNtupleDColumn(id,row, time/ns); row++;
-  // analysisManager->FillNtupleDColumn(id,row, pos[0]/mm); row++;
-  // analysisManager->FillNtupleDColumn(id,row, pos[1]/mm); row++;
-  // analysisManager->FillNtupleDColumn(id,row, pos[2]/mm); row++;
-  // analysisManager->FillNtupleSColumn(id,row, startp); row++;
+  analysisManager->AddNtupleRow(id);
 
-  // analysisManager->AddNtupleRow(id);
+
+
+  }
 
 
   
-}
+
 
 
 

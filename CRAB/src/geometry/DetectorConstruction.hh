@@ -31,7 +31,7 @@
 #include "OpticalMaterialProperties.hh"
 #include "MaterialsList.hh"
 #include "PmtR7378A.hh"
-
+#include "SampleFromSurface.hh"
 
 class G4VSolid;
 class G4LogicalVolume;
@@ -65,7 +65,7 @@ class DetectorConstruction : public G4VUserDetectorConstruction {
     inline G4double GetActiveL() {return FielCageGap/cm; }; 
     inline G4double GetGasPressure(){return gas_pressure_;};
     inline G4double GetTemperature(){return temperature;};
-  
+
   
  private:
     DetectorMessenger* detectorMessenger;
@@ -112,6 +112,7 @@ class DetectorConstruction : public G4VUserDetectorConstruction {
     G4double FielCageGap;
 
     G4LogicalVolume* gas_logic;
+    SampleFromSurface * Sampler;
 
 
 };

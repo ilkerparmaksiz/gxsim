@@ -28,7 +28,7 @@
 #include "Visibilities.hh"
 #include "HexagonMeshTools.hh"
 #include "CADMesh.hh"
-
+#include "SampleFromSurface.hh"
 
 
 DetectorConstruction::DetectorConstruction(GasModelParameters* gmp) :
@@ -66,6 +66,7 @@ DetectorConstruction::DetectorConstruction(GasModelParameters* gmp) :
     HideCollimator_(true)
 {
     detectorMessenger = new DetectorMessenger(this);
+    Sampler=new SampleFromSurface();
 }
 
 DetectorConstruction::~DetectorConstruction() {
@@ -244,13 +245,17 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
     auto Needle_10_Solid=Needle10->GetTessellatedSolid();
     auto Needle_15_Solid=Needle15->GetTessellatedSolid();
     auto Needles_solid=Needles->GetTessellatedSolid();
-    std::cout<<Needle_15_Solid->GetNumberOfFacets()<<std::endl;
-    for (int i=round(Needle_15_Solid->GetNumberOfFacets()*0.85);i<Needle_15_Solid->GetNumberOfFacets();i++ )
-        std::cout<<"Fecet "<< i << " " <<Needle_15_Solid->GetFacet(i)->GetPointOnFace()<<std::endl;
-    G4Exception("[test]","",FatalException,"");
-    G4LogicalVolume * Needle_5_logical= new G4LogicalVolume(Needle_5_Solid,Steel,"Needle_5cm");
-    G4LogicalVolume * Needle_10_logical= new G4LogicalVolume(Needle_10_Solid,Steel,"Needle_10cm");
-    G4LogicalVolume * Needle_15_logical= new G4LogicalVolume(Needle_15_Solid,Steel,"Needle_15cm");
+
+    //Call Sampler for Needles
+    Sampler->SampleFromFacet(Needle_5_Solid);
+    Sampler->SampleFromFacet(Needle_10_Solid);
+    Sampler->SampleFromFacet(Needle_15_Solid);
+    auto SamplePoints= Sampler->getRawPoints();
+
+    // Define the Logical Space for the Needles
+    G4LogicalVolume * Needle_5_logical= new G4LogicalVolume(Needle_5_Solid,Steel,"Needle5cm");
+    G4LogicalVolume * Needle_10_logical= new G4LogicalVolume(Needle_10_Solid,Steel,"Needle10cm");
+    G4LogicalVolume * Needle_15_logical= new G4LogicalVolume(Needle_15_Solid,Steel,"Needle15cm");
     G4LogicalVolume * Needles_logic= new G4LogicalVolume(Needles_solid,Steel,"Needles");
 
 
@@ -352,8 +357,6 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
 
     // Chamber
     G4VPhysicalVolume * chamber_phys=  new G4PVPlacement(0,G4ThreeVector(0.,0.,0) ,chamber_logic, chamber_solid->GetName(), lab_logic_volume, false, 0,false);
-
-
 
 
     // FieldCage
@@ -546,35 +549,32 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
             new G4PVPlacement(NeedleRotate,CollPosition,Coll_Logic,CollimatorWithBlock->GetName(),gas_logic,true,0,false);
         }
 
-        G4RotationMatrix* Needle5cmRotate = new G4RotationMatrix();
-        Needle5cmRotate->rotateY(90.*deg);
-        Needle5cmRotate->rotateX(90.*deg);
-        Needle5cmRotate->rotateY(180.*deg);
-        Needle5cmRotate->rotateZ(90*deg);
-        new G4PVPlacement(Needle5cmRotate, G4ThreeVector(NeedlePos[0],NeedlePos[1],NeedlePos[2]),Needle_5_logical,Needle_5_logical->GetName(),gas_logic, false,0, false);
+
+        G4ThreeVector Needle5cmPos (vtx_[0]-1.4*cm, vtx_[1]-NeedleOffset-1.25*cm, vtx_[2]-FieldCagePos/2-0.9*cm);
+        G4Transform3D Needle_5cm_Transform=G4Translate3D(Needle5cmPos)*G4RotateY3D(270*deg)*G4RotateX3D(90*deg)*G4RotateZ3D(90*deg)*G4RotateY3D(15*deg);
+        auto Needle_5cm_Physical=new G4PVPlacement(Needle_5cm_Transform,Needle_5_logical,Needle_5_logical->GetName(),gas_logic, false,0, false);
+        Sampler->FaceTransform(Needle_5cm_Physical);
+
 
         G4RotationMatrix* Needle10cmRotate = new G4RotationMatrix();
         Needle10cmRotate->rotateY(90.*deg);
         Needle10cmRotate->rotateX(90.*deg);
         Needle10cmRotate->rotateY(180.*deg);
         Needle10cmRotate->rotateZ(90*deg);
-        new G4PVPlacement(Needle10cmRotate, G4ThreeVector(NeedlePos[0],NeedlePos[1],NeedlePos[2]+2*cm),Needle_10_logical,Needle_10_logical->GetName(),gas_logic, false,0, false);
-
-
+        //new G4PVPlacement(Needle10cmRotate, G4ThreeVector(NeedlePos[0],NeedlePos[1],NeedlePos[2]+2*cm),Needle_10_logical,Needle_10_logical->GetName(),gas_logic, false,0, false);
         G4RotationMatrix* Needle15cmRotate = new G4RotationMatrix();
         Needle15cmRotate->rotateY(90.*deg);
         Needle15cmRotate->rotateX(90.*deg);
         Needle15cmRotate->rotateY(180.*deg);
         //Needle15cmRotate->rotateZ(90*deg);
 
-        new G4PVPlacement(Needle15cmRotate, G4ThreeVector(NeedlePos[0],NeedlePos[1],NeedlePos[2]+3*cm),Needle_15_logical,Needle_15_logical->GetName(),gas_logic, false,0, false);
+        //new G4PVPlacement(Needle15cmRotate, G4ThreeVector(NeedlePos[0],NeedlePos[1],NeedlePos[2]+3*cm),Needle_15_logical,Needle_15_logical->GetName(),gas_logic, false,0, false);
 
         G4RotationMatrix* Needles = new G4RotationMatrix();
         Needles->rotateZ(-90*deg);
         Needles->rotateY(0*deg);
         Needles->rotateX(-90*deg);
         Needles->rotateY(220*deg);
-
 
         //new G4PVPlacement(Needles, G4ThreeVector(0,0,-5.9*cm),Needles_logic,Needles_logic->GetName(),gas_logic, true,0, false);
 

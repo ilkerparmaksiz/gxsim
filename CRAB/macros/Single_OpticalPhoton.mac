@@ -27,7 +27,7 @@
 
 /run/initialize
 
-/analysis/setFileName needles.root
+/analysis/setFileName needles_sep.root
 
 ####################################
 ############ Verbosities ###########
@@ -48,8 +48,8 @@
 #/Generator/SingleParticle/pos -1.6 0 -3 cm
 /Generator/SingleParticle/Isotropic true
 /Generator/SingleParticle/Mode Single
-/Generator/SingleParticle/useNeedle true
-/Generator/SingleParticle/Amount 10000000
+/Generator/SingleParticle/useNeedle false
+/Generator/SingleParticle/Amount 100000
 /run/beamOn 1
 
 

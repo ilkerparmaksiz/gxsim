@@ -86,10 +86,10 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
     //std::cout<<filename<<std::endl;
 
     // Import Needles using CADMesh
-    //auto Needle5=CADMesh::TessellatedMesh::FromSTL(crabpath+"/data/Needle_5.stl");
-    //auto Needle10=CADMesh::TessellatedMesh::FromSTL(crabpath+"/data/Needle_10.stl");
-    //auto Needle15=CADMesh::TessellatedMesh::FromSTL(crabpath+"/data/Needle_15v2.stl");
-    auto Needles=CADMesh::TessellatedMesh::FromOBJ("/home/ilker/Projects/Diffusion_gxsim/CRAB/data/Needles.obj");
+    auto Needle5=CADMesh::TessellatedMesh::FromSTL(crabpath+"/data/Needle_5.stl");
+    auto Needle10=CADMesh::TessellatedMesh::FromSTL(crabpath+"/data/Needle_10.stl");
+    auto Needle15=CADMesh::TessellatedMesh::FromSTL(crabpath+"/data/Needle_15v2.stl");
+    auto Needles=CADMesh::TessellatedMesh::FromOBJ(crabpath+"/data/Needles.obj");
 
 
     // Optical Properties Assigned here
@@ -240,14 +240,17 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
 
 
     // Needles
-   // auto Needle_5_Solid=Needle5->GetSolid();
-    //auto Needle_10_Solid=Needle10->GetSolid();
-    //auto Needle_15_Solid=Needle15->GetSolid();
-    auto Needles_solid=Needles->GetSolid();
-
-    //G4LogicalVolume * Needle_5_logical= new G4LogicalVolume(Needle_5_Solid,Steel,"Needle_5cm");
-    //G4LogicalVolume * Needle_10_logical= new G4LogicalVolume(Needle_10_Solid,Steel,"Needle_10cm");
-    //G4LogicalVolume * Needle_15_logical= new G4LogicalVolume(Needle_15_Solid,Steel,"Needle_15cm");
+    auto Needle_5_Solid=Needle5->GetTessellatedSolid();
+    auto Needle_10_Solid=Needle10->GetTessellatedSolid();
+    auto Needle_15_Solid=Needle15->GetTessellatedSolid();
+    auto Needles_solid=Needles->GetTessellatedSolid();
+    std::cout<<Needle_15_Solid->GetNumberOfFacets()<<std::endl;
+    for (int i=round(Needle_15_Solid->GetNumberOfFacets()*0.85);i<Needle_15_Solid->GetNumberOfFacets();i++ )
+        std::cout<<"Fecet "<< i << " " <<Needle_15_Solid->GetFacet(i)->GetPointOnFace()<<std::endl;
+    G4Exception("[test]","",FatalException,"");
+    G4LogicalVolume * Needle_5_logical= new G4LogicalVolume(Needle_5_Solid,Steel,"Needle_5cm");
+    G4LogicalVolume * Needle_10_logical= new G4LogicalVolume(Needle_10_Solid,Steel,"Needle_10cm");
+    G4LogicalVolume * Needle_15_logical= new G4LogicalVolume(Needle_15_Solid,Steel,"Needle_15cm");
     G4LogicalVolume * Needles_logic= new G4LogicalVolume(Needles_solid,Steel,"Needles");
 
 
@@ -344,8 +347,8 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
     //new G4PVPlacement(0, G4ThreeVector(0.,0.,0.), Active_logic, Active_solid->GetName(),gas_logic, false, 0, false);
 
     // Flanges on the Chamber, place in the gas logic so we include the aperature region
-    G4VPhysicalVolume *Left_Flange_phys  = new G4PVPlacement(0,G4ThreeVector(0, 0, chamber_length/2 + chamber_thickn/2.0),chamber_flange_logic,chamber_flange_solid->GetName(),gas_logic,true,0,false);
-    G4VPhysicalVolume *Right_Flange_phys = new G4PVPlacement(0,G4ThreeVector(0,0, -chamber_length/2 - chamber_thickn/2.0),chamber_flange_logic,chamber_flange_solid->GetName(),gas_logic,true,1,false);
+    G4VPhysicalVolume *Left_Flange_phys  = new G4PVPlacement(0,G4ThreeVector(0, 0, chamber_length/2 + chamber_thickn/2.0),chamber_flange_logic,chamber_flange_solid->GetName(),lab_logic_volume,true,0,false);
+    G4VPhysicalVolume *Right_Flange_phys = new G4PVPlacement(0,G4ThreeVector(0,0, -chamber_length/2 - chamber_thickn/2.0),chamber_flange_logic,chamber_flange_solid->GetName(),lab_logic_volume,true,1,false);
 
     // Chamber
     G4VPhysicalVolume * chamber_phys=  new G4PVPlacement(0,G4ThreeVector(0.,0.,0) ,chamber_logic, chamber_solid->GetName(), lab_logic_volume, false, 0,false);
@@ -468,8 +471,8 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
     G4double window_posz = chamber_length/2 + chamber_thickn;
     // G4VPhysicalVolume* lensPhysical = new G4PVPlacement(0, G4ThreeVector(0., 0., window_posz), MgF2_window_logic,"MgF2_WINDOW1", lab_logic_volume,false, 0, false);
 
-    G4VPhysicalVolume* lensPhysical = new G4PVPlacement(0, G4ThreeVector(0., 0., window_posz+ maxLensLength/2.0), lensLogical,"MgF2_WINDOW1", gas_logic,false, 0, false);
-    new G4PVPlacement(0, G4ThreeVector(0., 0., -window_posz), MgF2_window_logic,"MgF2_WINDOW2", gas_logic, false, 1, false);
+    G4VPhysicalVolume* lensPhysical = new G4PVPlacement(0, G4ThreeVector(0., 0., window_posz+ maxLensLength/2.0), lensLogical,"MgF2_WINDOW1", lab_logic_volume,false, 0, false);
+    new G4PVPlacement(0, G4ThreeVector(0., 0., -window_posz), MgF2_window_logic,"MgF2_WINDOW2", lab_logic_volume, false, 1, false);
 
 
     // PMT Tubes
@@ -536,7 +539,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
         G4ThreeVector NeedlePos={vtx_[0], vtx_[1]-NeedleOffset, vtx_[2]-FieldCagePos/2};
         G4ThreeVector CollPosition={NeedlePos[0],NeedlePos[1]-5*mm,NeedlePos[2]};
 
-        //Needle_Phys= new G4PVPlacement(NeedleRotate,NeedlePos,Needle_Logic,Needle->GetName(),gas_logic,true,0,false);
+        Needle_Phys= new G4PVPlacement(NeedleRotate,NeedlePos,Needle_Logic,Needle->GetName(),gas_logic,true,0,false);
         
         if(!HideCollimator_) {
             new G4PVPlacement(NeedleRotate,CollPosition,Coll_Logic,CollimatorWithBlock->GetName(),gas_logic,true,0,false);
@@ -547,14 +550,14 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
         Needle5cmRotate->rotateX(90.*deg);
         Needle5cmRotate->rotateY(180.*deg);
         Needle5cmRotate->rotateZ(90*deg);
-        //new G4PVPlacement(Needle5cmRotate, G4ThreeVector(NeedlePos[0],NeedlePos[1],NeedlePos[2]),Needle_5_logical,Needle_5_logical->GetName(),gas_logic, false,0, false);
+        new G4PVPlacement(Needle5cmRotate, G4ThreeVector(NeedlePos[0],NeedlePos[1],NeedlePos[2]),Needle_5_logical,Needle_5_logical->GetName(),gas_logic, false,0, false);
 
         G4RotationMatrix* Needle10cmRotate = new G4RotationMatrix();
         Needle10cmRotate->rotateY(90.*deg);
         Needle10cmRotate->rotateX(90.*deg);
         Needle10cmRotate->rotateY(180.*deg);
         Needle10cmRotate->rotateZ(90*deg);
-        //new G4PVPlacement(Needle10cmRotate, G4ThreeVector(NeedlePos[0],NeedlePos[1],NeedlePos[2]+2*cm),Needle_10_logical,Needle_10_logical->GetName(),gas_logic, false,0, false);
+        new G4PVPlacement(Needle10cmRotate, G4ThreeVector(NeedlePos[0],NeedlePos[1],NeedlePos[2]+2*cm),Needle_10_logical,Needle_10_logical->GetName(),gas_logic, false,0, false);
 
 
         G4RotationMatrix* Needle15cmRotate = new G4RotationMatrix();
@@ -563,7 +566,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
         Needle15cmRotate->rotateY(180.*deg);
         //Needle15cmRotate->rotateZ(90*deg);
 
-        //new G4PVPlacement(Needle15cmRotate, G4ThreeVector(NeedlePos[0],NeedlePos[1],NeedlePos[2]+3*cm),Needle_15_logical,Needle_15_logical->GetName(),gas_logic, false,0, false);
+        new G4PVPlacement(Needle15cmRotate, G4ThreeVector(NeedlePos[0],NeedlePos[1],NeedlePos[2]+3*cm),Needle_15_logical,Needle_15_logical->GetName(),gas_logic, false,0, false);
 
         G4RotationMatrix* Needles = new G4RotationMatrix();
         Needles->rotateZ(-90*deg);
@@ -572,15 +575,16 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
         Needles->rotateY(220*deg);
 
 
-        new G4PVPlacement(Needles, G4ThreeVector(0,0,-5.9*cm),Needles_logic,Needles_logic->GetName(),gas_logic, true,0, false);
+        //new G4PVPlacement(Needles, G4ThreeVector(0,0,-5.9*cm),Needles_logic,Needles_logic->GetName(),gas_logic, true,0, false);
 
 
         G4VisAttributes *needlevis=new G4VisAttributes(G4Colour(1,1,1));
         needlevis->SetForceSolid(true);
-        //Needle_5_logical->SetVisAttributes(G4VisAttributes::GetInvisible());
-        // Needle_10_logical->SetVisAttributes(G4VisAttributes::GetInvisible());
-        //Needle_15_logical->SetVisAttributes(G4VisAttributes::GetInvisible());
+        Needle_5_logical->SetVisAttributes(needlevis);
+        Needle_10_logical->SetVisAttributes(needlevis);
+        Needle_15_logical->SetVisAttributes(needlevis);
         Needles_logic->SetVisAttributes(needlevis);
+        Needle_Logic->SetVisAttributes(needlevis);
 
     }
 
@@ -627,10 +631,9 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
 
     // Camera
     G4OpticalSurface* opXenon_Glass = new G4OpticalSurface("XenonCamSurface");
-    opXenon_Glass->SetModel(glisur);                  // SetModel
-    opXenon_Glass->SetType(dielectric_dielectric);   // SetType
-    opXenon_Glass->SetFinish(ground);                 // SetFinish
-    opXenon_Glass->SetPolish(0.0);
+    opXenon_Glass->SetModel(unified);                  // SetModel
+    opXenon_Glass->SetType(dielectric_metal);   // SetType
+    opXenon_Glass->SetFinish(polished);                 // SetFinish
     new G4LogicalBorderSurface("XenonCamSurface",PMT_Tube_Vacuum_Phys0, camPhysical,opXenon_Glass);
 
     // Lens

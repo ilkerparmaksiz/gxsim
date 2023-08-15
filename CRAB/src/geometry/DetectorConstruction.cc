@@ -472,7 +472,8 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
     // G4VPhysicalVolume* lensPhysical = new G4PVPlacement(0, G4ThreeVector(0., 0., window_posz), MgF2_window_logic,"MgF2_WINDOW1", lab_logic_volume,false, 0, false);
 
     G4VPhysicalVolume* lensPhysical = new G4PVPlacement(0, G4ThreeVector(0., 0., window_posz+ maxLensLength/2.0), lensLogical,"MgF2_WINDOW1", lab_logic_volume,false, 0, false);
-    new G4PVPlacement(0, G4ThreeVector(0., 0., -window_posz), MgF2_window_logic,"MgF2_WINDOW2", lab_logic_volume, false, 1, false);
+    G4VPhysicalVolume* PMTWindow = new G4PVPlacement(0, G4ThreeVector(0., 0., -window_posz), MgF2_window_logic,"MgF2_WINDOW2", lab_logic_volume, false, 1, false);
+
 
 
     // PMT Tubes
@@ -586,6 +587,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
         Needles_logic->SetVisAttributes(needlevis);
         Needle_Logic->SetVisAttributes(needlevis);
 
+
     }
 
 
@@ -636,6 +638,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
     opXenon_Glass->SetFinish(polished);                 // SetFinish
     new G4LogicalBorderSurface("XenonCamSurface",PMT_Tube_Vacuum_Phys0, camPhysical,opXenon_Glass);
 
+
     // Lens
     G4OpticalSurface* opXenon_Glass2 = new G4OpticalSurface("XenonLensSurface");
     opXenon_Glass2->SetModel(glisur);                  // SetModel
@@ -643,6 +646,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
     opXenon_Glass2->SetFinish(polished);                 // SetFinish
     opXenon_Glass2->SetPolish(0.0);
     new G4LogicalBorderSurface("XenonLensSurface",gas_phys,lensPhysical,opXenon_Glass2);
+    new G4LogicalBorderSurface("XenonPMTsSurface",gas_phys,PMTWindow,opXenon_Glass2);
 
     // Visuals
     AssignVisuals();

@@ -50,6 +50,7 @@
 /Generator/SingleParticle/Mode Single
 /Generator/SingleParticle/useNeedle false
 /Generator/SingleParticle/Amount 100000
+
 /run/beamOn 1
 
 

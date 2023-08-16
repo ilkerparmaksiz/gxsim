@@ -66,7 +66,7 @@ DetectorConstruction::DetectorConstruction(GasModelParameters* gmp) :
     HideCollimator_(true)
 {
     detectorMessenger = new DetectorMessenger(this);
-    Sampler=new SampleFromSurface();
+    Sampler=new util::SampleFromSurface("Needle");
 }
 
 DetectorConstruction::~DetectorConstruction() {
@@ -82,6 +82,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
     G4Material *PEEK  = materials::PEEK();
     G4Material *vacuum = G4NistManager::Instance()->FindOrBuildMaterial("G4_Galactic");
     G4Material *teflon = G4NistManager::Instance()->FindOrBuildMaterial("G4_TEFLON");
+    G4Material *air = G4NistManager::Instance()->FindOrBuildMaterial("G4_AIR");
     std::string crabpath= getenv("CRABPATH");
 
     //std::cout<<filename<<std::endl;
@@ -352,8 +353,10 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
     //new G4PVPlacement(0, G4ThreeVector(0.,0.,0.), Active_logic, Active_solid->GetName(),gas_logic, false, 0, false);
 
     // Flanges on the Chamber, place in the gas logic so we include the aperature region
-    G4VPhysicalVolume *Left_Flange_phys  = new G4PVPlacement(0,G4ThreeVector(0, 0, chamber_length/2 + chamber_thickn/2.0),chamber_flange_logic,chamber_flange_solid->GetName(),lab_logic_volume,true,0,false);
-    G4VPhysicalVolume *Right_Flange_phys = new G4PVPlacement(0,G4ThreeVector(0,0, -chamber_length/2 - chamber_thickn/2.0),chamber_flange_logic,chamber_flange_solid->GetName(),lab_logic_volume,true,1,false);
+    //G4VPhysicalVolume *Left_Flange_phys  = new G4PVPlacement(0,G4ThreeVector(0, 0, chamber_length/2 + chamber_thickn/2.0),chamber_flange_logic,chamber_flange_solid->GetName(),lab_logic_volume,true,0,false);
+    //G4VPhysicalVolume *Right_Flange_phys = new G4PVPlacement(0,G4ThreeVector(0,0, -chamber_length/2 - chamber_thickn/2.0),chamber_flange_logic,chamber_flange_solid->GetName(),lab_logic_volume,true,1,false);
+    G4VPhysicalVolume *Left_Flange_phys  = new G4PVPlacement(0,G4ThreeVector(0, 0, chamber_length/2 + chamber_thickn/2.0),chamber_flange_logic,chamber_flange_solid->GetName(),gas_logic,true,0,false);
+    G4VPhysicalVolume *Right_Flange_phys = new G4PVPlacement(0,G4ThreeVector(0,0, -chamber_length/2 - chamber_thickn/2.0),chamber_flange_logic,chamber_flange_solid->GetName(),gas_logic,true,1,false);
 
     // Chamber
     G4VPhysicalVolume * chamber_phys=  new G4PVPlacement(0,G4ThreeVector(0.,0.,0) ,chamber_logic, chamber_solid->GetName(), lab_logic_volume, false, 0,false);
@@ -474,8 +477,8 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
     G4double window_posz = chamber_length/2 + chamber_thickn;
     // G4VPhysicalVolume* lensPhysical = new G4PVPlacement(0, G4ThreeVector(0., 0., window_posz), MgF2_window_logic,"MgF2_WINDOW1", lab_logic_volume,false, 0, false);
 
-    G4VPhysicalVolume* lensPhysical = new G4PVPlacement(0, G4ThreeVector(0., 0., window_posz+ maxLensLength/2.0), lensLogical,"MgF2_WINDOW1", lab_logic_volume,false, 0, false);
-    G4VPhysicalVolume* PMTWindow = new G4PVPlacement(0, G4ThreeVector(0., 0., -window_posz), MgF2_window_logic,"MgF2_WINDOW2", lab_logic_volume, false, 1, false);
+    G4VPhysicalVolume* lensPhysical = new G4PVPlacement(0, G4ThreeVector(0., 0., window_posz+ maxLensLength/2.0), lensLogical,"MgF2_WINDOW1", gas_logic,false, 0, false);
+    G4VPhysicalVolume* PMTWindow = new G4PVPlacement(0, G4ThreeVector(0., 0., -window_posz), MgF2_window_logic,"MgF2_WINDOW2", gas_logic, false, 1, false);
 
 
 
@@ -829,4 +832,3 @@ void DetectorConstruction::AssignVisuals() {
     Lab->SetVisAttributes(G4VisAttributes::GetInvisible());
 
     }
-

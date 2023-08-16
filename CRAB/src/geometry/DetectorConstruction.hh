@@ -65,7 +65,7 @@ class DetectorConstruction : public G4VUserDetectorConstruction {
     inline G4double GetActiveL() {return FielCageGap/cm; }; 
     inline G4double GetGasPressure(){return gas_pressure_;};
     inline G4double GetTemperature(){return temperature;};
-
+    const util::SampleFromSurface * getSamples() {return Sampler;};
   
  private:
     DetectorMessenger* detectorMessenger;
@@ -112,7 +112,7 @@ class DetectorConstruction : public G4VUserDetectorConstruction {
     G4double FielCageGap;
 
     G4LogicalVolume* gas_logic;
-    SampleFromSurface * Sampler;
+    util::SampleFromSurface * Sampler;
 
 
 };

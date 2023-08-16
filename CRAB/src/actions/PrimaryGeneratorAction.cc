@@ -9,7 +9,6 @@
 #include "G4Event.hh"
 #include "G4RandomDirection.hh"
 #include "G4RunManager.hh"
-#include "DetectorConstruction.hh"
 #include "RunAction.hh"
 #include "G4ThreeVector.hh"
 #include "G4Geantino.hh"

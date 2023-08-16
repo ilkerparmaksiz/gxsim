@@ -1,20 +1,35 @@
 //
-// Created by argon on 8/15/23.
+// Created by Ilker Parmaksiz on 8/15/23.
 //
 
 #include "SampleFromSurface.hh"
 #include "G4PVPlacement.hh"
+#include "FileHandling.hh"
 using namespace CLHEP;
+using namespace util;
 
-SampleFromSurface::SampleFromSurface ():percent_(0.85){
-    // Initialize the Map Pointer
-    SamplePoints_=new std::map<G4String,std::vector<G4ThreeVector>>();
-    TranslatedSamplePoints_=new std::map<G4String,std::vector<G4ThreeVector>>();
+ SampleFromSurface::SampleFromSurface (G4String name):frac_(0.135),OverRide(true){
+     // Initialize the Map Pointer
+     name_=name;
+     SamplePoints_=new std::map<G4String,std::vector<G4ThreeVector>>();
+     TranslatedSamplePoints_=new std::map<G4String,std::vector<G4ThreeVector>>();
+     file=new filehandler::FileHandling();
+     std::string crabpath= getenv("CRABPATH");
+     FilePath=crabpath+"data/"+name_+".txt";
 }
+
 SampleFromSurface::~SampleFromSurface(){}
 
 // Transforms the sample points
 void SampleFromSurface::FaceTransform(const G4VPhysicalVolume* tr) {
+
+   // If the File Exist do not worry of transforming it
+   if(file->FileCheck(FilePath) and OverRide==false){
+       G4String ss;
+       ss=name_+".txt is exist !";
+       G4Exception("[SampleFromSurface]","FaceTransform",JustWarning,ss);
+       return;
+   }
 
   // Fill variables
   const G4String key=tr->GetName();
@@ -22,14 +37,13 @@ void SampleFromSurface::FaceTransform(const G4VPhysicalVolume* tr) {
 
   std::vector<G4ThreeVector> Samples=SamplePoints_->at(key);
   std::vector<G4ThreeVector> TranslatedSamples;
-  const G4RotationMatrix ro=*tr->GetRotation();
-  const G4ThreeVector translation = tr->GetTranslation();
+  const G4RotationMatrix ro=tr->GetObjectRotationValue();
+  G4ThreeVector translation = tr->GetObjectTranslation();
   G4ThreeVector tVector;
 
   // Loop Through and apply the transformation
   for (int i=0;i<TotalPoints;i++){
-      tVector=translation+(Samples.at(i)*mm);
-      //tVector.transform(ro);
+      tVector=translation+(Samples.at(i)*mm).transform(ro);
       TranslatedSamples.push_back(tVector);
   }
 
@@ -42,20 +56,26 @@ void SampleFromSurface::FaceTransform(const G4VPhysicalVolume* tr) {
         G4Exception("[SampleFromSurface/FaceTransform]",tr->GetName(),G4ExceptionSeverity::JustWarning,str);
     }
 
-
-
+    // Save it to the file
+    file->SaveToTextFile(FilePath,"X,Y,Z",',',TranslatedSamples);
 }
 
 void SampleFromSurface::SampleFromFacet(G4String n1, G4TessellatedSolid *solid1) {
     G4int initial;
     G4int TotalFacets=solid1->GetNumberOfFacets();
+    if(file->FileCheck(FilePath) and OverRide==false){
+        G4String ss;
+        ss=name_+".txt is exist !";
+        G4Exception("[SampleFromSurface]","SampleFromFacet",JustWarning,ss);
+        return;
+    }
     if(solid1== nullptr or TotalFacets==0)G4Exception("[SampleFromFacet]","solid",G4ExceptionSeverity::FatalException,"Solid is not Defined or No Facets found");
 
-    if(percent_==0) {
-        G4Exception("[SampleFromFacet]","Percent",G4ExceptionSeverity::JustWarning,"Percent is not set! Will Sample from Whole Object");
+    if(frac_==0) {
+        G4Exception("[SampleFromFacet]","Fraction",G4ExceptionSeverity::JustWarning,"Percent is not set! Will Sample from Whole Object");
         initial=0;
     }
-    else initial=round(TotalFacets*percent_);
+    else initial=round(TotalFacets*(1-frac_));
 
     G4cout <<"Running Facet Sampler For --> "<< n1 <<G4endl;
 
@@ -79,14 +99,19 @@ void SampleFromSurface::SampleFromFacet(G4String n1, G4TessellatedSolid *solid1)
 void SampleFromSurface::SampleFromFacet(G4TessellatedSolid *solid1) {
     G4int initial;
     G4int TotalFacets=solid1->GetNumberOfFacets();
+    if(file->FileCheck(FilePath)  and OverRide==false){
+        G4String ss;
+        ss=name_+".txt is exist !";
+        G4Exception("[SampleFromSurface]","SampleFromFacet",JustWarning,ss);
+        return;
+    }
     if(solid1== nullptr or TotalFacets==0)G4Exception("[SampleFromFacet]","solid",G4ExceptionSeverity::FatalException,"Solid is not Defined or No Facets found");
 
-    if(percent_==0) {
+    if(frac_==0) {
         G4Exception("[SampleFromFacet]","Percent",G4ExceptionSeverity::JustWarning,"Percent is not set! Will Sample from Whole Object");
         initial=0;
     }
-    else initial=round(TotalFacets*percent_);
-
+    else initial=round(TotalFacets*(1-frac_));
 
     G4cout <<"Running Facet Sampler For --> "<< solid1->GetName() <<G4endl;
 

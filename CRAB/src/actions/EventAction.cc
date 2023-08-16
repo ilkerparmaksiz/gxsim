@@ -7,7 +7,6 @@
 
 #include "G4SDManager.hh"
 #include "G4Threading.hh"
-#include "DetectorConstruction.hh"
 #include "Analysis.hh"
 #include "SteppingAction.hh"
 #include "G4VPhysicalVolume.hh"

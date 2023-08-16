@@ -42,7 +42,6 @@
 
 #include "FileHandling.hh"
 
-
 class G4Event;
 //class G4DecayProducts;
 
@@ -58,6 +57,7 @@ class PrimaryGenerator : public G4VPrimaryGenerator
   virtual void GeneratePrimaryVertex(G4Event*) {};
   virtual void GeneratePrimaryVertexIon(G4Event*,std::vector<double> &);
   virtual void GenerateSingleParticle(G4Event*);
+  virtual void GenerateFromSurface(G4Event*);
   virtual void Generate(G4Event* event, std::vector<double> &xyz); // Choose which generator to launch
 
 
@@ -84,6 +84,7 @@ private:
     G4bool useNeedle;
     G4int fAmount_;
     G4String GeneratorMode_;
+    std::vector<G4ThreeVector> NeedlePoints;
 
 };
 

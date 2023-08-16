@@ -5,6 +5,8 @@
 #include <G4SIunits.hh>
 #include "FileHandling.hh"
 #include "G4Exception.hh"
+#include <sys/stat.h>
+#include <thread>
 namespace filehandler{
     using namespace CLHEP;
     // construct
@@ -56,10 +58,45 @@ namespace filehandler{
         return Data2d;
 
     }
+    vector<G4ThreeVector> FileHandling::GetThreeVectorData(string file, char del,G4int SkipRow=1){
+        string str;
+        ifsfile =ifstream (file);
+
+        if (!ifsfile.is_open()) {
+            G4Exception("FileHandling","[GetThreeVectorData]",FatalException,"Could not open the file!");
+        }
+        vector<G4ThreeVector> Data;
+
+
+        G4int SkipCount=0;
+
+        while(getline(ifsfile,str)){
+            string val;
+            stringstream sline(str);
+            G4ThreeVector vt;
+            if(SkipRow!=0 and SkipCount<SkipRow) {
+                G4cout<<"Skipping following lines "<<G4endl;
+                G4cout<<str<< " is Skipped "<<G4endl;
+                SkipCount++;
+            } else{
+                int Counter=0;
+                while (getline(sline,val,del)){
+                    vt[Counter]=stof(val);
+                    Counter++;
+                }
+                Data.push_back(vt);
+
+            }
+
+        }
+
+        return Data;
+    }
+
     void FileHandling::SaveToTextFile(string file, string labels, char del , std::vector<vector<G4double>>data) {
         string val;
         fstfile = fstream (file);
-        if (!fstfile.is_open()) G4Exception("FileHandling","[SaveToTextFile]",FatalException,"Couldnt open the file!");
+        if (!fstfile.is_open()){ G4Exception("FileHandling","[SaveToTextFile]",FatalException,"Couldnt open the file!");
 
 
         stringstream sline(labels);
@@ -97,6 +134,53 @@ namespace filehandler{
                 else
                     str=str+del+ to_string(data.at(i).at(k));
             }
+            fstfile << str;
+        }
+
+        fstfile.close();
+    }
+    }
+    void FileHandling::SaveToTextFile(string file,string labels,char del, std::vector<G4ThreeVector>data) {
+        string val;
+        fstfile = fstream (file,fstream::in | fstream::out | fstream::trunc );
+        if (!fstfile.is_open()) {
+            G4cout<< "File Path is "<<file <<G4endl;
+            fstfile.open(file,  fstream::in | fstream::out | fstream::trunc);
+            G4Exception("FileHandling","[SaveToTextFile]",JustWarning,"Couldnt open the file! so Creating it");
+            //std::this_thread::sleep_for(std::chrono::seconds(1));
+            //G4cout<<"Waiting to create file for 1s" <<G4endl;
+            if(!fstfile.is_open()) G4Exception("FileHandling","[SaveToTextFile]",FatalException,"Couldnt create it");
+
+
+        }
+
+
+        stringstream sline(labels);
+        G4int counter=0;
+
+        // Checking to see if something written in the file, if it is skip labels
+        if(fstfile.peek()==std::fstream::traits_type::eof()) {
+
+            // These are needed to point to the begining of the empty page
+            fstfile.seekp(std::ios::beg);
+            fstfile.seekg(std::ios::beg);
+
+            //////////////////////////////////////////////////////////////////////////
+
+
+            // Just a Warning
+            G4Exception("FileHandling","[SaveToTextFile]",JustWarning,"Empty File!");
+
+            // If the labels are not present,  just add them
+            if(!labels.empty()){
+                fstfile << labels +"\n";
+            }
+        }
+
+        if (data.size()==0) G4Exception("FileHandling","[SaveToTextFile]",FatalException,"Data array is empty!");
+        string str;
+        for (int i=0; i<data.size();i++){
+            str=to_string(data.at(i)[0])+del+to_string(data.at(i)[1])+del+to_string(data.at(i)[2])+"\n";
             fstfile << str;
         }
 
@@ -143,7 +227,7 @@ namespace filehandler{
     void FileHandling::GetTimeProfileData(string filename, vector<vector<vector<G4double>>> &data, vector<G4double> &events) {
 
         std::cout << "[File Handling] Loading EL timing profiles..." << std::endl;
-        
+
 
         // Open the file
         std::ifstream FileIn_(filename);
@@ -204,7 +288,7 @@ namespace filehandler{
     void FileHandling::GetEvent(string filename, vector<vector<G4double>> &data) {
 
         std::cout << "[File Handling] Loading event data..." << std::endl;
-        
+
 
         // Open the file
         std::ifstream FileIn_(filename);
@@ -246,6 +330,10 @@ namespace filehandler{
 
 
     }
-
+    // Checks if file exists or not
+    bool FileHandling::FileCheck(std::string file) {
+        struct stat buffer;
+        return (stat (file.c_str(), &buffer) == 0);
+    }
 
 } // Namespace nexus is closed

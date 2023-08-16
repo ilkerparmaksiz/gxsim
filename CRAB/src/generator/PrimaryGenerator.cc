@@ -44,7 +44,7 @@
 #include "G4ProcessTable.hh"
 #include "G4RadioactiveDecay.hh"
 #include "Randomize.hh"
-
+#include "FileHandling.hh"
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
@@ -94,12 +94,24 @@ void PrimaryGenerator::Generate(G4Event* event, std::vector<double> &xyz){
       if (fAmount_==0) fAmount_=1;
       for (int i=0; i<fAmount_;i++) GenerateSingleParticle(event);
   }
+  else if(GeneratorMode_=="Needle"){
+      using namespace filehandler;
+      FileHandling *f=new FileHandling();
+      string Path;
+      std::string crabpath= getenv("CRABPATH");
+      Path=crabpath+"data/"+GeneratorMode_+".txt";
+      NeedlePoints=  f->GetThreeVectorData(Path,',',1);
+
+      if (fAmount_==0) fAmount_=1;
+      for (int i=0; i<fAmount_;i++) GenerateFromSurface(event);
+  }
   else {
     std::cout <<"Generating with Ion Mode for event: " << event->GetEventID() << std::endl;
     GeneratePrimaryVertexIon(event, xyz);
   }
 
 }
+
 
 
 // -------------------
@@ -244,6 +256,63 @@ void PrimaryGenerator::GenerateSingleParticle(G4Event * event) {
     vertexA->SetPrimary(particle1);
     event->AddPrimaryVertex(vertexA);
     //vertexA->Print();
+}
+void PrimaryGenerator::GenerateFromSurface(G4Event* evt){
+    G4int Size=NeedlePoints.size()-1;
+    G4int Index;
+    Index= round(G4UniformRand()*Size);
+
+    G4double NeedleOffset=1*mm;
+    G4ThreeVector positionA=NeedlePoints[Index];
+    energy_=energy_*MeV;
+    G4ParticleDefinition* particleDefinition;
+    G4PrimaryParticle* particle1;
+    G4double mass;
+    G4double energy;
+    G4double pmod;
+    G4ThreeVector p;
+
+
+
+    // Particle 1 at vertex A
+
+    // Initialise the Single Particle
+
+    particleDefinition = G4ParticleTable::GetParticleTable()->FindParticle(ParticleType_);
+    particle1 = new G4PrimaryParticle(particleDefinition);
+
+    mass   = particleDefinition->GetPDGMass();
+    energy = energy_ + mass;
+    pmod = std::sqrt(energy*energy - mass*mass);
+
+    if(Iso_){
+        G4ThreeVector SphericalCoord;
+        G4double iniPhi=0;
+        G4double deltaPhi_=pi;
+        G4double deltatheta=twopi;
+
+        G4double phi = (iniPhi + (G4UniformRand() * deltaPhi_));
+        G4double theta=(iniPhi+(G4UniformRand() * deltatheta));
+        G4double rad = 1;
+        SphericalCoord ={rad*sin(phi)*cos(theta),rad*sin(phi)*sin(theta),rad*cos(phi)};
+        p=SphericalCoord*pmod;
+
+    }else{
+        p = pmod * momentum_;
+
+    }
+    particle1->SetMomentum(p.x(), p.y(), p.z());
+    //std::cout << "\nPrimaryGenerator: Adding particle with " << particle1->GetKineticEnergy()/keV << " keV w ux,uy,uz " << p.x() << ", " << p.y() << ", " << p.z()<< " to vertexA."  << std::endl;
+
+    G4PrimaryVertex* vertexA = new G4PrimaryVertex(positionA,0);
+
+
+
+    // Add particle to the vertex
+    vertexA->SetPrimary(particle1);
+    evt->AddPrimaryVertex(vertexA);
+
+
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

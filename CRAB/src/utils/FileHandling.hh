@@ -21,18 +21,18 @@ namespace filehandler{
             ~FileHandling();
             // Reading 2 Column data like ev and Absorbtion Length
             vector<vector<G4double>> GetData(string file, char del,G4int SkipRow);
+            vector<G4ThreeVector> GetThreeVectorData(string file, char del,G4int SkipRow);
 
             // Load in data for photon yields
             void GetTimeProfileData(string filename, vector<vector<vector<G4double>>> &data, vector<G4double> &events);
 
             // Get event data from csv
             void GetEvent(string filename, vector<vector<G4double>> &data);
-
-
             // This is for wrting detector counts to a text file
             void SaveToTextFile(string file,string labels, char del, std::vector<vector<G4double>>data);
             void SaveToTextFile(string file,string labels, G4String data);
-
+            void SaveToTextFile(string file,string labels,char del, std::vector<G4ThreeVector>data);
+            bool FileCheck(string file);
         private:
         ifstream ifsfile;
         fstream fstfile;

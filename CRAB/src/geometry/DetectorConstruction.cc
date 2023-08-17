@@ -546,7 +546,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
         G4ThreeVector NeedlePos={vtx_[0], vtx_[1]-NeedleOffset, vtx_[2]-FieldCagePos/2};
         G4ThreeVector CollPosition={NeedlePos[0],NeedlePos[1]-5*mm,NeedlePos[2]};
 
-        Needle_Phys= new G4PVPlacement(NeedleRotate,NeedlePos,Needle_Logic,Needle->GetName(),gas_logic,true,0,false);
+        //Needle_Phys= new G4PVPlacement(NeedleRotate,NeedlePos,Needle_Logic,Needle->GetName(),gas_logic,true,0,false);
         
         if(!HideCollimator_) {
             new G4PVPlacement(NeedleRotate,CollPosition,Coll_Logic,CollimatorWithBlock->GetName(),gas_logic,true,0,false);
@@ -598,8 +598,8 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
     G4OpticalSurface * OpSteelSurf=new G4OpticalSurface("SteelSurface",unified,polished,dielectric_metal);
     OpSteelSurf->SetMaterialPropertiesTable(opticalprops::STEEL());
     new G4LogicalBorderSurface("SteelSurface_Chamber",gas_phys,chamber_phys,OpSteelSurf);
-    new G4LogicalBorderSurface("SteelSurface_LeftFlange",gas_phys,Left_Flange_phys,OpSteelSurf);
     new G4LogicalBorderSurface("SteelSurface_RightFlange",gas_phys,Right_Flange_phys,OpSteelSurf);
+    new G4LogicalBorderSurface("SteelSurface_LeftFlange",gas_phys,Left_Flange_phys,OpSteelSurf);
     new G4LogicalBorderSurface("SteelSurface_PMT3_Enclosing",PMT_Tube_Vacuum_Phys0,PMT_Tube_Phys0,OpSteelSurf);
     new G4LogicalBorderSurface("SteelSurface_PMT1_Enclosing",PMT_Tube_Vacuum_Phys1,PMT_Tube_Phys1,OpSteelSurf);
 

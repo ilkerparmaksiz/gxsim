@@ -9,18 +9,19 @@ using namespace CLHEP;
 using namespace util;
 
  SampleFromSurface::SampleFromSurface (G4String name):frac_(0.135),OverRide(true){
-     // Initialize the Map Pointer
      name_=name;
      SamplePoints_=new std::map<G4String,std::vector<G4ThreeVector>>();
      TranslatedSamplePoints_=new std::map<G4String,std::vector<G4ThreeVector>>();
      file=new filehandler::FileHandling();
+
      std::string crabpath= getenv("CRABPATH");
+     if(crabpath=="") G4Exception("SampleFromSurface","CRABPATH",FatalException,"CRAB Path is not defined");
      FilePath=crabpath+"data/"+name_+".txt";
 }
 
 SampleFromSurface::~SampleFromSurface(){}
 
-// Transforms the sample points
+// Transforms the sample points so they will allign with the geometry
 void SampleFromSurface::FaceTransform(const G4VPhysicalVolume* tr) {
 
    // If the File Exist do not worry of transforming it
@@ -59,7 +60,7 @@ void SampleFromSurface::FaceTransform(const G4VPhysicalVolume* tr) {
     // Save it to the file
     file->SaveToTextFile(FilePath,"X,Y,Z",',',TranslatedSamples);
 }
-
+// Sampling from vertex points of the triangles
 void SampleFromSurface::SampleFromFacet(G4String n1, G4TessellatedSolid *solid1) {
     G4int initial;
     G4int TotalFacets=solid1->GetNumberOfFacets();

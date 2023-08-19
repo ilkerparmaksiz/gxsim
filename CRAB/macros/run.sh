@@ -1,6 +1,6 @@
 #!/bin/bash
 ## folder Name
-folder=test
+folder=build
 ## Set CRABPATH this is needed for the simulation
 export CRABPATH=../${pwd}
 echo "CRABPATH is $CRABPATH"

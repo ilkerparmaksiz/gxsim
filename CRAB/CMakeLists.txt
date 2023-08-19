@@ -4,9 +4,11 @@
 cmake_minimum_required(VERSION 3.16...3.21)
 project(CRAB)
 
+
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS ON)
+set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake/Modules ${CMAKE_MODULE_PATH})
 
 #----------------------------------------------------------------------------
 # Find Geant4 package, activating all available UI and Vis drivers by default
@@ -38,7 +40,6 @@ if(NOT ROOT_FOUND)
   return()
 endif()
 include(${ROOT_USE_FILE})
-
 # Setup Geant4 include directories and compile definitions
 include_directories($ENV{PROJECT_SOURCE_DIR}/include)
 
@@ -56,9 +57,16 @@ link_directories($ENV{G4INSTALL}/lib)
 find_package(NEST REQUIRED)
 include_directories($ENV{NEST_INCLUDE_DIRS}  $ENV{NEST_INCLUDE_DIRS}/.. $ENV{NEST_INCLUDE_DIRS}/../Detectors )
 link_directories($ENV{NEST_INCLUDE_DIRS}/../../lib)
-
-
 message(STATUS "include dir: $ENV{NEST_INCLUDE_DIRS} $ENV{NEST_INCLUDE_DIRS}/..")
+
+## Include tetgen
+option(WITH_SYS_TETGEN "WITH_TETGEN" OFF)
+if(${WITH_SYS_TETGEN} MATCHES "ON")
+    find_package(tetgen)
+endif()
+
+
+
 
 IF(APPLE)
     # Fix linking on 10.14+. See https://stackoverflow.com/questions/54068035
@@ -88,7 +96,10 @@ file(COPY ${headers} DESTINATION ${PROJECT_SOURCE_DIR}/include/${PROJECT_NAME})
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -g")
 add_executable(CRAB CRAB.cc ${sources} ${headers})
 message(STATUS "GEANT4 libraries libs: ${Geant4_LIBRARIES}")
-target_link_libraries(CRAB -lGarfield -lgfortran ${ROOT_LIBRARIES} libNESTCore.a  libNESTG4.a ${Geant4_LIBRARIES})
+target_link_libraries(CRAB -lGarfield -lgfortran ${ROOT_LIBRARIES} libNESTCore.a  libNESTG4.a ${Geant4_LIBRARIES} )
+if(${WITH_SYS_TETGEN} MATCHES "ON")
+    target_link_libraries(CRAB tet)
+endif()
 #target_link_libraries(CRAB -lGarfield -lgfortran ${ROOT_LIBRARIES} libNESTCore.dylib  libNESTG4.dylib ${Geant4_LIBRARIES})
 #----------------------------------------------------------------------------
 # Copy all scripts to the build directory, i.e. the directory in which we

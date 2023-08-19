@@ -206,7 +206,7 @@ void SteppingAction::UserSteppingAction(const G4Step *aStep)
     }
       // Keep
       id=6;
-      if(eVolume->GetName().find("Needles")!=std::string::npos){
+      if(eVname.find("FieldCage")!=std::string::npos){
           //track->SetTrackStatus(fStopAndKill);
           analysisManager->FillNtupleDColumn(id,0, event+ev_shift);
           analysisManager->FillNtupleDColumn(id,1, pID);

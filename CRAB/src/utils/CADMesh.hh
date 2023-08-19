@@ -37,20 +37,20 @@
 
 #pragma once
 
-class BuiltInReader;
-class CADMeshTemplate;
-class Mesh;
-class STLReader;
-class ASSIMPReader;
-class PLYReader;
 class FileTypes;
-class OBJReader;
-class Exceptions;
-class TetrahedralMesh;
+class Mesh;
 class Reader;
 class Lexer;
-class LexerMacros;
+class ASSIMPReader;
+class BuiltInReader;
+class CADMeshTemplate;
+class Exceptions;
 class TessellatedMesh;
+class TetrahedralMesh;
+class LexerMacros;
+class STLReader;
+class OBJReader;
+class PLYReader;
 
 #include "G4String.hh"
 
@@ -87,8 +87,10 @@ static std::map<Type, G4String> TypeName = {
 
 Type TypeFromExtension(G4String extension);
 Type TypeFromName(G4String name);
-}
-}
+
+} // namespace File
+
+} // namespace CADMesh
 
 #include "G4ThreeVector.hh"
 #include "G4TriangularFacet.hh"
@@ -128,7 +130,8 @@ private:
 };
 
 typedef std::vector<std::shared_ptr<Mesh>> Meshes;
-}
+
+} // namespace CADMesh
 
 namespace CADMesh {
 
@@ -162,8 +165,10 @@ private:
 
   G4String name_ = "";
 };
-}
-}
+
+} // namespace File
+
+} // namespace CADMesh
 
 #include <iostream>
 #include <string>
@@ -301,8 +306,10 @@ private:
 
   std::string last_error_ = "";
 };
-}
-}
+
+} // namespace File
+
+} // namespace CADMesh
 
 #ifdef USE_CADMESH_ASSIMP_READER
 
@@ -328,8 +335,9 @@ private:
 };
 
 std::shared_ptr<ASSIMPReader> ASSIMP();
-}
-}
+
+} // namespace File
+} // namespace CADMesh
 #endif
 
 namespace CADMesh {
@@ -346,8 +354,9 @@ public:
 };
 
 std::shared_ptr<BuiltInReader> BuiltIn();
-}
-}
+
+} // namespace File
+} // namespace CADMesh
 #ifndef CADMESH_DEFAULT_READER
 #define CADMESH_DEFAULT_READER BuiltIn
 #endif
@@ -435,7 +444,8 @@ protected:
 
   std::shared_ptr<File::Reader> reader_ = nullptr;
 };
-}
+
+} // namespace CADMesh
 
 #include "globals.hh"
 
@@ -454,8 +464,9 @@ void ReaderCantReadError(G4String origin, File::Type file_type,
 
 void MeshNotFound(G4String origin, size_t index);
 void MeshNotFound(G4String origin, G4String name);
-}
-}
+
+} // namespace Exceptions
+} // namespace CADMesh
 
 namespace CADMesh {
 
@@ -484,7 +495,8 @@ public:
 private:
   G4bool reverse_;
 };
-}
+
+} // namespace CADMesh
 
 #ifdef USE_CADMESH_TETGEN
 
@@ -532,7 +544,8 @@ private:
 
   G4Material *material_;
 };
-}
+
+} // namespace CADMesh
 #endif
 
 namespace CADMesh {
@@ -557,8 +570,10 @@ inline Type TypeFromName(G4String name) {
 
   return TypeFromExtension(extension);
 }
-}
-}
+
+} // namespace File
+
+} // namespace CADMesh
 
 namespace CADMesh {
 
@@ -639,7 +654,8 @@ inline G4bool Mesh::IsValidForNavigation() {
 
   return true;
 }
-}
+
+} // namespace CADMesh
 
 namespace CADMesh {
 
@@ -698,8 +714,10 @@ inline size_t Reader::AddMesh(std::shared_ptr<Mesh> mesh) {
 }
 
 inline void Reader::SetMeshes(Meshes meshes) { meshes_ = meshes; }
-}
-}
+
+} // namespace File
+
+} // namespace CADMesh
 
 #include <fstream>
 #include <sstream>
@@ -1078,8 +1096,10 @@ inline void Lexer::PrintItem(Item item) {
 #else
 inline void Lexer::PrintItem(Item) {}
 #endif
-}
-}
+
+} // namespace File
+
+} // namespace CADMesh
 
 namespace CADMesh {
 
@@ -1213,7 +1233,8 @@ template <typename T> void CADMeshTemplate<T>::SetOffset(G4ThreeVector offset) {
 template <typename T> G4ThreeVector CADMeshTemplate<T>::GetOffset() {
   return offset_;
 }
-}
+
+} // namespace CADMesh
 
 namespace CADMesh {
 
@@ -1261,8 +1282,9 @@ inline void MeshNotFound(G4String origin, G4String name) {
       ("CADMesh in " + origin).c_str(), "MeshNotFound", FatalException,
       ("\nThe mesh with name '" + name + "' could not be found.").c_str());
 }
-}
-}
+
+} // namespace Exceptions
+} // namespace CADMesh
 
 #include "Randomize.hh"
 
@@ -1354,7 +1376,8 @@ TessellatedMesh::GetTessellatedSolid(std::shared_ptr<Mesh> mesh) {
   }
   return volume_solid;
 }
-}
+
+} // namespace CADMesh
 
 #ifdef USE_CADMESH_TETGEN
 
@@ -1456,7 +1479,8 @@ inline G4ThreeVector TetrahedralMesh::GetTetPoint(G4int index_offset) {
       out_->pointlist[out_->tetrahedronlist[index_offset] * 3 + 2] * scale_ -
           offset_.z());
 }
-}
+
+} // namespace CADMesh
 #endif
 
 #define CADMeshLexerToken(name)                                                \
@@ -1577,8 +1601,9 @@ protected:
   G4TriangularFacet *ParseVertices(Items items);
   G4ThreeVector ParseThreeVector(Items items);
 };
-}
-}
+
+} // namespace File
+} // namespace CADMesh
 
 namespace CADMesh {
 
@@ -1607,8 +1632,9 @@ protected:
 private:
   Points vertices_;
 };
-}
-}
+
+} // namespace File
+} // namespace CADMesh
 
 namespace CADMesh {
 
@@ -1651,8 +1677,9 @@ protected:
 
   size_t facet_index_ = 0;
 };
-}
-}
+
+} // namespace File
+} // namespace CADMesh
 
 namespace CADMesh {
 
@@ -1926,8 +1953,9 @@ inline G4ThreeVector STLReader::ParseThreeVector(Items items) {
 
   return G4ThreeVector(numbers[0], numbers[1], numbers[2]);
 }
-}
-}
+
+} // namespace File
+} // namespace CADMesh
 
 namespace CADMesh {
 
@@ -2218,8 +2246,9 @@ inline G4TriangularFacet *OBJReader::ParseFacet(Items items, G4bool quad) {
                                  vertices_[indices[2] - 1], ABSOLUTE);
   }
 }
-}
-}
+
+} // namespace File
+} // namespace CADMesh
 
 namespace CADMesh {
 
@@ -2595,8 +2624,9 @@ inline G4TriangularFacet *PLYReader::ParseFacet(Items items, Points vertices) {
                                vertices[indices[2 + facet_index_]],
                                vertices[indices[3 + facet_index_]], ABSOLUTE);
 }
-}
-}
+
+} // namespace File
+} // namespace CADMesh
 
 #ifdef USE_CADMESH_ASSIMP_READER
 
@@ -2656,8 +2686,9 @@ inline G4bool ASSIMPReader::CanRead(Type /*file_type*/) { return true; }
 std::shared_ptr<ASSIMPReader> ASSIMP() {
   return std::make_shared<ASSIMPReader>();
 }
-}
-}
+
+} // namespace File
+} // namespace CADMesh
 #endif
 
 namespace CADMesh {
@@ -2700,5 +2731,6 @@ inline G4bool BuiltInReader::CanRead(Type type) {
 inline std::shared_ptr<BuiltInReader> BuiltIn() {
   return std::make_shared<BuiltInReader>();
 }
-}
-}
+
+} // namespace File
+} // namespace CADMesh

@@ -43,7 +43,7 @@ DetectorConstruction::DetectorConstruction(GasModelParameters* gmp) :
     temperature(300*kelvin), // temperature
     Lab_size(3. *m),
     chamber_diam   (16.4 * cm),
-    chamber_length (43.18 * cm), // Config files vary
+    chamber_length (44.8* cm), // Config files vary
     chamber_thickn (7. * mm),
     SourceEn_offset (5.7 *cm),
     SourceEn_diam   (1.0 * cm),
@@ -52,7 +52,7 @@ DetectorConstruction::DetectorConstruction(GasModelParameters* gmp) :
     SourceEn_holedia (5. * mm),
     gas_pressure_(10 * bar),
     vtx_(0*cm,-1.6*cm,-5.25*cm),
-    Active_diam(8.6 * cm),
+    Active_diam(7.2 * cm),
     sc_yield_(25510./MeV),
     e_lifetime_(1000. * ms),
     pmt_hole_length_ (18.434 * cm),
@@ -110,74 +110,72 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
 
     // Import Detector Geometry from an STL
 
-    auto start = std::chrono::high_resolution_clock::now();
-    auto FieldCage=CADMesh::TessellatedMesh::FromSTL(crabpath+"data/FieldCage_Steel.stl");
-    auto end = std::chrono::high_resolution_clock::now();
-    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
-    std::cout<<"Time it TOOK to read this file is --  > " <<duration.count()<<std::endl;
-    start = std::chrono::high_resolution_clock::now();
+    auto FieldCage=CADMesh::TessellatedMesh::FromSTL(crabpath+"data/CRAB_STL/FieldRings.stl");
+    auto Meshes=CADMesh::TessellatedMesh::FromSTL(crabpath+"data/CRAB_STL/Meshes.stl");
+    auto Needle4=CADMesh::TessellatedMesh::FromSTL(crabpath+"data/CRAB_STL/Needle_4cm.stl");
+    auto Needle9=CADMesh::TessellatedMesh::FromSTL(crabpath+"data/CRAB_STL/Needle_9cm.stl");
+    auto Needle14=CADMesh::TessellatedMesh::FromSTL(crabpath+"data/CRAB_STL/Needle_14cm.stl");
+    auto Chamber=CADMesh::TessellatedMesh::FromSTL(crabpath+"data/CRAB_STL/Chamber.stl");
+    auto MgF2Lens=CADMesh::TessellatedMesh::FromSTL(crabpath+"data/CRAB_STL/MgF2Lens.stl");
+    auto MgF2Window=CADMesh::TessellatedMesh::FromSTL(crabpath+"data/CRAB_STL/MgF2Window.stl");
+    auto AnodeTube=CADMesh::TessellatedMesh::FromSTL(crabpath+"data/CRAB_STL/AnodeTube.stl");
+    auto CathodeTube=CADMesh::TessellatedMesh::FromSTL(crabpath+"data/CRAB_STL/CathodeTube.stl");
+    auto Peeks=CADMesh::TessellatedMesh::FromSTL(crabpath+"data/CRAB_STL/Peeks.stl");
+    auto Brackets=CADMesh::TessellatedMesh::FromSTL(crabpath+"data/CRAB_STL/Brackets.stl");
+    auto Pmt=CADMesh::TessellatedMesh::FromSTL(crabpath+"data/CRAB_STL/PMT.stl");
+    auto Camera=CADMesh::TessellatedMesh::FromSTL(crabpath+"data/CRAB_STL/Camera.stl");
 
-    auto Needle4=CADMesh::TessellatedMesh::FromSTL(crabpath+"data/Needle4cm.stl");
-    auto Needle9=CADMesh::TessellatedMesh::FromSTL(crabpath+"data/Needle9cm.stl");
-    auto Needle14=CADMesh::TessellatedMesh::FromSTL(crabpath+"data/Needle14cm.stl");
-    auto Chamber=CADMesh::TessellatedMesh::FromSTL(crabpath+"data/Chamber.stl");
-    auto LensAndWindow=CADMesh::TessellatedMesh::FromSTL(crabpath+"data/MGF2.stl");
-    auto SteelTubes=CADMesh::TessellatedMesh::FromSTL(crabpath+"data/SteelTubes.stl");
-    auto Peeks=CADMesh::TessellatedMesh::FromSTL(crabpath+"data/Peeks.stl");
-    auto Brackets=CADMesh::TessellatedMesh::FromSTL(crabpath+"data/Brakets.stl");
-
-    double x = 0.0;
-    double y = 0.0;
-    double z = 0.0;
-    Chamber->SetOffset(G4ThreeVector(x, y, z));
-    end = std::chrono::high_resolution_clock::now();
-    duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
-    std::cout<<"Time it TOOK to read this file is --  > " <<duration.count()<<std::endl;
-    // Collect the Solids
-    start = std::chrono::high_resolution_clock::now();
-    //auto FieldCage_solid=FieldCage->G();
-    end = std::chrono::high_resolution_clock::now();
-    duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
-    std::cout<<"Time it TOOK to GeT this SOLID is --  > " <<duration.count()<<std::endl;
-    start = std::chrono::high_resolution_clock::now();
-
+    auto FieldCage_solid=FieldCage->GetSolid();
+    auto Meshes_solid=Meshes->GetSolid();
     auto Needle4_solid=Needle4->GetTessellatedSolid();
     auto Needle9_solid=Needle9->GetTessellatedSolid();
     auto Needle14_solid=Needle14->GetTessellatedSolid();
-    auto Chamber_solid=Chamber->GetTessellatedSolid();
-    auto LensAndWindow_solid=LensAndWindow->GetTessellatedSolid();
-    auto SteelTubes_solid=SteelTubes->GetTessellatedSolid();
-    auto Peeks_solid=Peeks->GetTessellatedSolid();
-    auto Brackets_solid=Brackets->GetTessellatedSolid();
-    auto FieldCage_solid=FieldCage->GetTessellatedSolid();
+    auto Chamber_solid=Chamber->GetSolid();
+    auto MgF2Lens_solid=MgF2Lens->GetSolid();
+    auto MgF2Window_solid=MgF2Window->GetSolid();
+    auto AnodeTube_solid=AnodeTube->GetSolid();
+    auto CathodeTube_solid=CathodeTube->GetSolid();
+    auto Peeks_solid=Peeks->GetSolid();
+    auto Brackets_solid=Brackets->GetSolid();
+    auto Pmt_solid=Pmt->GetSolid();
+    auto Camera_solid=Camera->GetSolid();
 
-    end = std::chrono::high_resolution_clock::now();
-    duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
-    std::cout<<"Time it TOOK to GeT this SOLIDs is --  > " <<duration.count()<<std::endl;
     // Create Logical Space
     auto Needle4_logic= new G4LogicalVolume(Needle4_solid,Steel,"Needle4cm_logic");
     auto Needle9_logic=new G4LogicalVolume(Needle9_solid,Steel,"Needle9cm_logic");
     auto Needle14_logic=new G4LogicalVolume(Needle14_solid,Steel,"Needle14cm_logic");
     auto Chamber_logic=new G4LogicalVolume(Chamber_solid,Steel,"Chamber_logic");
     auto FieldCage_logic=new G4LogicalVolume(FieldCage_solid,Steel,"FieldCage_logic");
-    auto LensAndWindow_logic=new G4LogicalVolume(LensAndWindow_solid,MgF2,"LensAndWindow_logic");
-    auto SteelTubes_logic=new G4LogicalVolume(SteelTubes_solid,Steel,"SteelTubes_logic");
+    auto MgF2Lens_logic=new G4LogicalVolume(MgF2Lens_solid,MgF2,"MgF2Lens_logic");
+    auto AnodeTube_logic=new G4LogicalVolume(AnodeTube_solid,Steel,"AnodeTube_logic");
     auto Peeks_logic=new G4LogicalVolume(Peeks_solid,PEEK,"Peeks_logic");
-    auto Brackets_logic=new G4LogicalVolume(Brackets_solid,PEEK,"Brackets_logic");
+    auto Brackets_logic=new G4LogicalVolume(Brackets_solid,materials::HDPE(),"Brackets_logic");
+    auto Meshes_logic=new G4LogicalVolume(Meshes_solid,Steel,"Mesh_logic");
+    auto MgF2Window_logic=new G4LogicalVolume(MgF2Window_solid,MgF2,"MgF2Window_logic");
+    auto CathodeTube_logic=new G4LogicalVolume(CathodeTube_solid,Steel,"CathodeTube_logic");
+    auto Pmt_logic=new G4LogicalVolume(Pmt_solid,MgF2,"Pmt_logic");
+    auto Camera_logic=new G4LogicalVolume(Camera_solid,MgF2,"Camera_logic");
 
     // Placement of the Items
 
     auto Chamber_physical=new G4PVPlacement(0,G4ThreeVector(),Chamber_logic,Chamber_solid->GetName(),lab_logic_volume,0,0,false);
-    auto FieldCage_physical=new G4PVPlacement(0,G4ThreeVector(),FieldCage_logic,FieldCage_solid->GetName(),Chamber_logic,0,0,false);
-    auto LensAndWindow_physical=new G4PVPlacement(0,G4ThreeVector(),LensAndWindow_logic,LensAndWindow_solid->GetName(),Chamber_logic,0,0,false);
-    auto SteelTubes_physical=new G4PVPlacement(0,G4ThreeVector(),SteelTubes_logic,SteelTubes_solid->GetName(),lab_logic_volume,0,0,false);
-    auto Peeks_physical=new G4PVPlacement(0,G4ThreeVector(),Peeks_logic,Peeks_solid->GetName(),Chamber_logic,0,0,false);
-    auto Brackets_physical=new G4PVPlacement(0,G4ThreeVector(),Brackets_logic,Brackets_solid->GetName(),Chamber_logic,0,0,false);
+    auto FieldCage_physical=new G4PVPlacement(0,G4ThreeVector(),FieldCage_logic,FieldCage_solid->GetName(),gas_logic,false,0,false);
+    auto Peeks_physical=new G4PVPlacement(0,G4ThreeVector(),Peeks_logic,Peeks_solid->GetName(),gas_logic,0,0,false);
+    auto Brackets_physical=new G4PVPlacement(0,G4ThreeVector(),Brackets_logic,Brackets_solid->GetName(),gas_logic,0,0,false);
 
+
+    auto MgF2Lens_physical=new G4PVPlacement(0,G4ThreeVector(),MgF2Lens_logic,MgF2Lens_solid->GetName(),lab_logic_volume,0,0,false);
+    auto AnodeTube_physical=new G4PVPlacement(0,G4ThreeVector(),AnodeTube_logic,AnodeTube_solid->GetName(),lab_logic_volume,0,0,false);
+    auto Meshes_physical=new G4PVPlacement(0,G4ThreeVector(),Meshes_logic,Meshes_solid->GetName(),gas_logic,0,0,false);
+    auto MgF2Window_physical=new G4PVPlacement(0,G4ThreeVector(),MgF2Window_logic,MgF2Window_solid->GetName(),lab_logic_volume,0,0,false);
+    auto CathodeTube_physical=new G4PVPlacement(0,G4ThreeVector(),CathodeTube_logic,CathodeTube_solid->GetName(),lab_logic_volume,0,0,false);
+    auto Pmt_physical=new G4PVPlacement(0,G4ThreeVector(),Pmt_logic,Pmt_solid->GetName(),lab_logic_volume,0,0,false);
+    auto Camera_physical=new G4PVPlacement(0,G4ThreeVector(),Camera_logic,Camera_solid->GetName(),lab_logic_volume,0,0,false);
 
 
     //////////////////////////////////////////
     G4double FieldCagePos=-0*cm;
+    G4double Offset=-1*cm;
     // G4double EL_pos=-FielCageGap-ElGap_;
     G4double EL_pos=-10.98*cm;
     // FielCageGap=(16.03+2.955)*cm;
@@ -189,7 +187,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
     G4LogicalVolume* EL_logic = new G4LogicalVolume(EL_solid, gxe, "EL_GAP");
 
     // EL_Gap
-    new G4PVPlacement(0, G4ThreeVector(0.,0.,EL_pos),EL_logic,EL_solid->GetName(),gas_logic, 0,0, false);
+    new G4PVPlacement(0, G4ThreeVector(0.,0.,EL_pos-Offset/2),EL_logic,EL_solid->GetName(),gas_logic, 0,0, false);
 
 
 
@@ -198,7 +196,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
     G4Tubs* FieldCage_Solid =new G4Tubs("FIELDCAGE", 0., Active_diam/2.,FielCageGap/2 , 0., twopi);
     G4LogicalVolume* FieldCage_Logic = new G4LogicalVolume(FieldCage_Solid, gxe, "FIELDCAGE");
 
-    G4VPhysicalVolume * FieldCage_Phys=new G4PVPlacement(0,G4ThreeVector(0,0,FieldCagePos/2),FieldCage_Logic,FieldCage_Logic->GetName(),gas_logic, 0,0,false);
+    G4VPhysicalVolume * FieldCage_Phys=new G4PVPlacement(0,G4ThreeVector(0,0,FieldCagePos/2-Offset/2),FieldCage_Logic,FieldCage_Logic->GetName(),gas_logic, 0,0,false);
 
     // Radioactive Source Encloser
     // Source
@@ -255,7 +253,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
 
 
     // Xenon Gas in Active Area and Non-Active Area
-    G4VPhysicalVolume * gas_phys= new G4PVPlacement(0, G4ThreeVector(0.,0.,0.), gas_logic, gas_solid->GetName(),lab_logic_volume, false, 0, false);
+    G4VPhysicalVolume * gas_phys= new G4PVPlacement(0, G4ThreeVector(0.,0.,Offset/6), gas_logic, gas_solid->GetName(),lab_logic_volume, false, 0, false);
 
     // FieldCage
     // G4double FieldCagePos=chamber_length/2-((129)*mm)-FielCageGap/2-ElGap_/2;
@@ -283,9 +281,9 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
     /// OpticalSurface
     G4OpticalSurface * OpSteelSurf=new G4OpticalSurface("SteelSurface",unified,polished,dielectric_metal);
     OpSteelSurf->SetMaterialPropertiesTable(opticalprops::STEEL());
-    new G4LogicalBorderSurface("SteelSurface_Chamber",labPhysical,Chamber_physical,OpSteelSurf);
-    new G4LogicalBorderSurface("SteelSurface_RingsAndMesh",labPhysical,FieldCage_physical,OpSteelSurf);
-    new G4LogicalBorderSurface("SteelSurface_ImagingDeviceHolders",labPhysical,FieldCage_physical,OpSteelSurf);
+    new G4LogicalBorderSurface("SteelSurface_Chamber",gas_phys,Chamber_physical,OpSteelSurf);
+    new G4LogicalBorderSurface("SteelSurface_RingsAndMesh",gas_phys,FieldCage_physical,OpSteelSurf);
+    new G4LogicalBorderSurface("SteelSurface_ImagingDeviceHolders",gas_phys,FieldCage_physical,OpSteelSurf);
 
 
     // Camera
@@ -302,7 +300,8 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
     opXenon_Glass2->SetType(dielectric_dielectric);   // SetType
     opXenon_Glass2->SetFinish(polished);                 // SetFinish
     opXenon_Glass2->SetPolish(0.0);
-    new G4LogicalBorderSurface("XenonLensSurface",labPhysical,LensAndWindow_physical,opXenon_Glass2);
+    new G4LogicalBorderSurface("XenonLensSurface",gas_phys,MgF2Window_physical,opXenon_Glass2);
+    new G4LogicalBorderSurface("XenonLensSurface",gas_phys,MgF2Lens_physical,opXenon_Glass2);
     //new G4LogicalBorderSurface("XenonPMTsSurface",gas_phys,PMTWindow,opXenon_Glass2);
 
 
@@ -315,9 +314,9 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
         }
 
 
-        auto Needle4_physical= new G4PVPlacement(0,G4ThreeVector(),Needle4_logic,Needle4_solid->GetName(),FieldCage_logic,0,0,false);
-        auto Needle9_physical= new G4PVPlacement(0,G4ThreeVector(),Needle9_logic,Needle9_solid->GetName(),FieldCage_logic,0,0,false);
-        auto Needle14_physical=new G4PVPlacement(0,G4ThreeVector(),Needle14_logic,Needle14_solid->GetName(),FieldCage_logic,0,0,false);
+        auto Needle4_physical= new G4PVPlacement(0,G4ThreeVector(),Needle4_logic,Needle4_solid->GetName(),gas_logic,0,0,false);
+        auto Needle9_physical= new G4PVPlacement(0,G4ThreeVector(),Needle9_logic,Needle9_solid->GetName(),gas_logic,0,0,false);
+        auto Needle14_physical=new G4PVPlacement(0,G4ThreeVector(),Needle14_logic,Needle14_solid->GetName(),gas_logic,0,0,false);
         Sampler->FaceTransform(Needle4_physical);
         Sampler->FaceTransform(Needle9_physical);
         Sampler->FaceTransform(Needle14_physical);
@@ -330,9 +329,9 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
         Needle4_logic->SetVisAttributes(needlevis);
         Needle14_logic->SetVisAttributes(needlevis);
 
-        new G4LogicalBorderSurface("SteelSurface_Needle4",labPhysical,Needle4_physical,OpSteelSurf);
-        new G4LogicalBorderSurface("SteelSurface_Needle9",labPhysical,Needle9_physical,OpSteelSurf);
-        new G4LogicalBorderSurface("SteelSurface_Needle14",labPhysical,Needle14_physical,OpSteelSurf);
+        new G4LogicalBorderSurface("SteelSurface_Needle4",gas_phys,Needle4_physical,OpSteelSurf);
+        new G4LogicalBorderSurface("SteelSurface_Needle9",gas_phys,Needle9_physical,OpSteelSurf);
+        new G4LogicalBorderSurface("SteelSurface_Needle14",gas_phys,Needle14_physical,OpSteelSurf);
 
     }
 
@@ -378,7 +377,7 @@ void DetectorConstruction::AssignVisuals() {
 
     //GAS
     G4LogicalVolume* Gas = lvStore->GetVolume("GAS");
-    G4VisAttributes *GasVa=new G4VisAttributes(colours::WhiteAlpha());
+    G4VisAttributes *GasVa=new G4VisAttributes(colours::YellowAlpha());
     GasVa->SetForceCloud(true);
     Gas->SetVisAttributes(GasVa);
 
@@ -411,8 +410,12 @@ void DetectorConstruction::AssignVisuals() {
 
 
     //PMT TUBE AND PMT BLOCK
-    G4LogicalVolume * SteelTubes=lvStore->GetVolume("SteelTubes_logic");
-    SteelTubes->SetVisAttributes(ChamberVa);
+    G4LogicalVolume * AnodeTube=lvStore->GetVolume("AnodeTube_logic");
+    G4LogicalVolume * CathodeTube=lvStore->GetVolume("CathodeTube_logic");
+    G4LogicalVolume * Meshes=lvStore->GetVolume("Mesh_logic");
+    AnodeTube->SetVisAttributes(ChamberVa);
+    CathodeTube->SetVisAttributes(ChamberVa);
+    Meshes->SetVisAttributes(FReVis);
     /*G4LogicalVolume * PmttubeBlockLog0=lvStore->GetVolume("PMT_TUBE_BLOCK0");
     G4LogicalVolume * PmttubeLog1=lvStore->GetVolume("PMT_TUBE1");
     PmttubeLog1->SetVisAttributes(G4VisAttributes::GetInvisible());
@@ -428,10 +431,12 @@ void DetectorConstruction::AssignVisuals() {
     */
 
     //MgF2Window
-    G4LogicalVolume* lensLogical = lvStore->GetVolume("LensAndWindow_logic");
+    G4LogicalVolume* lensLogical = lvStore->GetVolume("MgF2Lens_logic");
+    G4LogicalVolume* WindowLogic = lvStore->GetVolume("MgF2Window_logic");
     G4VisAttributes  MgF2LensVis=colours::DarkGreen();
     MgF2LensVis.SetForceSolid(true);
     lensLogical->SetVisAttributes(MgF2LensVis);
+    WindowLogic->SetVisAttributes(MgF2LensVis);
 
 
     // Camera

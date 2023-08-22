@@ -77,10 +77,10 @@
 /Action/SteppingAction/event_shift 0
 /Generator/SingleParticle/ParticleType S2Photon
 /Generator/SingleParticle/energy 7 eV
-/Generator/SingleParticle/pos 0 0 0 cm
+/Generator/SingleParticle/pos 0 0 -10 cm
 #/Generator/SingleParticle/pos -1.6 0 -3 cm
 /Generator/SingleParticle/Isotropic true
 /Generator/SingleParticle/Mode Needle
-/Generator/SingleParticle/Amount 100000
-/Generator/SingleParticle/useNeedle true
+/Generator/SingleParticle/Amount 10000
+/Generator/SingleParticle/useNeedle false
 

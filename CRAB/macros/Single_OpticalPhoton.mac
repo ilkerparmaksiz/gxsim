@@ -33,7 +33,7 @@
 ############ Verbosities ###########
 ####################################
 /control/verbose 1
-/tracking/verbose 0
+/tracking/verbose 1
 /run/verbose 0
 /event/verbose 0
 /process/optical/verbose 0
@@ -49,7 +49,7 @@
 /Generator/SingleParticle/Isotropic true
 /Generator/SingleParticle/Mode Needle
 /Generator/SingleParticle/useNeedle false
-/Generator/SingleParticle/Amount 100000
+/Generator/SingleParticle/Amount 10000
 
 /run/beamOn 1
 

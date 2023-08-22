@@ -81,6 +81,6 @@
 #/Generator/SingleParticle/pos -1.6 0 -3 cm
 /Generator/SingleParticle/Isotropic true
 /Generator/SingleParticle/Mode Needle
-/Generator/SingleParticle/Amount 10000
+/Generator/SingleParticle/Amount 100000
 /Generator/SingleParticle/useNeedle true
 

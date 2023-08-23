@@ -76,6 +76,7 @@
 
 /Action/SteppingAction/event_shift 0
 /Generator/SingleParticle/ParticleType S2Photon
+#/Generator/SingleParticle/ParticleType opticalphoton
 /Generator/SingleParticle/energy 7 eV
 /Generator/SingleParticle/pos 0 0 -10 cm
 #/Generator/SingleParticle/pos -1.6 0 -3 cm

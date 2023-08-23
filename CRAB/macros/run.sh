@@ -30,7 +30,12 @@ elif [ "$1" = "clean" ]; then
   build
   echo "Running Interactive Mode"
    ../"$folder"/CRAB Single_OpticalPhoton.mac 100
-
+elif [ "$1" = "mthread" ]; then
+  echo "argument is $1"
+  build
+  echo "Running MultiThread Batch Mode"
+   ../"$folder"/CRAB Single_OpticalPhoton.mac 100 30
+ 
 else
   echo "argument is $1"
   echo "Running Batch Mode"

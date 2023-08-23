@@ -58,7 +58,7 @@ void SteppingAction::UserSteppingAction(const G4Step *aStep)
   G4int pID       = particle->GetPDGEncoding();
   G4double time   = aStep->GetPreStepPoint()->GetGlobalTime();
 
-  G4OpBoundaryProcess* boundary = 0;
+  /*G4OpBoundaryProcess* boundary = 0;
   // if (!boundary &&  particle->GetParticleName() == "S2Photon") {
   if (!boundary){
       
@@ -93,7 +93,7 @@ void SteppingAction::UserSteppingAction(const G4Step *aStep)
               break;
           }
       }
-  }
+  }*/
 
   G4int id(0);
 

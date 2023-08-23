@@ -56,6 +56,6 @@
 /gps/pos/centre 0 0 0 cm
 /gps/polarization 0 0 1
 
-/run/beamOn 100
+/run/beamOn 160000000
 
 

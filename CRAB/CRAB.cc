@@ -31,9 +31,13 @@ int main(int argc, char** argv) {
   G4Random::setTheEngine(new CLHEP::RanecuEngine);
   
 #ifdef G4MULTITHREADED
+  G4int thr=1;
+  if(argc>3){
+      thr=atoi(argv[3]);
+  }
   G4MTRunManager* runManager = new G4MTRunManager();
   //    runManager->SetNumberOfThreads(G4Threading::G4GetNumberOfCores());
-  runManager->SetNumberOfThreads(1);
+  runManager->SetNumberOfThreads(thr);
 #else
     G4RunManager* runManager = new G4RunManager();
     G4cout << "Creation of G4RunManager" << G4endl;

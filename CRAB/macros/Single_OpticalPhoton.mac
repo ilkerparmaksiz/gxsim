@@ -33,7 +33,7 @@
 ############ Verbosities ###########
 ####################################
 /control/verbose 1
-/tracking/verbose 1
+/tracking/verbose 0
 /run/verbose 0
 /event/verbose 0
 /process/optical/verbose 0
@@ -41,8 +41,8 @@
 /tracking/storeTrajectory 1
 
 /Action/SteppingAction/event_shift 0
-/Generator/SingleParticle/ParticleType S2Photon
-#/Generator/SingleParticle/ParticleType opticalphoton
+#/Generator/SingleParticle/ParticleType S2Photon
+/Generator/SingleParticle/ParticleType opticalphoton
 /Generator/SingleParticle/energy 7 eV
 /Generator/SingleParticle/pos 0 0 0 cm
 #/Generator/SingleParticle/pos -1.6 0 -3 cm

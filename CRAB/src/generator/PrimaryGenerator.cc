@@ -45,6 +45,8 @@
 #include "G4RadioactiveDecay.hh"
 #include "Randomize.hh"
 #include "FileHandling.hh"
+#include "G4OpticalPhoton.hh"
+#include "S2Photon.hh"
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
@@ -251,6 +253,7 @@ void PrimaryGenerator::GenerateSingleParticle(G4Event * event) {
     G4PrimaryVertex* vertexA = new G4PrimaryVertex(positionA,0);
 
 
+    RandomPolarization(particle1);
 
     // Add particle to the vertex
     vertexA->SetPrimary(particle1);
@@ -282,6 +285,7 @@ void PrimaryGenerator::GenerateFromSurface(G4Event* evt){
     particle1 = new G4PrimaryParticle(particleDefinition);
 
     mass   = particleDefinition->GetPDGMass();
+
     energy = energy_ + mass;
     pmod = std::sqrt(energy*energy - mass*mass);
 
@@ -301,18 +305,39 @@ void PrimaryGenerator::GenerateFromSurface(G4Event* evt){
         p = pmod * momentum_;
 
     }
+
     particle1->SetMomentum(p.x(), p.y(), p.z());
     //std::cout << "\nPrimaryGenerator: Adding particle with " << particle1->GetKineticEnergy()/keV << " keV w ux,uy,uz " << p.x() << ", " << p.y() << ", " << p.z()<< " to vertexA."  << std::endl;
 
     G4PrimaryVertex* vertexA = new G4PrimaryVertex(positionA,0);
 
-
-
+    RandomPolarization(particle1);
     // Add particle to the vertex
     vertexA->SetPrimary(particle1);
     evt->AddPrimaryVertex(vertexA);
 
 
+}
+void PrimaryGenerator::RandomPolarization(G4PrimaryParticle *particle) {
+    if(particle->GetParticleDefinition()==G4OpticalPhoton::Definition() or particle->GetParticleDefinition()==S2Photon::Definition() ) {
+        G4double angle = G4UniformRand() * 360.0 * deg;
+        G4ThreeVector normal(1., 0., 0.);
+        G4ThreeVector kphoton = particle->GetMomentumDirection();
+        G4ThreeVector product = normal.cross(kphoton);
+        G4double modul2 = product * product;
+
+        G4ThreeVector e_perpend(0., 0., 1.);
+        if (modul2 > 0.) e_perpend = (1. / std::sqrt(modul2)) * product;
+        G4ThreeVector e_paralle = e_perpend.cross(kphoton);
+
+        G4ThreeVector polar = std::cos(angle) * e_paralle
+                              + std::sin(angle) * e_perpend;
+        particle->SetPolarization(polar.x(), polar.y(), polar.z());
+    }else {
+        particle->SetPolarization(particle->GetPolX(),
+                                  particle->GetPolY(),
+                                  particle->GetPolZ());
+    }
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

@@ -24,6 +24,7 @@ https://svs.icts.kuleuven.be/projects/svs_project014/wiki/Wiki
 
 #include "DetectorConstruction.hh"
 #include "PhysicsList.hh"
+#include "S2Photon.hh"
 #include "MyUserActionInitialization.hh"
 #include "GasModelParameters.hh"
 
@@ -49,19 +50,21 @@ int main(int argc, char** argv) {
  G4Random::setTheSeed(randseed);
   G4cout << "Setting the Random seed: " << randseed << G4endl;
   G4cout << "Creation of the gas model parameter class" << G4endl;
+
+
   GasModelParameters* gmp = new GasModelParameters();
-    
+
   G4cout << "Creation of DetectorConstruction" << G4endl;
   DetectorConstruction* detector = new DetectorConstruction(gmp);
   runManager->SetUserInitialization(detector);
 
-  
+
   G4cout << "Creation of PhysicsList" << G4endl;
   PhysicsList* physics = new PhysicsList();
   runManager->SetUserInitialization(physics);
-  
+
   runManager->SetUserInitialization(new MyUserActionInitialization());
- 
+
   // get the pointer to the User Interface manager
   G4UImanager* UImanager = G4UImanager::GetUIpointer();
   G4UIExecutive* ui = nullptr;

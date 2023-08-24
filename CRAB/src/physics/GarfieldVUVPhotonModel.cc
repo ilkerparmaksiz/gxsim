@@ -32,6 +32,9 @@
 #include "Analysis.hh"
 #include "ComponentComsol.hh"
 #include "S2Photon.hh"
+#include "OpAbsorption.hh"
+#include "OpBoundaryProcess.hh"
+#include "OpWLS.hh"
 
 #include "G4AutoLock.hh"
 namespace{G4Mutex aMutex = G4MUTEX_INITIALIZER;}
@@ -58,9 +61,9 @@ GarfieldVUVPhotonModel::GarfieldVUVPhotonModel(GasModelParameters* gmp, G4String
     fGasModelParameters = gmp;
     InitialisePhysics();
 
-    G4OpBoundaryProcess* fBoundaryProcess = new G4OpBoundaryProcess();
-    G4OpAbsorption* fAbsorptionProcess = new G4OpAbsorption();
-    G4OpWLS* fTheWLSProcess = new G4OpWLS();
+    OpBoundaryProcess* fBoundaryProcess = new OpBoundaryProcess();
+    OpAbsorption* fAbsorptionProcess = new OpAbsorption();
+    OpWLS* fTheWLSProcess = new OpWLS();
 
 
 }

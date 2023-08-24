@@ -72,12 +72,12 @@
 #/vis/modeling/trajectories/drawByCharge-0/default/setStepPtsSize 6
 /vis/scene/add/axes    # Simple axes: x=red, y=green, z=blue.
 /tracking/storeTrajectory 1
-
+/process/optical/boundary/verbose 0
 
 /Action/SteppingAction/event_shift 0
 /Generator/SingleParticle/ParticleType S2Photon
 #/Generator/SingleParticle/ParticleType opticalphoton
-/Generator/SingleParticle/energy 7 eV
+/Generator/SingleParticle/energy 7.29 eV
 /Generator/SingleParticle/pos 0 0 -10 cm
 #/Generator/SingleParticle/pos -1.6 0 -3 cm
 /Generator/SingleParticle/Isotropic true

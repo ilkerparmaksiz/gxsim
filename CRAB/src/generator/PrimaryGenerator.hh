@@ -41,7 +41,7 @@
 #include "G4BetaMinusDecay.hh"
 
 #include "FileHandling.hh"
-
+#include "G4PrimaryParticle.hh"
 class G4Event;
 //class G4DecayProducts;
 
@@ -59,8 +59,7 @@ class PrimaryGenerator : public G4VPrimaryGenerator
   virtual void GenerateSingleParticle(G4Event*);
   virtual void GenerateFromSurface(G4Event*);
   virtual void Generate(G4Event* event, std::vector<double> &xyz); // Choose which generator to launch
-
-
+  virtual void RandomPolarization(G4PrimaryParticle * particle);
 private:
     bool fFSNeutrino;
     G4IonTable* fIonTable;

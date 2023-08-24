@@ -173,14 +173,10 @@ void PhysListEmStandard::ConstructProcess() {
             // all others charged particles except geantino
             ph->RegisterProcess(new G4hMultipleScattering(), particle);
             ph->RegisterProcess(new G4hIonisation(), particle);
-        }else if (particleName=="S2Photon"){
-            ph->RegisterProcess(new OpBoundaryProcess(),particle);
-            ph->RegisterProcess(new OpAbsorption(),particle);
-            ph->RegisterProcess(new OpRayleigh(),particle);
-            ph->RegisterProcess(new OpMieHG(),particle);
-            ph->RegisterProcess(new OpWLS(),particle);
-            ph->RegisterProcess(new OpWLS2(),particle);
-        }
+        }/*else if(particleName=="S2Photon"){
+            ph->RegisterProcess(new OpBoundaryProcess,particle);
+            ph->RegisterProcess(new OpAbsorption,particle);
+        }*/
     }
     
     // Em options
@@ -236,7 +232,8 @@ void PhysListEmStandard::ConstructProcess() {
         if (theNEST2ScintillationProcess->IsApplicable(*particle) && pmanager) {
         std::cout << "PhysicsList::InitialisePhysics(): particleName, pmanager  " << particleName << ", " << pmanager << "." << std::endl;
         std::cout << "ordDefault, ordInActive " << ordDefault << ", " << ordInActive  << std::endl;
-        pmanager->AddProcess(theNEST2ScintillationProcess, ordDefault + 1, ordInActive, ordDefault + 1);
+        // This needs to be called because Nest is not aware of the S2Photon
+        if(particleName!="S2Photon") pmanager->AddProcess(theNEST2ScintillationProcess, ordDefault + 1, ordInActive, ordDefault + 1);
       }
         OpBoundaryProcess* fBoundaryProcess = new OpBoundaryProcess();
         OpAbsorption* fAbsorptionProcess = new OpAbsorption();
@@ -245,14 +242,14 @@ void PhysListEmStandard::ConstructProcess() {
         OpRayleigh* fTOpRayleigh = new OpRayleigh();
         OpWLS2* fOpWLS2 = new OpWLS2();
 
-    if (((particleName == "opticalphoton") or (particleName == "S2Photon")) && pmanager) {
+    if (((particleName == "opticalphoton") || particleName=="S2Photon") && pmanager) {
             G4cout << " AddDiscreteProcess to OpticalPhoton " << G4endl;
-           pmanager->AddDiscreteProcess(fBoundaryProcess);
            pmanager->AddDiscreteProcess(fAbsorptionProcess);
-	       pmanager->AddDiscreteProcess(fTOpRayleigh);
-           pmanager->AddDiscreteProcess(fTheWLSProcess);
-           pmanager->AddDiscreteProcess(fOpMieHG);
-           pmanager->AddDiscreteProcess(fOpWLS2);
+           pmanager->AddDiscreteProcess(fBoundaryProcess);
+	       //pmanager->AddDiscreteProcess(fTOpRayleigh);
+           //pmanager->AddDiscreteProcess(fTheWLSProcess);
+           //pmanager->AddDiscreteProcess(fOpMieHG);
+           //pmanager->AddDiscreteProcess(fOpWLS2);
     }
 
       

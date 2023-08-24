@@ -8,7 +8,7 @@
 // ----------------------------------------------------------------------------
 
 #include "SensorSD.hh"
-
+#include "S2Photon.hh"
 #include <G4OpticalPhoton.hh>
 #include <G4SDManager.hh>
 #include <G4ProcessManager.hh>
@@ -60,7 +60,7 @@ namespace sensorsd {
   {
     // Check whether the track is an optical photon
     G4ParticleDefinition* pdef = step->GetTrack()->GetDefinition();
-    if (pdef != G4OpticalPhoton::Definition()) return false;
+    if (pdef != G4OpticalPhoton::Definition() || pdef!=S2Photon::Definition()) return false;
 
     const G4VTouchable* touchable =
       step->GetPostStepPoint()->GetTouchable();

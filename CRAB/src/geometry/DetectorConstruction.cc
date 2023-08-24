@@ -95,8 +95,8 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
     G4String lab_name="LAB";
     G4Box * lab_solid_volume = new G4Box(lab_name,Lab_size/2,Lab_size/2,Lab_size/2);
 
-    G4Tubs* gas_solid =new G4Tubs("GAS", 0., chamber_diam/2., chamber_length/2. + chamber_thickn+3*cm/2, 0., twopi);
-    //G4Tubs* gas_solid =new G4Tubs("GAS", 0., chamber_diam/2., chamber_length/2. + chamber_thickn, 0., twopi);
+    //G4Tubs* gas_solid =new G4Tubs("GAS", 0., chamber_diam/2., chamber_length/2. + chamber_thickn+3*cm/2, 0., twopi);
+    G4Tubs* gas_solid =new G4Tubs("GAS", 0., chamber_diam/2., chamber_length/2. + chamber_thickn, 0., twopi);
 
 
     // Optical Properties Assigned here
@@ -195,8 +195,8 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
     auto labPhysical = new G4PVPlacement(0, G4ThreeVector(),lab_logic_volume,lab_logic_volume->GetName(),0, false,0,false);
 
     auto Chamber_physical=new G4PVPlacement(0,G4ThreeVector(),Chamber_logic,Chamber_solid->GetName(),lab_logic_volume,0,0,false);
-    //auto gas_pyhsical=new G4PVPlacement(0,G4ThreeVector(0,0,0.7*cm/2),gas_logic,gas_logic->GetName(),lab_logic_volume,0,0,false);
-    auto gas_pyhsical=new G4PVPlacement(0,G4ThreeVector(0,0,-0.2*cm/2),gas_logic,gas_logic->GetName(),lab_logic_volume,0,0,false);
+    auto gas_pyhsical=new G4PVPlacement(0,G4ThreeVector(0,0,0.7*cm/2),gas_logic,gas_logic->GetName(),lab_logic_volume,0,0,false);
+    //auto gas_pyhsical=new G4PVPlacement(0,G4ThreeVector(0,0,-0.2*cm/2),gas_logic,gas_logic->GetName(),lab_logic_volume,0,0,false);
 
     auto FieldCage_physical=new G4PVPlacement(0,G4ThreeVector(),FieldCage_logic,FieldCage_solid->GetName(),gas_logic,false,0,false);
 
@@ -204,8 +204,8 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
     //auto Peeks_physical=new G4PVPlacement(0,G4ThreeVector(),Peeks_logic,Peeks_solid->GetName(),gas_logic,0,0,false);
     auto Brackets_physical=new G4PVPlacement(0,G4ThreeVector(),Brackets_logic,Brackets_solid->GetName(),gas_logic,0,0,false);
     // Gas Filling the Gaps
-    //auto Gas_Lens_pysical=new G4PVPlacement(0,G4ThreeVector(0,0,-1*mm/2),Gas_Lens_logic,Gas_Lens_solid->GetName(),lab_logic_volume,0,0,false);
-    //auto Gas_Window_pysical=new G4PVPlacement(0,G4ThreeVector(0,0,1.5*mm/2),Gas_Window_logic,Gas_Window_solid->GetName(),lab_logic_volume,0,0,false);
+    auto Gas_Lens_pysical=new G4PVPlacement(0,G4ThreeVector(0,0,-1*mm/2),Gas_Lens_logic,Gas_Lens_solid->GetName(),lab_logic_volume,0,0,false);
+    auto Gas_Window_pysical=new G4PVPlacement(0,G4ThreeVector(0,0,1.5*mm/2),Gas_Window_logic,Gas_Window_solid->GetName(),lab_logic_volume,0,0,false);
 
     //Lens and Window
     auto MgF2Lens_physical=new G4PVPlacement(0,G4ThreeVector(),MgF2Lens_logic,MgF2Lens_solid->GetName(),lab_logic_volume,0,0,false);
@@ -409,8 +409,8 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
     opXenon_Glass->SetModel(glisur);                  // SetModel
     opXenon_Glass->SetType(dielectric_dielectric);   // SetType
     opXenon_Glass->SetFinish(polished);                 // SetFinish
-    new G4LogicalBorderSurface("XenonSurfaceWindow",gas_pyhsical,MgF2Window_physical ,opXenon_Glass);
-    new G4LogicalBorderSurface("XenonSurfaceLens",gas_pyhsical , MgF2Lens_physical, opXenon_Glass);
+    //new G4LogicalBorderSurface("XenonSurfaceWindow",gas_pyhsical,MgF2Window_physical ,opXenon_Glass);
+    //new G4LogicalBorderSurface("XenonSurfaceLens",gas_pyhsical , MgF2Lens_physical, opXenon_Glass);
     //new G4LogicalBorderSurface("XenonSurfaceWindow",gas_pyhsical,lensPhysical ,opXenon_Glass);
     //new G4LogicalBorderSurface("XenonSurfaceLens",gas_pyhsical , WindowPhysical, opXenon_Glass);
 

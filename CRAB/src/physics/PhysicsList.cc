@@ -67,7 +67,6 @@
 #include "G4FastSimulationPhysics.hh"
 #include "G4GlobalFastSimulationManager.hh"
 
-
 #ifdef theParticleIterator
 #undef theParticleIterator
 #endif
@@ -81,16 +80,13 @@ PhysicsList::PhysicsList()
   cutForGamma = defaultCutValue;
   cutForElectron = defaultCutValue;
   cutForPositron = defaultCutValue;
-
+  // Particles
+  S2Photon::Definition();
+  NEST::NESTThermalElectron::Definition();
   pMessenger = new PhysicsListMessenger(this);
 
 
   SetVerboseLevel(0);
-
-// EM physics
-  NEST::NESTThermalElectron::Definition();
-  G4OpticalPhoton::Definition();
-  S2Photon::Definition();
 
   RegisterPhysics(new G4EmLivermorePhysics(1));
 
@@ -149,7 +145,7 @@ void PhysicsList::InitializePhysicsList(const G4String& name) {
     ReplacePhysics(new G4EmStandardPhysics(1));
     AddIonGasModels();
   }
-  
+
 
 }
 

@@ -49,10 +49,10 @@ void SteppingAction::UserSteppingAction(const G4Step *aStep)
   G4Track* track = aStep->GetTrack();
   G4double tID = track->GetTrackID();
 
-  if (trackID != track->GetTrackID()){
+  /*if (trackID != track->GetTrackID()){
     trackID =  track->GetTrackID();
     reflected = false;
-  }
+  }*/
 
   const G4ParticleDefinition* particle = track->GetParticleDefinition();
   G4int pID       = particle->GetPDGEncoding();

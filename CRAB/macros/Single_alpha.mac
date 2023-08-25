@@ -9,7 +9,7 @@
 
 # For setting the geometry
 /gasModelParameters/geometry/COMSOL_Path /Users/mistryk2/OneDrive - University of Texas at Arlington/Projects/CRAB/COMSOL/
-/gasModelParameters/geometry/useEL_File true
+/gasModelParameters/geometry/useEL_File false
 /gasModelParameters/geometry/useComsol false
 
 # Threading
@@ -46,8 +46,7 @@
 /Generator/SingleParticle/pos 0 0 0 cm
 #/Generator/SingleParticle/pos  -1.6 0 -5 cm
 /Generator/SingleParticle/Isotropic true
-/Generator/SingleParticle/Mode Single
-/Generator/SingleParticle/useNeedle false
+/Generator/SingleParticle/Mode Needle14cm
 /run/beamOn 1
 
 

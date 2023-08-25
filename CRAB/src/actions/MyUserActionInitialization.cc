@@ -25,7 +25,7 @@ void MyUserActionInitialization::Build() const {
 
 	SetUserAction(new RunAction());
 
-	//SetUserAction(new NESTStackingAction()); // comment to launch, e.g., opticalphotons as primaries. EC, 29-July-2022.
+	SetUserAction(new NESTStackingAction()); // comment to launch, e.g., opticalphotons as primaries. EC, 29-July-2022.
 	TrackingAction* trackAct = new TrackingAction();
 	SetUserAction(trackAct);
 	

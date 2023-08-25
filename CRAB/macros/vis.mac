@@ -50,7 +50,7 @@
 #/vis/scene/add/hits
 
 ## needed to keep the display from clearing out many drawn objects. EC, 22-June-2022.
-#/vis/ogl/set/displayListLimit 5000000
+/vis/ogl/set/displayListLimit 5000000
 #/vis/viewer/set/lightsThetaPhi 90. 0.
 /vis/viewer/set/viewpointThetaPhi 90. 0.
 #/vis/viewer/set/viewpointThetaPhi 180. 90.
@@ -71,17 +71,43 @@
 #/vis/modeling/trajectories/drawByCharge-0/default/setDrawStepPts true
 #/vis/modeling/trajectories/drawByCharge-0/default/setStepPtsSize 6
 /vis/scene/add/axes    # Simple axes: x=red, y=green, z=blue.
+
+/vis/scene/endOfEventAction accumulate 100000
 /tracking/storeTrajectory 1
 /process/optical/boundary/verbose 0
 
 /Action/SteppingAction/event_shift 0
+## SingleGenerator
 /Generator/SingleParticle/ParticleType S2Photon
 #/Generator/SingleParticle/ParticleType opticalphoton
 /Generator/SingleParticle/energy 7.29 eV
-/Generator/SingleParticle/pos 0 0 -10 cm
-#/Generator/SingleParticle/pos -1.6 0 -3 cm
+/Generator/SingleParticle/pos 0 0 25 cm
 /Generator/SingleParticle/Isotropic true
-/Generator/SingleParticle/Mode Needle
+/Generator/SingleParticle/Mode Needle14cm
 /Generator/SingleParticle/Amount 10000
-/Generator/SingleParticle/useNeedle false
 
+## GPS // For Cool Examples visit --> https://hurel.hanyang.ac.kr/Geant4/Geant4_GPS/reat.space.qinetiq.com/gps/examples/examples.html
+## and this is as well                http://www.hep.ph.ic.ac.uk/~yoshiu/T2KUKFiles/GeneralParticleSourceMacros/
+#/gps/particle opticalphoton
+#/gps/ene/type Mono
+#/gps/ene/mono 7 eV
+#/gps/direction 0 0 1
+#/gps/pos/centre 0 0 -25 cm
+#/gps/polarization 0 0 1
+
+### circular Plane
+#/gps/particle opticalphoton
+#/gps/pos/type Plane
+#/gps/pos/shape Circle
+#/gps/pos/centre 0 0 -10.5 cm
+#/gps/pos/radius 16.52. mm
+#/gps/direction 0 0 1
+#/gps/ang/mono 7eV
+
+
+## isoTropic
+#/gps/particle opticalphoton
+#/gps/pos/type Point
+#/gps/pos/centre 0 0 30 cm
+#/gps/ang/type iso
+#/gps/energy 7eV

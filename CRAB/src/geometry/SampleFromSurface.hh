@@ -21,7 +21,7 @@ namespace util{
         void SampleFromFacet(G4TessellatedSolid * solid1);
         void SampleFromFacet(G4String n1,G4TessellatedSolid * solid1,G4String n2,G4TessellatedSolid * solid2);
         void SampleFromFacet(G4String n1,G4TessellatedSolid * solid1,G4String n2,G4TessellatedSolid * solid2,G4String n3,G4TessellatedSolid * solid3);
-        void FaceTransform(const G4VPhysicalVolume* tr);
+        void FaceTransform(const G4VPhysicalVolume* tr,const G4VPhysicalVolume * Mother);
 
         std::map<G4String,std::vector<G4ThreeVector>> * getRawPoints();
         std::map<G4String,std::vector<G4ThreeVector>> * getTranslatedPoints();

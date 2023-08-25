@@ -96,7 +96,7 @@ void PrimaryGenerator::Generate(G4Event* event, std::vector<double> &xyz){
       if (fAmount_==0) fAmount_=1;
       for (int i=0; i<fAmount_;i++) GenerateSingleParticle(event);
   }
-  else if(GeneratorMode_=="Needle"){
+  else if(GeneratorMode_=="Needle" or GeneratorMode_=="Needle4cm" or GeneratorMode_=="Needle9cm" or GeneratorMode_=="Needle14cm"){
       using namespace filehandler;
       FileHandling *f=new FileHandling();
       string Path;
@@ -308,7 +308,7 @@ void PrimaryGenerator::GenerateFromSurface(G4Event* evt){
 
     particle1->SetMomentum(p.x(), p.y(), p.z());
     //std::cout << "\nPrimaryGenerator: Adding particle with " << particle1->GetKineticEnergy()/keV << " keV w ux,uy,uz " << p.x() << ", " << p.y() << ", " << p.z()<< " to vertexA."  << std::endl;
-
+    //G4cout<<"Particle Position is " << positionA <<G4endl;
     G4PrimaryVertex* vertexA = new G4PrimaryVertex(positionA,0);
 
     RandomPolarization(particle1);
@@ -318,6 +318,7 @@ void PrimaryGenerator::GenerateFromSurface(G4Event* evt){
 
 
 }
+// This is to create polarization for optical photons and S2Photons
 void PrimaryGenerator::RandomPolarization(G4PrimaryParticle *particle) {
     if(particle->GetParticleDefinition()==G4OpticalPhoton::Definition() or particle->GetParticleDefinition()==S2Photon::Definition() ) {
         G4double angle = G4UniformRand() * 360.0 * deg;
@@ -333,10 +334,6 @@ void PrimaryGenerator::RandomPolarization(G4PrimaryParticle *particle) {
         G4ThreeVector polar = std::cos(angle) * e_paralle
                               + std::sin(angle) * e_perpend;
         particle->SetPolarization(polar.x(), polar.y(), polar.z());
-    }else {
-        particle->SetPolarization(particle->GetPolX(),
-                                  particle->GetPolY(),
-                                  particle->GetPolZ());
     }
 }
 

@@ -35,7 +35,17 @@ elif [ "$1" = "mthread" ]; then
   build
   echo "Running MultiThread Batch Mode"
    ../"$folder"/CRAB Single_OpticalPhoton.mac 100 30
- 
+elif [ "$1" = "malpha" ]; then
+  echo "argument is $1"
+  build
+  echo "Running MultiThread Batch Mode"
+   ../"$folder"/CRAB Single_alpha.mac 100 30
+elif [ "$1" = "alpha" ]; then
+  echo "argument is $1"
+  build
+  echo "Running MultiThread Batch Mode"
+   ../"$folder"/CRAB Single_alpha.mac 100
+
 else
   echo "argument is $1"
   echo "Running Batch Mode"

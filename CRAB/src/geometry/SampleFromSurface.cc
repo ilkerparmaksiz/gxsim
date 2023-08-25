@@ -8,7 +8,7 @@
 using namespace CLHEP;
 using namespace util;
 
- SampleFromSurface::SampleFromSurface (G4String name):frac_(0.135),OverRide(true){
+ SampleFromSurface::SampleFromSurface (G4String name):frac_(0.135),OverRide(false){
      name_=name;
      SamplePoints_=new std::map<G4String,std::vector<G4ThreeVector>>();
      TranslatedSamplePoints_=new std::map<G4String,std::vector<G4ThreeVector>>();
@@ -22,7 +22,7 @@ using namespace util;
 SampleFromSurface::~SampleFromSurface(){}
 
 // Transforms the sample points so they will allign with the geometry
-void SampleFromSurface::FaceTransform(const G4VPhysicalVolume* tr) {
+void SampleFromSurface::FaceTransform(const G4VPhysicalVolume* tr,const G4VPhysicalVolume * Mother) {
 
    // If the File Exist do not worry of transforming it
    if(file->FileCheck(FilePath) and OverRide==false){
@@ -39,12 +39,14 @@ void SampleFromSurface::FaceTransform(const G4VPhysicalVolume* tr) {
   std::vector<G4ThreeVector> Samples=SamplePoints_->at(key);
   std::vector<G4ThreeVector> TranslatedSamples;
   const G4RotationMatrix ro=tr->GetObjectRotationValue();
-  G4ThreeVector translation = tr->GetObjectTranslation();
+  G4ThreeVector Mothertranslation = Mother->GetObjectTranslation();
+  const G4RotationMatrix MotherRotation = Mother->GetObjectRotationValue();
+  G4ThreeVector Daughtertranslation = tr->GetObjectTranslation();
   G4ThreeVector tVector;
 
   // Loop Through and apply the transformation
   for (int i=0;i<TotalPoints;i++){
-      tVector=translation+(Samples.at(i)*mm).transform(ro);
+      tVector=Daughtertranslation+(Samples.at(i)*mm).transform(ro).transform(MotherRotation)+Mothertranslation;
       TranslatedSamples.push_back(tVector);
   }
 

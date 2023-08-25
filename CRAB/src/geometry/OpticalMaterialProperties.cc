@@ -270,9 +270,10 @@ namespace opticalprops {
 
       // REFLECTIVITY
       std::vector<G4double> ENERGIES = {
-              optPhotMinE_, 7.29 * eV,  optPhotMaxE_
+              optPhotMinE_,7.20*eV, 7.29 * eV,  optPhotMaxE_
       };
-      std::vector<G4double> REFLECTIVITY = { 0.20,0.20,0.20};
+      //std::vector<G4double> REFLECTIVITY = { 0.20,0.20,0.20,0.20};
+      std::vector<G4double> REFLECTIVITY = { 0.2,0.2,0.2,0.2};
       // std::vector<G4double> REFLECTIVITY = { 0.00,0.00,0.00};
 
       // REFLEXION BEHAVIOR
@@ -293,6 +294,21 @@ namespace opticalprops {
       mpt->AddProperty("REFLECTIVITY", ENERGIES, REFLECTIVITY);
       return mpt;
   }
+  G4MaterialPropertiesTable * PerfectDetector(){
+      G4MaterialPropertiesTable* mpt = new G4MaterialPropertiesTable();
+
+      // REFLECTIVITY
+      std::vector<G4double> ENERGIES = {
+              optPhotMinE_,7.20*eV, 7.29 * eV,  optPhotMaxE_
+      };
+      std::vector<G4double> REFLECTIVITY = { 0,0,0,0};
+      std::vector<G4double> EFFICIENCY = { 1,1,1,1};
+
+      mpt->AddProperty("REFLECTIVITY", ENERGIES, REFLECTIVITY);
+      mpt->AddProperty("EFFICIENCY", ENERGIES, EFFICIENCY);
+      return mpt;
+  }
+
 
 
 }

@@ -136,7 +136,8 @@ void SteppingAction::UserSteppingAction(const G4Step *aStep)
       eVname = eVolume->GetName();
 
     // Camera
-    if (lVolume->GetName().find("camLogical")!=std::string::npos){
+    //if (lVolume->GetName().find("camLogical")!=std::string::npos){
+    if (eVname.find("Camera_logic")!=std::string::npos){
       //track->SetTrackStatus(fStopAndKill);
       analysisManager->FillNtupleDColumn(id,0, event+ev_shift);
       analysisManager->FillNtupleDColumn(id,1, pID);
@@ -181,7 +182,7 @@ void SteppingAction::UserSteppingAction(const G4Step *aStep)
 
     // PMT location
     id = 5;
-    if (lVolume->GetName().find("S1_WINDOW")!=std::string::npos){
+    if (lVolume->GetName().find("Pmt_logic")!=std::string::npos){
       analysisManager->FillNtupleDColumn(id,0, event+ev_shift);
       analysisManager->FillNtupleDColumn(id,1, pID);
       analysisManager->FillNtupleDColumn(id,2, time/ns);

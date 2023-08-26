@@ -26,7 +26,7 @@ void TrackingAction::PreUserTrackingAction(const G4Track *aTrack) {
 
     // Do not Store Trajectories to help on memory
     if(G4OpticalPhoton::Definition()==aTrack->GetParticleDefinition())
-        fpTrackingManager->SetStoreTrajectory(true);
+        fpTrackingManager->SetStoreTrajectory(false);
     else
         fpTrackingManager->SetStoreTrajectory(true);
 

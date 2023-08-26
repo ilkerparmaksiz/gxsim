@@ -110,7 +110,7 @@ void GarfieldVUVPhotonModel::DoIt(const G4FastTrack& fastTrack, G4FastStep& fast
      EC, 2-Dec-2021.
 
    */
-    fastStep.SetNumberOfSecondaryTracks(1);
+    fastStep.SetNumberOfSecondaryTracks(1e3);
   
     // G4cout<<"HELLO Garfield"<<G4endl;
     ////The details of the Garfield model are implemented here
@@ -121,11 +121,11 @@ void GarfieldVUVPhotonModel::DoIt(const G4FastTrack& fastTrack, G4FastStep& fast
      garfTime = fastTrack.GetPrimaryTrack()->GetGlobalTime();
      //G4cout<<"GLOBAL TIME "<<G4BestUnit(garfTime,"Time")<<" POSITION "<<G4BestUnit(garfPos,"Length")<<G4endl;
      counter[1]++; // maybe not threadsafe
-     if (!(counter[1]%10000))
+    if (!(counter[1]%10000))
        G4cout << "GarfieldVUV: actual NEST thermales: " << counter[1] << G4endl;
 
-     if (!(counter[3]%10000))
-        G4cout << "GarfieldVUV: S2 OpticalPhotons: " << counter[3] << G4endl;
+     //if (!(counter[3]%10000))
+        //G4cout << "GarfieldVUV: S2 OpticalPhotons: " << counter[3] << G4endl;
 
      if(counter[1]<2) GenerateVUVPhotons(fastTrack,fastStep,garfPos,garfTime);
 
@@ -168,22 +168,27 @@ void GarfieldVUVPhotonModel::GenerateVUVPhotons(const G4FastTrack& fastTrack, G4
     // std::cout << "GVUVPM: E field in medium " << medium << " at " << x0<<","<<y0<<","<<z0 << " is: " << ef[0]<<","<<ef[1]<<","<<ef[2] << std::endl;
 
     // Need to get the AvalancheMC drift at the High-Field point in z, and then call fAvalanche-AvalancheElectron() to create excitations/VUVphotons.
+    std::cout << "----------" << std::endl;
+    std::cout << x0 << " " << y0 << " " << z0  << std::endl;
     fAvalancheMC->DriftElectron(x0,y0,z0,t0);
 
-    unsigned int n = fAvalancheMC->GetNumberOfElectronEndpoints();
+    //unsigned int n = fAvalancheMC->GetNumberOfElectronEndpoints();
+    unsigned int n = fAvalancheMC->GetNumberOfDriftLinePoints();
     double xi,yi,zi,ti;
     int status;
     //	std::cout << "Drift(): avalanchetracking, n DLTs is " << n << std::endl;
 
     // Get zi when in the beginning of the EL region
     for(unsigned int i=0;i<n;i++){
-        fAvalancheMC->GetElectronEndpoint(i,x0,y0,z0,t0,xi,yi,zi,ti,status);
+        //fAvalancheMC->GetElectronEndpoint(i,x0,y0,z0,t0,xi,yi,zi,ti,status);
+        fAvalancheMC->GetDriftLinePoint(i,xi,yi,zi,ti);
         // std::cout << "GVUVPM: positions are " << xi<<"," <<yi<<","<<zi <<"," <<ti<< std::endl;
 
-
+        std::cout << x0 << " " << y0 << " " << z0 << " " << xi << " " << yi << " " << zi << " " << ti << " " << status << std::endl;
+        std::cout << "ELPos -- > " << ELPos <<std::endl;
       // Drift line point entered LEM
       if (zi < ELPos && ( std::sqrt(xi*xi + yi*yi) < DetActiveR/2.0) )
-        break; 
+        break;
       // No drift line point meets criteria, so return
       else if (i==n-1)
         return;
@@ -204,7 +209,7 @@ void GarfieldVUVPhotonModel::GenerateVUVPhotons(const G4FastTrack& fastTrack, G4
     const G4Track* pG4trk = fastTrack.GetPrimaryTrack();
     G4int pntid = pG4trk->GetParentID();
     G4int tid = pG4trk->GetTrackID();
-    
+
     delete garfExcHitsCol;
     
 }
@@ -490,7 +495,6 @@ void GarfieldVUVPhotonModel::MakeELPhotonsFromFile( G4FastStep& fastStep, G4doub
       }
       counter[3]++;
     }
-    fastStep.KillPrimaryTrack();
 }
 
 
@@ -537,6 +541,5 @@ void GarfieldVUVPhotonModel::MakeELPhotonsSimple(G4FastStep& fastStep, G4double 
       }
       counter[3]++;
     }
-    fastStep.KillPrimaryTrack();
 
 }

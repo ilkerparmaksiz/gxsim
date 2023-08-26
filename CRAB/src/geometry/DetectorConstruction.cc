@@ -45,7 +45,6 @@ DetectorConstruction::DetectorConstruction(GasModelParameters* gmp) :
     Gas_diam(17.4*cm),
     Gas_length(42.5*cm),
     chamber_diam   (16.4 * cm),
-    //chamber_length (41.8* cm), // Config files vary
     chamber_length (43.18* cm), // Config files vary
     chamber_thickn (7. * mm),
     SourceEn_offset (5.7 *cm),
@@ -106,7 +105,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
     vacuum->SetMaterialPropertiesTable(opticalprops::Vacuum());
     gxe->SetMaterialPropertiesTable(opticalprops::GXe(gas_pressure_, 68,sc_yield_,e_lifetime_));
 
-    G4LogicalVolume * lab_logic_volume = new G4LogicalVolume(lab_solid_volume,vacuum,lab_name) ; //G4NistManager::Instance()->FindOrBuildMaterial("G4_AIR")
+    G4LogicalVolume * lab_logic_volume = new G4LogicalVolume(lab_solid_volume,air,lab_name) ; //G4NistManager::Instance()->FindOrBuildMaterial("G4_AIR")
 
     gas_logic = new G4LogicalVolume(gas_solid, gxe, "GAS");
 

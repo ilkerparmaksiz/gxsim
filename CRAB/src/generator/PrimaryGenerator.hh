@@ -72,7 +72,7 @@ private:
 
 
     // For reading in files
-    filehandler::FileHandling FileHandler;
+    filehandler::FileHandling *FileHandler;
 
     std::vector<std::vector<G4double>> electron_data;
     std::vector<std::vector<G4double>> alpha_data;
@@ -84,6 +84,8 @@ private:
     G4int fAmount_;
     G4String GeneratorMode_;
     std::vector<G4ThreeVector> NeedlePoints;
+    std::string CRABPATH;
+    std::string NeedlePointPath;
 
 };
 

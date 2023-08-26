@@ -13,7 +13,9 @@
 #include "G4Polyline.hh"
 #include "G4Colour.hh"
 #include "G4VisAttributes.hh"
-
+#include "G4OpticalPhoton.hh"
+#include "S2Photon.hh"
+#include "NEST/G4/NESTProc.hh"
 GasBoxSD::GasBoxSD(G4String name) : G4VSensitiveDetector(name),
     fXenonHitsCollection(NULL), fGarfieldExcitationHitsCollection(NULL){
     collectionName.insert("XHC");
@@ -41,19 +43,23 @@ void GasBoxSD::Initialize(G4HCofThisEvent * HCE){
 
 G4bool GasBoxSD::ProcessHits(G4Step* aStep, G4TouchableHistory* hist){
     G4Track* aTrack = aStep->GetTrack();
+    G4ParticleDefinition *currDeff =aTrack->GetDefinition();
+    G4double edep=aStep->GetTotalEnergyDeposit();
+    // do not worry if there is no energy in the detector
+    if (edep<=0) return false;
+    if (currDeff==G4OpticalPhoton::Definition() || currDeff==S2Photon::Definition() || currDeff == NEST::NESTThermalElectron::Definition()) return false;
+    G4bool isPrint=false;
+    if(isPrint){
+        G4cout << "GasBox Hit!!" << G4endl;
+        G4cout << "Particle ID: " << aTrack->GetTrackID() << G4endl;
+        G4cout << "Particle Name: " << currDeff->GetParticleName() << G4endl;
+        G4cout << "Particle electron: " << aTrack->GetKineticEnergy() << G4endl;
 
-
-    if(aTrack->GetDefinition()->GetParticleName() == "e-"){
-    /*
-      G4cout << "GasBox Hit!!" << G4endl;
-      G4cout << "Particle ID: " << aTrack->GetTrackID() << G4endl;
-      G4cout << "Energy electron: " << aTrack->GetKineticEnergy() << G4endl;
-    */
-        return true;
+        G4cout << "Particle Deposit: " << edep << G4endl;
+        aTrack->GetCreatorProcess()->DumpInfo();
     }
+    return true;
 
-    return false;
-    
     
 }
 

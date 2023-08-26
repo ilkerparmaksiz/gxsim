@@ -42,9 +42,11 @@ DetectorConstruction::DetectorConstruction(GasModelParameters* gmp) :
     checkOverlaps(1),
     temperature(300*kelvin), // temperature
     Lab_size(10. *m),
-    chamber_diam   (19.4 * cm),
+    Gas_diam(17.4*cm),
+    Gas_length(42.5*cm),
+    chamber_diam   (16.4 * cm),
     //chamber_length (41.8* cm), // Config files vary
-    chamber_length (42.5* cm), // Config files vary
+    chamber_length (43.18* cm), // Config files vary
     chamber_thickn (7. * mm),
     SourceEn_offset (5.7 *cm),
     SourceEn_diam   (1.0 * cm),
@@ -73,9 +75,7 @@ DetectorConstruction::DetectorConstruction(GasModelParameters* gmp) :
     HideCollimator_(true)
 {
     detectorMessenger = new DetectorMessenger(this);
-    Needle4cm_Sampler=new util::SampleFromSurface("Needle4cm");
-    Needle9cm_Sampler=new util::SampleFromSurface("Needle9cm");
-    Needle14cm_Sampler=new util::SampleFromSurface("Needle14cm");
+    Sampler=new util::SampleFromSurface("Needles");
 }
 
 DetectorConstruction::~DetectorConstruction() {
@@ -98,7 +98,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
     G4Box * lab_solid_volume = new G4Box(lab_name,Lab_size/2,Lab_size/2,Lab_size/2);
 
     //G4Tubs* gas_solid =new G4Tubs("GAS", 0., chamber_diam/2., chamber_length/2. + chamber_thickn+3*cm/2, 0., twopi);
-    G4Tubs* gas_solid =new G4Tubs("GAS", 0., chamber_diam/2., chamber_length/2. + chamber_thickn, 0., twopi);
+    G4Tubs* gas_solid =new G4Tubs("GAS", 0., Gas_diam/2., Gas_length/2. + chamber_thickn, 0., twopi);
 
 
     // Optical Properties Assigned here
@@ -106,7 +106,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
     vacuum->SetMaterialPropertiesTable(opticalprops::Vacuum());
     gxe->SetMaterialPropertiesTable(opticalprops::GXe(gas_pressure_, 68,sc_yield_,e_lifetime_));
 
-    G4LogicalVolume * lab_logic_volume = new G4LogicalVolume(lab_solid_volume,air,lab_name) ; //G4NistManager::Instance()->FindOrBuildMaterial("G4_AIR")
+    G4LogicalVolume * lab_logic_volume = new G4LogicalVolume(lab_solid_volume,vacuum,lab_name) ; //G4NistManager::Instance()->FindOrBuildMaterial("G4_AIR")
 
     gas_logic = new G4LogicalVolume(gas_solid, gxe, "GAS");
 
@@ -240,6 +240,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
     G4double Offset=-0.8*cm;
     // G4double EL_pos=-FielCageGap-ElGap_;
     G4double EL_pos=-10.98*cm;
+    SetELPosition(EL_pos);
     // FielCageGap=(16.03+2.955)*cm;
     FielCageGap=21.26*cm;
 
@@ -272,9 +273,9 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
 
 
     //Call Sampler for Needles
-    Needle4cm_Sampler->SampleFromFacet(Needle4_solid);
-    Needle9cm_Sampler->SampleFromFacet(Needle9_solid);
-    Needle14cm_Sampler->SampleFromFacet(Needle14_solid);
+   Sampler->SampleFromFacet(Needle4_solid);
+   Sampler->SampleFromFacet(Needle9_solid);
+   Sampler->SampleFromFacet(Needle14_solid);
 
     ///
     //Adding the PMTs in here
@@ -334,11 +335,8 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
         if(!HideCollimator_) {
             //new G4PVPlacement(NeedleRotate,CollPosition,Coll_Logic,CollimatorWithBlock->GetName(),gas_logic,true,0,false);
         }
-
-        Needle4cm_Sampler->FaceTransform(Needle4_physical,gas_pyhsical);
-        Needle9cm_Sampler->FaceTransform(Needle9_physical,gas_pyhsical);
-        Needle14cm_Sampler->FaceTransform(Needle14_physical,gas_pyhsical);
-
+       // This takes account of any shifting or rotation happens
+        Sampler->SaveAllPointsToOneFile();
         G4VisAttributes *needlevis=new G4VisAttributes(G4Colour(1,1,1));
         needlevis->SetForceSolid(true);
         Needle9_logic->SetVisAttributes(needlevis);
@@ -351,8 +349,6 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
     //Construct a G4Region, connected to the logical volume in which you want to use the G4FastSimulationModel
     G4Region* regionGas = new G4Region("GasRegion");
     regionGas->AddRootLogicalVolume(gas_logic);
-
-
     return labPhysical;
 
 }
@@ -360,6 +356,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
 void DetectorConstruction::ConstructSDandField(){
     G4SDManager* SDManager = G4SDManager::GetSDMpointer();
     G4String GasBoxSDname = "interface/GasBoxSD";
+
     GasBoxSD* myGasBoxSD = new GasBoxSD(GasBoxSDname);
     SDManager->SetVerboseLevel(1);
     SDManager->AddNewDetector(myGasBoxSD);
@@ -382,7 +379,8 @@ void DetectorConstruction::AssignVisuals() {
     //Chamber
     G4LogicalVolume* Chamber = lvStore->GetVolume("Chamber_logic");
     G4VisAttributes *ChamberVa=new G4VisAttributes(G4Colour(1,1,1));
-    ChamberVa->SetForceCloud(true);
+    //ChamberVa->SetForceCloud(true);
+    ChamberVa->SetForceSolid(true);
     Chamber->SetVisAttributes(ChamberVa);
 
 

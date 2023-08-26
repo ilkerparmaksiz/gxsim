@@ -60,6 +60,7 @@ namespace filehandler{
     }
     vector<G4ThreeVector> FileHandling::GetThreeVectorData(string file, char del,G4int SkipRow=1){
         string str;
+        G4cout<<"Openning the file --> " << file << G4endl;
         ifsfile =ifstream (file);
 
         if (!ifsfile.is_open()) {

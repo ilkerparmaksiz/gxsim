@@ -74,8 +74,7 @@ PrimaryGenerator::PrimaryGenerator()
 					"Environment variable CRABPATH not defined!");
 	}
 
-	std::string crab_path(nexus_path);
-
+    CRABPATH= getenv("CRABPATH");
 
   //FileHandler.GetEvent(crab_path + "/data/pb210_electron.csv", electron_data);
   //FileHandler.GetEvent(crab_path + "/data/pb210_alpha.csv",    alpha_data);
@@ -89,21 +88,18 @@ PrimaryGenerator::~PrimaryGenerator()
 
 // -------------------
 void PrimaryGenerator::Generate(G4Event* event, std::vector<double> &xyz){
-
+  // Set Needle Path
+  using namespace filehandler;
+  FileHandling *f=new FileHandling();
+  NeedlePointPath= CRABPATH +"data/"+GeneratorMode_+".txt";
 
   if (GeneratorMode_ == "Single"){
     std::cout <<"Generating with Single Particle Mode for event: " << event->GetEventID() << std::endl;
       if (fAmount_==0) fAmount_=1;
       for (int i=0; i<fAmount_;i++) GenerateSingleParticle(event);
   }
-  else if(GeneratorMode_=="Needle" or GeneratorMode_=="Needle4cm" or GeneratorMode_=="Needle9cm" or GeneratorMode_=="Needle14cm"){
-      using namespace filehandler;
-      FileHandling *f=new FileHandling();
-      string Path;
-      std::string crabpath= getenv("CRABPATH");
-      Path=crabpath+"data/"+GeneratorMode_+".txt";
-      NeedlePoints=  f->GetThreeVectorData(Path,',',1);
-
+  else if(GeneratorMode_!=" " && f->FileCheck(NeedlePointPath)){
+      NeedlePoints=f->GetThreeVectorData(NeedlePointPath,',',1);
       if (fAmount_==0) fAmount_=1;
       for (int i=0; i<fAmount_;i++) GenerateFromSurface(event);
   }
@@ -310,7 +306,7 @@ void PrimaryGenerator::GenerateFromSurface(G4Event* evt){
     //std::cout << "\nPrimaryGenerator: Adding particle with " << particle1->GetKineticEnergy()/keV << " keV w ux,uy,uz " << p.x() << ", " << p.y() << ", " << p.z()<< " to vertexA."  << std::endl;
     //G4cout<<"Particle Position is " << positionA <<G4endl;
     G4PrimaryVertex* vertexA = new G4PrimaryVertex(positionA,0);
-
+    // This is needed for optical photons
     RandomPolarization(particle1);
     // Add particle to the vertex
     vertexA->SetPrimary(particle1);

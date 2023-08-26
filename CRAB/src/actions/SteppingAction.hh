@@ -31,6 +31,7 @@ class SteppingAction : public G4UserSteppingAction {
   G4bool reflected;
   G4int trackID = -99;
   G4String Material_Store;
+  G4bool Detected= false;
   
 };
 

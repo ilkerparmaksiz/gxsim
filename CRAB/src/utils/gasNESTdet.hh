@@ -53,8 +53,8 @@ public:
 
     // Thermodynamic Properties
     inGas = true;
-    T_Kelvin = 273.; //1910.04211
-    p_bar = 1.0; //1910.04211
+    T_Kelvin = 293.; //1910.04211
+    p_bar = 10.0; //1910.04211
 
     // Data Analysis Parameters and Geometry
     dtCntr = 40.;  // center of detector for S1 corrections, in usec.

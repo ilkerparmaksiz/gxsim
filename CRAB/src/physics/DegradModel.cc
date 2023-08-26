@@ -40,7 +40,6 @@ DegradModel::~DegradModel() {}
 G4bool DegradModel::IsApplicable(const G4ParticleDefinition& particleType) {
     if (particleType.GetParticleName()=="e-")
         return true;
-    
     return false;
 }
 

@@ -58,7 +58,8 @@ void SteppingAction::UserSteppingAction(const G4Step *aStep)
   G4int pID       = particle->GetPDGEncoding();
   G4double time   = aStep->GetPreStepPoint()->GetGlobalTime();
 
-  /*G4OpBoundaryProcess* boundary = 0;
+  G4OpBoundaryProcess* boundary = 0;
+  Detected= false;
   // if (!boundary &&  particle->GetParticleName() == "S2Photon") {
   if (!boundary){
       
@@ -68,7 +69,7 @@ void SteppingAction::UserSteppingAction(const G4Step *aStep)
           if ((*pv)[i]->GetProcessName() == "OpBoundary") {
               boundary = (G4OpBoundaryProcess*) (*pv)[i];
               
-              // This is a reflection on the SS
+              /*// This is a reflection on the SS
               if(aStep->GetPreStepPoint()->GetMaterial()->GetName() == "GXe" && aStep->GetPostStepPoint()->GetMaterial()->GetName() == "Steel" && boundary->GetStatus() == SpikeReflection){
                   reflected = true;
                }
@@ -88,12 +89,12 @@ void SteppingAction::UserSteppingAction(const G4Step *aStep)
               if(aStep->GetPreStepPoint()->GetMaterial()->GetName() == "MgF2" && boundary->GetStatus() == TotalInternalReflection){
                 reflected = true;
                 Material_Store = aStep->GetPreStepPoint()->GetTouchableHandle()->GetVolume()->GetLogicalVolume()->GetName();
-              }
-
+              } */
+              if(boundary->GetStatus() == Detection)  Detected=true;
               break;
           }
       }
-  }*/
+  }
 
   G4int id(0);
 
@@ -134,10 +135,10 @@ void SteppingAction::UserSteppingAction(const G4Step *aStep)
     //G4cout<<"Logical Volume -->"<<lVolume->GetName()<<G4endl;
 
       eVname = eVolume->GetName();
-
+      //G4cout<<"Volume --> "<<eVname<<G4endl;
     // Camera
     //if (lVolume->GetName().find("camLogical")!=std::string::npos){
-    if (eVname.find("Camera_logic")!=std::string::npos){
+    if (eVname.find("Camera")!=std::string::npos and Detected){
       //track->SetTrackStatus(fStopAndKill);
       analysisManager->FillNtupleDColumn(id,0, event+ev_shift);
       analysisManager->FillNtupleDColumn(id,1, pID);
@@ -182,7 +183,7 @@ void SteppingAction::UserSteppingAction(const G4Step *aStep)
 
     // PMT location
     id = 5;
-    if (lVolume->GetName().find("Pmt_logic")!=std::string::npos){
+    if (eVname.find("PMT")!=std::string::npos and Detected){
       analysisManager->FillNtupleDColumn(id,0, event+ev_shift);
       analysisManager->FillNtupleDColumn(id,1, pID);
       analysisManager->FillNtupleDColumn(id,2, time/ns);

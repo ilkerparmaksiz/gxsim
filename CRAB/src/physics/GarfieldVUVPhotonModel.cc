@@ -110,12 +110,12 @@ void GarfieldVUVPhotonModel::DoIt(const G4FastTrack& fastTrack, G4FastStep& fast
      EC, 2-Dec-2021.
 
    */
-    fastStep.SetNumberOfSecondaryTracks(1E3);
+    fastStep.SetNumberOfSecondaryTracks(1);
   
     // G4cout<<"HELLO Garfield"<<G4endl;
     ////The details of the Garfield model are implemented here
      //fastStep.KillPrimaryTrack();//KILL NEST/DEGRAD/G4 TRACKS
-     fastStep.ProposeTrackStatus(fSuspend);
+     fastStep.ProposeTrackStatus(fStopAndKill);
 
      garfPos = fastTrack.GetPrimaryTrack()->GetVertexPosition();
      garfTime = fastTrack.GetPrimaryTrack()->GetGlobalTime();
@@ -127,9 +127,9 @@ void GarfieldVUVPhotonModel::DoIt(const G4FastTrack& fastTrack, G4FastStep& fast
      if (!(counter[3]%10000))
         G4cout << "GarfieldVUV: S2 OpticalPhotons: " << counter[3] << G4endl;
 
+     if(counter[1]<2) GenerateVUVPhotons(fastTrack,fastStep,garfPos,garfTime);
 
     //     if (!(counter[1]%1000)) // uncomment!
-       GenerateVUVPhotons(fastTrack,fastStep,garfPos,garfTime);
 
 }
 
@@ -151,7 +151,9 @@ void GarfieldVUVPhotonModel::GenerateVUVPhotons(const G4FastTrack& fastTrack, G4
     G4double ekin = fastTrack.GetPrimaryTrack()->GetKineticEnergy();
     G4ThreeVector dir = fastTrack.GetPrimaryTrack()->GetMomentumDirection();
     G4String particleName = fastTrack.GetPrimaryTrack()->GetParticleDefinition()->GetParticleName();
-    if (particleName.find("thermalelectron")!=std::string::npos) particleName = "e-";
+
+    //WHY ?
+    //if (particleName.find("thermalelectron")!=std::string::npos) particleName = "e-";
 
     garfExcHitsCol = new GarfieldExcitationHitsCollection();
 
@@ -351,7 +353,6 @@ void GarfieldVUVPhotonModel::InitialisePhysics(){
     // Load in the events
     if (fGasModelParameters->GetbEL_File())
         FileHandler.GetTimeProfileData(gas_path+"data/CRAB_Profiles_Rotated.csv", EL_profiles, EL_events);
-    
 }
 
   

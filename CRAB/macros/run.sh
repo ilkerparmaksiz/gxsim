@@ -2,7 +2,8 @@
 ## folder Name
 folder=build
 ## Set CRABPATH this is needed for the simulation
-export CRABPATH=../${pwd}
+export CRABPATH=${PWD%macros}
+
 echo "CRABPATH is $CRABPATH"
 ## if the folder does nt exist , this will create it
 build(){
@@ -45,7 +46,9 @@ elif [ "$1" = "alpha" ]; then
   build
   echo "Running MultiThread Batch Mode"
    ../"$folder"/CRAB Single_alpha.mac 100
-
+elif [ "$1" = "test" ]; then
+  echo "CRABPATH is $CRABPATH";
+  echo "Folder Path is $folder";  
 else
   echo "argument is $1"
   echo "Running Batch Mode"

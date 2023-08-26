@@ -65,6 +65,8 @@ class DetectorConstruction : public G4VUserDetectorConstruction {
     inline G4double GetActiveL() {return FielCageGap/cm; }; 
     inline G4double GetGasPressure(){return gas_pressure_;};
     inline G4double GetTemperature(){return temperature;};
+    inline G4double GetELPosition(){return fEL_Pos;};
+    inline G4double SetELPosition(G4double k){return fEL_Pos=k;};
     //const util::SampleFromSurface * getSamples() {return Sampler;};
   
  private:
@@ -78,6 +80,8 @@ class DetectorConstruction : public G4VUserDetectorConstruction {
     G4double chamber_diam   ;
     G4double chamber_length ;
     G4double chamber_thickn ;
+    G4double Gas_diam   ;
+    G4double Gas_length ;
     G4double SourceEn_offset ;
     G4double SourceEn_diam   ;
     G4double SourceEn_length ;
@@ -89,6 +93,7 @@ class DetectorConstruction : public G4VUserDetectorConstruction {
     G4double sc_yield_;
     G4double e_lifetime_;
     G4double ElGap_;
+    G4double fEL_Pos;
     G4double PMT1_Pos_;
     G4double PMT3_Pos_;
     G4ThreeVector vertex;
@@ -112,9 +117,8 @@ class DetectorConstruction : public G4VUserDetectorConstruction {
     G4double FielCageGap;
 
     G4LogicalVolume* gas_logic;
-    util::SampleFromSurface * Needle4cm_Sampler;
-    util::SampleFromSurface * Needle9cm_Sampler;
-    util::SampleFromSurface * Needle14cm_Sampler;
+    util::SampleFromSurface * Sampler;
+
 
 
 };

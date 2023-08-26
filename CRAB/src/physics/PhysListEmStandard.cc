@@ -217,8 +217,9 @@ void PhysListEmStandard::ConstructProcess() {
   NEST::NESTcalc* calcNEST = new NEST::NESTcalc(gndet);  
 
   NEST::NESTProc* theNEST2ScintillationProcess = new NEST::NESTProc("S1",fElectromagnetic, calcNEST, gndet); //gndet);
-  theNEST2ScintillationProcess->SetDetailedSecondaries(true);
+  theNEST2ScintillationProcess->SetDetailedSecondaries(false);
   theNEST2ScintillationProcess->SetStackElectrons(true);
+
 
   while( (*particleIteratorP)() ){
     G4ParticleDefinition* particle = particleIteratorP->value();

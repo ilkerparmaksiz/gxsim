@@ -16,7 +16,7 @@
 #include "XenonHit.hh"
 #include "G4VProcess.hh"
 #include "DetectorConstruction.hh"
-#include "G4/NESTProc.hh"
+#include "NESTProc.hh"
 
 DegradModel::DegradModel(GasModelParameters* gmp, G4String modelName, G4Region* envelope,DetectorConstruction* dc, GasBoxSD* sd)
     : G4VFastSimulationModel(modelName, envelope),detCon(dc), fGasBoxSD(sd){

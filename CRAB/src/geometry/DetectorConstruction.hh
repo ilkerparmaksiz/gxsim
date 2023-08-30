@@ -32,6 +32,12 @@
 #include "MaterialsList.hh"
 #include "PmtR7378A.hh"
 #include "SampleFromSurface.hh"
+#include "Garfield/ComponentComsol.hh"
+#include "Garfield/MediumMagboltz.hh"
+#include "Garfield/AvalancheMicroscopic.hh"
+#include "Garfield/AvalancheMC.hh"
+#include "Garfield/Sensor.hh"
+#include "Garfield/AvalancheMicroscopic.hh"
 
 class G4VSolid;
 class G4LogicalVolume;
@@ -66,9 +72,11 @@ class DetectorConstruction : public G4VUserDetectorConstruction {
     inline G4double GetGasPressure(){return gas_pressure_;};
     inline G4double GetTemperature(){return temperature;};
     inline G4double GetELPosition(){return fEL_Pos;};
+    inline G4double GetOffset(){return fOffset/cm;};
     inline G4double SetELPosition(G4double k){return fEL_Pos=k;};
+    inline  std::shared_ptr<Garfield::ComponentComsol> getComsolComponent (){return fcomsol;};
     //const util::SampleFromSurface * getSamples() {return Sampler;};
-  
+    void GarfieldInitialization();
  private:
     DetectorMessenger* detectorMessenger;
     GasModelParameters* fGasModelParameters;
@@ -82,11 +90,7 @@ class DetectorConstruction : public G4VUserDetectorConstruction {
     G4double chamber_thickn ;
     G4double Gas_diam   ;
     G4double Gas_length ;
-    G4double SourceEn_offset ;
-    G4double SourceEn_diam   ;
-    G4double SourceEn_length ;
-    G4double SourceEn_thickn ;
-    G4double SourceEn_holedia ;
+    std::shared_ptr<Garfield::ComponentComsol> fcomsol ;
     G4ThreeVector vtx_;
     G4double Active_diam;
     G4double Active_length;
@@ -94,21 +98,14 @@ class DetectorConstruction : public G4VUserDetectorConstruction {
     G4double e_lifetime_;
     G4double ElGap_;
     G4double fEL_Pos;
-    G4double PMT1_Pos_;
-    G4double PMT3_Pos_;
+    G4double fOffset;
+    G4double counter;
     G4ThreeVector vertex;
-    pmt::PmtR7378A *pmt1_;
-    pmt::PmtR7378A *pmt2_;
+
 
     G4double MgF2_window_thickness_;
     G4double MgF2_window_diam_;
-    G4double pmt_hole_length_ ;
-    G4double wndw_ring_stand_out_;
-    G4double pedot_coating_thickness_;
-    G4double optical_pad_thickness_;
-    G4double pmt_base_diam_;
-    G4double pmt_base_thickness_;
-    G4bool  HideCollimator_;
+
 
     G4bool HideSourceHolder_;
     G4double max_step_size_;
@@ -117,8 +114,16 @@ class DetectorConstruction : public G4VUserDetectorConstruction {
     G4double FielCageGap;
 
     G4LogicalVolume* gas_logic;
-    util::SampleFromSurface * Sampler;
+    std::shared_ptr<util::SampleFromSurface>Sampler;
 
+    //Garfield
+    G4String gasFile;
+    G4String ionMobFile;
+    Garfield::MediumMagboltz* fMediumMagboltz;
+    Garfield::AvalancheMicroscopic * fAvalanche;
+    Garfield::AvalancheMC * fAvalancheMC;
+
+    Garfield::Sensor* fSensor;
 
 
 };

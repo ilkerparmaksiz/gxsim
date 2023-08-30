@@ -38,14 +38,15 @@
 #include "FileHandling.hh"
 
 #include "G4VFastSimulationModel.hh"
-#include "Medium.hh"
+#include "Garfield/Medium.hh"
 #include "GasBoxSD.hh"
-#include "MediumMagboltz.hh"
-#include "AvalancheMicroscopic.hh"
-#include "AvalancheMC.hh"
-#include "ComponentUser.hh"
+#include "Garfield/MediumMagboltz.hh"
+#include "Garfield/AvalancheMicroscopic.hh"
+#include "Garfield/AvalancheMC.hh"
+#include "Garfield/ComponentUser.hh"
+#include "Garfield/ComponentComsol.hh"
 
-#include "TrackHeed.hh"
+#include "Garfield/TrackHeed.hh"
 
 class GasModelParameters;
 class DetectorConstruction;
@@ -79,8 +80,10 @@ public:
     
     // Generate EL photons in the gap according to a simple model
     void MakeELPhotonsSimple(G4FastStep& fastStep, G4double xi, G4double yi, G4double zi, G4double ti);
-    
-    
+
+    void RandomPolarization(G4Track *trk) ;
+
+    void ELRandomTimeSampling(G4Track *trk);
 private:
 
     void InitialisePhysics();
@@ -96,8 +99,8 @@ private:
     //degradPhysics* fdegradPhysics;
 
     Garfield::MediumMagboltz* fMediumMagboltz;
-    Garfield::AvalancheMicroscopic* fAvalanche;
-    Garfield::AvalancheMC* fAvalancheMC;
+    Garfield::AvalancheMicroscopic * fAvalanche;
+    Garfield::AvalancheMC * fAvalancheMC;
 
     Garfield::Sensor* fSensor;
 

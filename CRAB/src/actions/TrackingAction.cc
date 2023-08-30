@@ -28,7 +28,7 @@ void TrackingAction::PreUserTrackingAction(const G4Track *aTrack) {
     if(G4OpticalPhoton::Definition()==aTrack->GetParticleDefinition())
         fpTrackingManager->SetStoreTrajectory(false);
     else
-        fpTrackingManager->SetStoreTrajectory(true);
+        fpTrackingManager->SetStoreTrajectory(false);
 
 
   G4int id(12);
@@ -63,6 +63,7 @@ void TrackingAction::PreUserTrackingAction(const G4Track *aTrack) {
   G4int row(0);
 
   // Turn off the S2 fill since its heavy!
+  /*
   analysisManager->FillNtupleDColumn(id,row, event); row++;
 
   analysisManager->FillNtupleDColumn(id,row, (G4double)pID); row++;
@@ -73,15 +74,10 @@ void TrackingAction::PreUserTrackingAction(const G4Track *aTrack) {
   analysisManager->FillNtupleSColumn(id,row, startp); row++;
 
   analysisManager->AddNtupleRow(id);
-
+  */
 
 
   }
-
-
-  
-
-
 
 
 TrackingAction::TrackingAction():fPPID(0.0),fPKE(0.0), fFPKE(0.0)

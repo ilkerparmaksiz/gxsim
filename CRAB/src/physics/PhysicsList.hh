@@ -21,7 +21,7 @@
 #include "G4Electron.hh"
 #include "G4Positron.hh"
 #include "G4Gamma.hh"
-#include "G4/NESTProc.hh"
+#include "NESTProc.hh"
 
 
 class G4VPhysicsConstructor;

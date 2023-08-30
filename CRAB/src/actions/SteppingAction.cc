@@ -126,10 +126,7 @@ void SteppingAction::UserSteppingAction(const G4Step *aStep)
   else if(track->GetParticleDefinition()==G4OpticalPhoton::OpticalPhoton()){
     PhotonType = 1;
   }
- 
- 
 
-  
   if (eVolume){
     //G4cout<<"Volume -->"<<eVolume->GetName()<<G4endl;
     //G4cout<<"Logical Volume -->"<<lVolume->GetName()<<G4endl;
@@ -138,6 +135,7 @@ void SteppingAction::UserSteppingAction(const G4Step *aStep)
       //G4cout<<"Volume --> "<<eVname<<G4endl;
     // Camera
     //if (lVolume->GetName().find("camLogical")!=std::string::npos){
+    id=0;
     if (eVname.find("Camera")!=std::string::npos and Detected){
       //track->SetTrackStatus(fStopAndKill);
       analysisManager->FillNtupleDColumn(id,0, event+ev_shift);
@@ -146,92 +144,21 @@ void SteppingAction::UserSteppingAction(const G4Step *aStep)
       analysisManager->FillNtupleDColumn(id,3, pos[0]/mm);
       analysisManager->FillNtupleDColumn(id,4, pos[1]/mm);
       analysisManager->FillNtupleDColumn(id,5, pos[2]/mm);
-      
-      // Reflected photon
-      if (reflected){
-        analysisManager->FillNtupleIColumn(id,6, 1);
-        analysisManager->FillNtupleSColumn(id,7, Material_Store);
-      }
-      else {
-        analysisManager->FillNtupleIColumn(id,6, 0);
-        analysisManager->FillNtupleSColumn(id,7, "None");
-      }
-
-      analysisManager->FillNtupleIColumn(id,8, PhotonType);
-    
       analysisManager->AddNtupleRow(id);
 
       // if (reflected) std::cout << "Parent ID from reflected photon Detected: " << track->GetTrackID() << "  Material:  " << Material_Store << std::endl;
       // else  std::cout << "Photon arrived but was not reflected: " << track->GetTrackID() << std::endl;
-
     }
-
-
-    // Lens
     id = 4;
-    if (lVolume->GetName().find("Lens")!=std::string::npos)  {
-
-        // analysisManager->FillNtupleDColumn(id,0, event+ev_shift);
-        // analysisManager->FillNtupleDColumn(id,1, pID);
-        // analysisManager->FillNtupleDColumn(id,2, time/ns);
-        // analysisManager->FillNtupleDColumn(id,3, pos[0]/mm);
-        // analysisManager->FillNtupleDColumn(id,4, pos[1]/mm);
-        // analysisManager->FillNtupleDColumn(id,5, pos[2]/mm);
-        // analysisManager->AddNtupleRow(id);
-
-	  }
-
-    // PMT location
-    id = 5;
     if (eVname.find("PMT")!=std::string::npos and Detected){
       analysisManager->FillNtupleDColumn(id,0, event+ev_shift);
       analysisManager->FillNtupleDColumn(id,1, pID);
       analysisManager->FillNtupleDColumn(id,2, time/ns);
       analysisManager->FillNtupleDColumn(id,3, pos[0]/mm);
       analysisManager->FillNtupleDColumn(id,4, pos[1]/mm);
-      analysisManager->FillNtupleDColumn(id,5, pos[2]/mm);	  
-      
-      // Reflected photon
-      if (reflected){
-        analysisManager->FillNtupleIColumn(id,6, 1);
-        analysisManager->FillNtupleSColumn(id,7, Material_Store);
-      }
-      else {
-        analysisManager->FillNtupleIColumn(id,6, 0);
-        analysisManager->FillNtupleSColumn(id,7, "None");
-      }
-
-      analysisManager->FillNtupleIColumn(id,8, PhotonType);
-
+      analysisManager->FillNtupleDColumn(id,5, pos[2]/mm);
       analysisManager->AddNtupleRow(id);
-    
     }
-      // Keep
-      id=6;
-      if(eVname.find("FieldCage")!=std::string::npos){
-          //track->SetTrackStatus(fStopAndKill);
-          analysisManager->FillNtupleDColumn(id,0, event+ev_shift);
-          analysisManager->FillNtupleDColumn(id,1, pID);
-          analysisManager->FillNtupleDColumn(id,2, time/ns);
-          analysisManager->FillNtupleDColumn(id,3, pos[0]/mm);
-          analysisManager->FillNtupleDColumn(id,4, pos[1]/mm);
-          analysisManager->FillNtupleDColumn(id,5, pos[2]/mm);
-
-          // Reflected photon
-          if (reflected){
-              analysisManager->FillNtupleIColumn(id,6, 1);
-              analysisManager->FillNtupleSColumn(id,7, Material_Store);
-          }
-          else {
-              analysisManager->FillNtupleIColumn(id,6, 0);
-              analysisManager->FillNtupleSColumn(id,7, "None");
-          }
-
-          analysisManager->FillNtupleIColumn(id,8, PhotonType);
-
-          analysisManager->AddNtupleRow(id);
-      }
-
   }
   
   // if particle == thermale, opticalphoton and parent == primary and stepID==1, or trackID<=2

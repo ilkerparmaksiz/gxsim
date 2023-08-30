@@ -90,7 +90,7 @@ PrimaryGenerator::~PrimaryGenerator()
 void PrimaryGenerator::Generate(G4Event* event, std::vector<double> &xyz){
   // Set Needle Path
   using namespace filehandler;
-  FileHandling *f=new FileHandling();
+  std::shared_ptr<FileHandling> f=std::shared_ptr<FileHandling>(new FileHandling());
   NeedlePointPath= CRABPATH +"data/"+GeneratorMode_+".txt";
 
   if (GeneratorMode_ == "Single"){

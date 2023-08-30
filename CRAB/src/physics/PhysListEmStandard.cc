@@ -78,7 +78,7 @@
 #include "OpWLS2.hh"
 
 #include "gasNESTdet.hh"
-#include "G4/NESTProc.hh"
+#include "NESTProc.hh"
 #include "OpAbsorption.hh"
 
 #include "S2Photon.hh"

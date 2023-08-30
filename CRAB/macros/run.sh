@@ -4,7 +4,7 @@ folder=build
 ## Set CRABPATH this is needed for the simulation
 export CRABPATH=${PWD%macros}
 
-echo "CRABPATH is $CRABPATH"
+#echo "CRABPATH is $CRABPATH"
 ## if the folder does nt exist , this will create it
 build(){
   if [ ! -d "../$folder" ]
@@ -29,8 +29,8 @@ elif [ "$1" = "clean" ]; then
   echo "argument is $1"
   rm -rf ${CRABPATH}"$folder"
   build
-  echo "Running Interactive Mode"
-   ../"$folder"/CRAB Single_OpticalPhoton.mac 100
+  #echo "Running Interactive Mode"
+  #../"$folder"/CRAB Single_OpticalPhoton.mac 100
 elif [ "$1" = "mthread" ]; then
   echo "argument is $1"
   build
@@ -40,7 +40,7 @@ elif [ "$1" = "malpha" ]; then
   echo "argument is $1"
   build
   echo "Running MultiThread Batch Mode"
-   ../"$folder"/CRAB Single_alpha.mac 100 30
+   ../"$folder"/CRAB Single_alpha.mac 100 $2
 elif [ "$1" = "alpha" ]; then
   echo "argument is $1"
   build

@@ -2,8 +2,7 @@
 #define MyUserActionInitialization_hh
 
 #include "G4VUserActionInitialization.hh"
-
-#include "G4/NESTStackingAction.hh"
+#include "NESTStackingAction.hh"
 
 class DetectorConstruction;
 class PhysicsList;

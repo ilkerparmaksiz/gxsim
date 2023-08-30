@@ -8,7 +8,7 @@
 /gasModelParameters/degrad/thermalenergy 1.3 eV ## 150 gives almost same answer as 450, and 2x nexcitation as with 30. ## NEST e's are 1.13 eV
 
 # For setting the geometry
-/gasModelParameters/geometry/COMSOL_Path /Users/mistryk2/OneDrive - University of Texas at Arlington/Projects/CRAB/COMSOL/
+/gasModelParameters/geometry/COMSOL_Path /home/argon/Projects/Ilker/CRAB_COMSOL/
 /gasModelParameters/geometry/useEL_File false
 /gasModelParameters/geometry/useComsol false
 
@@ -27,7 +27,7 @@
 
 /run/initialize
 
-/analysis/setFileName alpha.root
+/analysis/setFileName kmalpha.root
 
 ####################################
 ############ Verbosities ###########
@@ -46,7 +46,8 @@
 /Generator/SingleParticle/pos 0 0 0 cm
 #/Generator/SingleParticle/pos  -1.6 0 -5 cm
 /Generator/SingleParticle/Isotropic true
-/Generator/SingleParticle/Mode Needle14cm
-/run/beamOn 1
+/Generator/SingleParticle/Mode Needles
+/Generator/SingleParticle/Amount 1
+/run/beamOn 20
 
 

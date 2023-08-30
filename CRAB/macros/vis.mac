@@ -16,7 +16,7 @@
 ##/process/optical/processActivation Scintillation false ### not with NEST. EC, 6-May-2022.
 
 # For setting the geometry
-/gasModelParameters/geometry/COMSOL_Path /Users/mistryk2/OneDrive - University of Texas at Arlington/Projects/CRAB/COMSOL/
+/gasModelParameters/geometry/COMSOL_Path /home/argon/Projects/Ilker/CRAB_COMSOL/
 /gasModelParameters/geometry/useEL_File false
 /gasModelParameters/geometry/useComsol false
 

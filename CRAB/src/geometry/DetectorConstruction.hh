@@ -74,7 +74,14 @@ class DetectorConstruction : public G4VUserDetectorConstruction {
     inline G4double GetELPosition(){return fEL_Pos;};
     inline G4double GetOffset(){return fOffset/cm;};
     inline G4double SetELPosition(G4double k){return fEL_Pos=k;};
+
+    // Garfield  and Handling Multi-Threading
     inline  std::shared_ptr<Garfield::ComponentComsol> getComsolComponent (){return fcomsol;};
+    inline  Garfield::MediumMagboltz* getMediumMagBoltz(){return fMediumMagboltz;};
+    inline  Garfield::AvalancheMC * getAvalanceMC (){return fAvalancheMC;};
+    inline  Garfield::Sensor*  getSensor (){return fSensor;};
+    inline  std::vector<std::vector<std::vector<G4double>>>  getELProfiles (){return EL_profiles;};
+    inline  std::vector<G4double> getELEvents (){return EL_events;};
     //const util::SampleFromSurface * getSamples() {return Sampler;};
     void GarfieldInitialization();
  private:
@@ -102,6 +109,13 @@ class DetectorConstruction : public G4VUserDetectorConstruction {
     G4double counter;
     G4ThreeVector vertex;
 
+    // Variable to store the EL timing profiles to sample from
+    // <event> <photon> <x,y,z,t of photon>
+    std::vector<std::vector<std::vector<G4double>>> EL_profiles;
+
+    // Vector consisting of the event numbers from the simulated Garfield using
+    // COMSOL geometry
+    std::vector<G4double> EL_events;
 
     G4double MgF2_window_thickness_;
     G4double MgF2_window_diam_;
@@ -120,11 +134,10 @@ class DetectorConstruction : public G4VUserDetectorConstruction {
     G4String gasFile;
     G4String ionMobFile;
     Garfield::MediumMagboltz* fMediumMagboltz;
-    Garfield::AvalancheMicroscopic * fAvalanche;
     Garfield::AvalancheMC * fAvalancheMC;
 
     Garfield::Sensor* fSensor;
-
+    filehandler::FileHandling FileHandler;
 
 };
 #endif

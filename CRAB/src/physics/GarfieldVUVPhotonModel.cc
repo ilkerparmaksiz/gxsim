@@ -273,6 +273,10 @@ void GarfieldVUVPhotonModel::InitialisePhysics(){
 
     ELPos =  - DetActiveL/2.0 - detCon->GetOffset()/2;
     FCTop =  + DetActiveL/2.0 - detCon->GetOffset()/2;
+    // Obtain only initialized components
+    fSensor=detCon->getSensor();
+    fAvalancheMC=detCon->getAvalanceMC();
+    fMediumMagboltz=detCon->getMediumMagBoltz();
 
     //std::cout << "Detector Dimentions: "<< DetChamberR << " " << DetChamberL << "  " << DetActiveR << "  " << DetActiveL << std::endl;
     if (!fGasModelParameters->GetbComsol()){
@@ -289,6 +293,12 @@ void GarfieldVUVPhotonModel::InitialisePhysics(){
         fSensor->AddComponent(detCon->getComsolComponent().get());
         // fSensor->SetArea(-DetChamberR, -DetChamberR, -DetChamberL/2.0, DetChamberR, DetChamberR, DetChamberL/2.0); // cm
 
+    }
+
+
+    if (fGasModelParameters->GetbEL_File()){
+        EL_profiles=detCon->getELProfiles();
+        EL_events=detCon->getELEvents();
     }
 
 }

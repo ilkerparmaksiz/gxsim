@@ -122,9 +122,9 @@ message(STATUS "GEANT4 libraries libs: ${Geant4_LIBRARIES}")
 message(STATUS "NEST Includes: ${NEST_INCLUDE_DIRS}")
 
 ## makes finding fortran little easier
-find_library(GFORTRAN_LIBRARY NAMES libgfortran)
+#find_library(GFORTRAN_LIBRARY NAMES libgfortran)
 
-target_link_libraries(CRAB ${GFORTRAN_LIBRARY} Garfield::Garfield ROOT::RIO ROOT::Net NEST::NESTCore NEST::NESTG4 ${Geant4_LIBRARIES} )
+target_link_libraries(CRAB -lgfortran Garfield::Garfield ROOT::RIO ROOT::Net NEST::NESTCore NEST::NESTG4 ${Geant4_LIBRARIES} )
 
 if(${WITH_SYS_TETGEN} MATCHES "ON")
     target_link_libraries(CRAB tet)

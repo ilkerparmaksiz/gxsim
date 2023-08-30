@@ -43,6 +43,15 @@
 #include "CADMesh.hh"
 #include "Garfield/ComponentUser.hh"
 #include "Garfield/ComponentComsol.hh"
+#include "Garfield/GeometrySimple.hh"
+#include "Garfield/SolidTube.hh"
+
+G4double DetectorConstruction::DetChamberR=0;
+G4double DetectorConstruction::DetActiveL=0;
+G4double DetectorConstruction::DetChamberL=0;
+G4double DetectorConstruction::DetOffset=0;
+G4double DetectorConstruction::DetActiveR=0;
+
 DetectorConstruction::DetectorConstruction(GasModelParameters* gmp) :
     fGasModelParameters(gmp),
     checkOverlaps(1),
@@ -67,6 +76,8 @@ DetectorConstruction::DetectorConstruction(GasModelParameters* gmp) :
     Sampler=std::make_shared<util::SampleFromSurface>(util::SampleFromSurface("Needles"));
     fcomsol=std::shared_ptr<Garfield::ComponentComsol>(new Garfield::ComponentComsol());
     counter=0;
+    useSingle=true;
+
 }
 
 DetectorConstruction::~DetectorConstruction() {
@@ -283,7 +294,6 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
     return labPhysical;
 
 }
-
 void DetectorConstruction::ConstructSDandField(){
     G4SDManager* SDManager = G4SDManager::GetSDMpointer();
     G4String GasBoxSDname = "interface/GasBoxSD";
@@ -293,10 +303,13 @@ void DetectorConstruction::ConstructSDandField(){
     SDManager->AddNewDetector(myGasBoxSD);
     SetSensitiveDetector(gas_logic,myGasBoxSD);
     std::cout << "Counter +++ "<< counter <<std::endl;
+    //Initialize Garfield
+    GarfieldInitialization();
     //These commands generate the four gas models and connect it to the GasRegion
     G4Region* region = G4RegionStore::GetInstance()->GetRegion("GasRegion");
     new DegradModel(fGasModelParameters,"DegradModel",region,this,myGasBoxSD);
     new GarfieldVUVPhotonModel(fGasModelParameters,"GarfieldVUVPhotonModel",region,this,myGasBoxSD);
+
     counter++;
 }
 
@@ -402,11 +415,19 @@ void DetectorConstruction::AssignVisuals() {
     Lab->SetVisAttributes(G4VisAttributes::GetInvisible());
 
     }
+
 void DetectorConstruction::GarfieldInitialization() {
 
+    if (!useSingle) return;
+    else useSingle=false;
     fMediumMagboltz = new Garfield::MediumMagboltz();
     fMediumMagboltz->SetComposition("Xe", 100.);
     fMediumMagboltz->DisableDebugging();
+    DetChamberR=GetChamberR();
+    DetActiveL=GetActiveL();
+    DetChamberL=GetChamberL();
+    DetActiveL=GetActiveL();
+    DetOffset=GetOffset();
 
     //  --- Load in Ion Mobility file ---
     ionMobFile = "IonMobility_Ar+_Ar.txt";
@@ -435,33 +456,47 @@ void DetectorConstruction::GarfieldInitialization() {
 
     // Initialize the gas
     fMediumMagboltz->Initialise(true);
-    G4String home = fGasModelParameters->GetCOMSOL_Path();
-    std::string gridfile   = "CRAB_Mesh.mphtxt";
-    std::string datafile   = "CRAB_Data.txt";
-    std::string fileconfig = "CRABMaterialProperties.txt";
 
-
-    // Setup the electric potential map
-
-    fcomsol->Initialise(home + gridfile ,home + fileconfig, home + datafile, "mm");
-    // Print some information about the cell dimensions.
-    fcomsol->PrintRange();
-
-    // Associate the gas with the corresponding field map material.
-    fcomsol->SetGas(fMediumMagboltz);
-    fcomsol->PrintMaterials();
-    fcomsol->Check();
     //We point the address to shared pointer so it the sensor can handle it
     fSensor = new Garfield::Sensor();
+    if (!fGasModelParameters->GetbComsol()) {
+        Garfield::ComponentUser *componentDriftLEM = CreateSimpleGeometry();
+        fSensor->AddComponent(componentDriftLEM);
 
-    
+        // Set the region where the sensor is active -- based on the gas volume
+        fSensor->SetArea(-GetChamberR(), -GetChamberR(), -GetChamberL() / 2.0, GetChamberR(), GetChamberR(),
+                         GetChamberL() / 2.0); // cm
+    }
+    else {
+
+        std::cout << "Initialising Garfiled with a COMSOL geometry" << std::endl;
+
+        G4String home = fGasModelParameters->GetCOMSOL_Path();
+        std::string gridfile   = "CRAB_Mesh.mphtxt";
+        std::string datafile   = "CRAB_Data.txt";
+        std::string fileconfig = "CRABMaterialProperties.txt";
+
+        // Setup the electric potential map
+        Garfield::ComponentComsol* fm = new Garfield::ComponentComsol(); // Field Map
+        fm->Initialise(home + gridfile ,home + fileconfig, home + datafile, "cm");
+
+        // Print some information about the cell dimensions.
+        fm->PrintRange();
+
+        // Associate the gas with the corresponding field map material.
+        fm->SetGas(fMediumMagboltz);
+        fm->PrintMaterials();
+        fm->Check();
+        // fSensor->SetArea(-DetChamberR, -DetChamberR, -DetChamberL/2.0, DetChamberR, DetChamberR, DetChamberL/2.0); // cm
+
+    }
+
 
 
 
     // fAvalanche = new Garfield::AvalancheMicroscopic();
     // fAvalanche->SetUserHandleInelastic(userHandle);
     // fAvalanche->SetSensor(fSensor);
-
 
     fAvalancheMC = new Garfield::AvalancheMC(); // drift, not avalanche, to be fair.
     fAvalancheMC->SetSensor(fSensor);
@@ -477,5 +512,67 @@ void DetectorConstruction::GarfieldInitialization() {
     // Load in the events
     if (fGasModelParameters->GetbEL_File())
         FileHandler.GetTimeProfileData(gas_path+"data/CRAB_Profiles_Rotated.csv", EL_profiles, EL_events);
+
+}
+
+Garfield::ComponentUser* DetectorConstruction::CreateSimpleGeometry(){
+
+    //  ---- Create the Garfield Field region ---
+    Garfield::GeometrySimple* geo = new Garfield::GeometrySimple();
+
+    // Tube oriented in Y'axis (0.,1.,0.,) The addition of the 1 cm is for making sure it doesnt fail on the boundary
+    Garfield::SolidTube* tube = new Garfield::SolidTube(0.0, 0.0 ,0.0, GetChamberR()+1, GetChamberR()*0.5, 0.,0.,1.);
+
+    // Add the solid to the geometry, together with the medium inside
+    geo->AddSolid(tube, fMediumMagboltz);
+
+    // Make a component with analytic electric field
+    Garfield::ComponentUser* componentDriftLEM = new Garfield::ComponentUser();
+    componentDriftLEM->SetGeometry(geo);
+    componentDriftLEM->SetElectricField(DetectorConstruction::ePiecewise);
+
+    // Printing pressure and temperature
+    std::cout << "GarfieldVUVPhotonModel::buildBox(): Garfield mass density [g/cm3], pressure [Torr], temp [K]: " <<
+              geo->GetMedium(0.,0.,0.)->GetMassDensity() << ", " << geo->GetMedium(0.,0.,0.)->GetPressure()<< ", "
+              << geo->GetMedium(0.,0.,0.)->GetTemperature() << std::endl;
+
+    return componentDriftLEM;
+
+}
+
+void DetectorConstruction::ePiecewise (const double x, const double y, const double z,double& ex, double& ey, double& ez) {
+
+    G4double torr = 1. / 760. * bar;
+    G4double gapLEM = 0.7; //cm
+    G4double fieldDrift = 438.0; // V/cm
+    G4double fieldLEM   = 11400.0; // V/cm higher than 3k (as used for 2 bar) for 10 bar!
+    // Only want Ey component to the field
+    ex = ey = 0.;
+    G4double ELPos =  - DetActiveL/2.0 - DetOffset/2;
+    G4double FCTop =  + DetActiveL/2.0 - DetOffset/2;
+    // Define a field region for the whole gas region
+
+    // Set ez for regions outside of the radius of the FC
+    if ( std::sqrt(x*x + y*y) > DetActiveR/2.0){
+        ez = -fieldDrift; // Negative field will send them away from the LEM region
+    }
+
+    // Field past the cathode drift them away from the LEM with negative field
+    if (z > FCTop)
+        ez = -fieldDrift;
+
+    // Drift region
+    if (z <= FCTop)
+        ez = fieldDrift;
+
+    // EL region
+    if (z <= ELPos && z > ELPos-gapLEM)
+        ez = fieldLEM;
+
+    // Drift towards the end cap
+    if (z <= ELPos - gapLEM)
+        ez = fieldDrift;
+
+    // std::cout<<"ePiecewise: z, ez are [cm]: " << z << ", " << ez << std::endl;
 
 }

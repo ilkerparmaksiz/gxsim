@@ -38,7 +38,7 @@
 #include "Garfield/AvalancheMC.hh"
 #include "Garfield/Sensor.hh"
 #include "Garfield/AvalancheMicroscopic.hh"
-
+#include "Garfield/ComponentUser.hh"
 class G4VSolid;
 class G4LogicalVolume;
 class G4VPhysicalVolume;
@@ -83,6 +83,8 @@ class DetectorConstruction : public G4VUserDetectorConstruction {
     inline  std::vector<std::vector<std::vector<G4double>>>  getELProfiles (){return EL_profiles;};
     inline  std::vector<G4double> getELEvents (){return EL_events;};
     //const util::SampleFromSurface * getSamples() {return Sampler;};
+    Garfield::ComponentUser* CreateSimpleGeometry();
+    static void ePiecewise (const double x, const double y, const double z,double& ex, double& ey, double& ez);
     void GarfieldInitialization();
  private:
     DetectorMessenger* detectorMessenger;
@@ -108,6 +110,12 @@ class DetectorConstruction : public G4VUserDetectorConstruction {
     G4double fOffset;
     G4double counter;
     G4ThreeVector vertex;
+    G4bool useSingle;
+    static G4double DetChamberL;
+    static G4double DetChamberR;
+    static G4double DetActiveL;
+    static G4double DetActiveR;
+    static G4double DetOffset;
 
     // Variable to store the EL timing profiles to sample from
     // <event> <photon> <x,y,z,t of photon>

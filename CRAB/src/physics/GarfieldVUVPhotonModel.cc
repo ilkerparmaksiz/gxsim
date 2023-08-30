@@ -134,7 +134,7 @@ void GarfieldVUVPhotonModel::DoIt(const G4FastTrack& fastTrack, G4FastStep& fast
 
 }
 
-GarfieldExcitationHitsCollection *garfExcHitsCol;
+unique_ptr<GarfieldExcitationHitsCollection> garfExcHitsCol;
 
 void GarfieldVUVPhotonModel::GenerateVUVPhotons(const G4FastTrack& fastTrack, G4FastStep& fastStep,G4ThreeVector garfPos,G4double garfTime)
 {
@@ -156,7 +156,7 @@ void GarfieldVUVPhotonModel::GenerateVUVPhotons(const G4FastTrack& fastTrack, G4
     //WHY ?
     //if (particleName.find("thermalelectron")!=std::string::npos) particleName = "e-";
 
-    garfExcHitsCol = new GarfieldExcitationHitsCollection();
+    garfExcHitsCol = unique_ptr<GarfieldExcitationHitsCollection>(new GarfieldExcitationHitsCollection());
 
     
     // Debug the electric field
@@ -173,6 +173,7 @@ void GarfieldVUVPhotonModel::GenerateVUVPhotons(const G4FastTrack& fastTrack, G4
 
     //unsigned int n = fAvalancheMC->GetDriftLines();
     unsigned int n = fAvalancheMC->GetElectrons().at(0).path.size();
+    if (n==0) return;
     auto DriftLines = fAvalancheMC->GetElectrons().at(0).path;
     double xi,yi,zi,ti;
     int status;
@@ -214,7 +215,7 @@ void GarfieldVUVPhotonModel::GenerateVUVPhotons(const G4FastTrack& fastTrack, G4
     G4int pntid = pG4trk->GetParentID();
     G4int tid = pG4trk->GetTrackID();
 
-    delete garfExcHitsCol;
+    //delete garfExcHitsCol;
     
 }
 
@@ -262,7 +263,7 @@ void GarfieldVUVPhotonModel::InitialisePhysics(){
 
     // Print the gas properties
     // fMediumMagboltz->PrintGas();
-
+    //G4AutoLock lock(&aMutex);
 
     // Make a box
     DetChamberR= detCon->GetChamberR(); // cm
@@ -280,20 +281,13 @@ void GarfieldVUVPhotonModel::InitialisePhysics(){
 
     //std::cout << "Detector Dimentions: "<< DetChamberR << " " << DetChamberL << "  " << DetActiveR << "  " << DetActiveL << std::endl;
     if (!fGasModelParameters->GetbComsol()){
-        Garfield::ComponentUser* componentDriftLEM = CreateSimpleGeometry();
-        fSensor->AddComponent(componentDriftLEM);
 
-        // Set the region where the sensor is active -- based on the gas volume
-        fSensor->SetArea(-DetChamberR, -DetChamberR, -DetChamberL/2.0, DetChamberR, DetChamberR, DetChamberL/2.0); // cm
-
-    }
-    else {
-        std::cout << "Initialising Garfiled with a COMSOL geometry" << std::endl;
-
-        fSensor->AddComponent(detCon->getComsolComponent().get());
-        // fSensor->SetArea(-DetChamberR, -DetChamberR, -DetChamberL/2.0, DetChamberR, DetChamberR, DetChamberL/2.0); // cm
+        std::cout <<"Preparing without comsol .." <<std::endl;
+    }else{
+        std::cout <<"Preparing with comsol .." <<std::endl;
 
     }
+
 
 
     if (fGasModelParameters->GetbEL_File()){

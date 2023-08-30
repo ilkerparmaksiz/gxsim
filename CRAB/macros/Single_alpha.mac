@@ -10,7 +10,7 @@
 # For setting the geometry
 /gasModelParameters/geometry/COMSOL_Path /home/argon/Projects/Ilker/CRAB_COMSOL/
 /gasModelParameters/geometry/useEL_File false
-/gasModelParameters/geometry/useComsol false
+/gasModelParameters/geometry/useComsol true
 
 # Threading
 #/run/numberOfThreads 1 # Currently hard-wired in CRAB.cc, cuz not evident thisis doing anything.
@@ -48,6 +48,6 @@
 /Generator/SingleParticle/Isotropic true
 /Generator/SingleParticle/Mode Needles
 /Generator/SingleParticle/Amount 1
-/run/beamOn 20
+/run/beamOn 5
 
 

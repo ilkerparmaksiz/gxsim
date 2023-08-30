@@ -7,11 +7,12 @@
 #include "G4Exception.hh"
 #include <sys/stat.h>
 #include <thread>
+#include "G4AutoLock.hh"
+namespace{G4Mutex aMutex = G4MUTEX_INITIALIZER;}
 namespace filehandler{
     using namespace CLHEP;
     // construct
     FileHandling::FileHandling() {
-
     }
     //Destruct
     FileHandling::~FileHandling() {
@@ -58,16 +59,17 @@ namespace filehandler{
         return Data2d;
 
     }
-    vector<G4ThreeVector> FileHandling::GetThreeVectorData(string file, char del,G4int SkipRow=1){
+    std::unique_ptr<vector<G4ThreeVector>> FileHandling::GetThreeVectorData(string file, char del,G4int SkipRow=1){
         string str;
+        G4AutoLock lock(&aMutex);
+
         G4cout<<"Openning the file --> " << file << G4endl;
         ifsfile =ifstream (file);
-
         if (!ifsfile.is_open()) {
             G4Exception("FileHandling","[GetThreeVectorData]",FatalException,"Could not open the file!");
         }
-        vector<G4ThreeVector> Data;
 
+        vector<G4ThreeVector>Data;
 
         G4int SkipCount=0;
 
@@ -90,8 +92,8 @@ namespace filehandler{
             }
 
         }
-
-        return Data;
+        std::unique_ptr<vector<G4ThreeVector>> uniquedata=std::make_unique<vector<G4ThreeVector>> (Data);
+        return uniquedata;
     }
 
     void FileHandling::SaveToTextFile(string file, string labels, char del , std::vector<vector<G4double>>data) {

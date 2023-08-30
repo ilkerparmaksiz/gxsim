@@ -9,10 +9,12 @@
 #include <fstream>
 #include <string>
 #include <vector>
+#include <memory>
 #include "G4UnitsTable.hh"
 using namespace std;
 
 namespace filehandler{
+
     class FileHandling {
         public:
             //Construct
@@ -21,7 +23,7 @@ namespace filehandler{
             ~FileHandling();
             // Reading 2 Column data like ev and Absorbtion Length
             vector<vector<G4double>> GetData(string file, char del,G4int SkipRow);
-            vector<G4ThreeVector> GetThreeVectorData(string file, char del,G4int SkipRow);
+            std::unique_ptr<vector<G4ThreeVector>>  GetThreeVectorData(string file, char del,G4int SkipRow);
 
             // Load in data for photon yields
             void GetTimeProfileData(string filename, vector<vector<vector<G4double>>> &data, vector<G4double> &events);
@@ -33,7 +35,9 @@ namespace filehandler{
             void SaveToTextFile(string file,string labels, G4String data);
             void SaveToTextFile(string file,string labels,char del, std::vector<G4ThreeVector>data);
             bool FileCheck(string file);
-        private:
+            std::shared_ptr<vector<G4ThreeVector>> threevector;
+
+    private:
         ifstream ifsfile;
         fstream fstfile;
     };

@@ -83,7 +83,7 @@ private:
     G4bool useNeedle;
     G4int fAmount_;
     G4String GeneratorMode_;
-    std::vector<G4ThreeVector> NeedlePoints;
+    std::unique_ptr<std::vector<G4ThreeVector>> NeedlePoints;
     std::string CRABPATH;
     std::string NeedlePointPath;
 

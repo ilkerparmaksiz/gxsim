@@ -75,17 +75,7 @@ class DetectorConstruction : public G4VUserDetectorConstruction {
     inline G4double GetOffset(){return fOffset/cm;};
     inline G4double SetELPosition(G4double k){return fEL_Pos=k;};
 
-    // Garfield  and Handling Multi-Threading
-    inline  std::shared_ptr<Garfield::ComponentComsol> getComsolComponent (){return fcomsol;};
-    inline  Garfield::MediumMagboltz* getMediumMagBoltz(){return fMediumMagboltz;};
-    inline  Garfield::AvalancheMC * getAvalanceMC (){return fAvalancheMC;};
-    inline  Garfield::Sensor*  getSensor (){return fSensor;};
-    inline  std::vector<std::vector<std::vector<G4double>>>  getELProfiles (){return EL_profiles;};
-    inline  std::vector<G4double> getELEvents (){return EL_events;};
-    //const util::SampleFromSurface * getSamples() {return Sampler;};
-    Garfield::ComponentUser* CreateSimpleGeometry();
-    static void ePiecewise (const double x, const double y, const double z,double& ex, double& ey, double& ez);
-    void GarfieldInitialization();
+
  private:
     DetectorMessenger* detectorMessenger;
     GasModelParameters* fGasModelParameters;
@@ -99,7 +89,6 @@ class DetectorConstruction : public G4VUserDetectorConstruction {
     G4double chamber_thickn ;
     G4double Gas_diam   ;
     G4double Gas_length ;
-    std::shared_ptr<Garfield::ComponentComsol> fcomsol ;
     G4ThreeVector vtx_;
     G4double Active_diam;
     G4double Active_length;
@@ -110,20 +99,7 @@ class DetectorConstruction : public G4VUserDetectorConstruction {
     G4double fOffset;
     G4double counter;
     G4ThreeVector vertex;
-    G4bool useSingle;
-    static G4double DetChamberL;
-    static G4double DetChamberR;
-    static G4double DetActiveL;
-    static G4double DetActiveR;
-    static G4double DetOffset;
 
-    // Variable to store the EL timing profiles to sample from
-    // <event> <photon> <x,y,z,t of photon>
-    std::vector<std::vector<std::vector<G4double>>> EL_profiles;
-
-    // Vector consisting of the event numbers from the simulated Garfield using
-    // COMSOL geometry
-    std::vector<G4double> EL_events;
 
     G4double MgF2_window_thickness_;
     G4double MgF2_window_diam_;
@@ -138,14 +114,6 @@ class DetectorConstruction : public G4VUserDetectorConstruction {
     G4LogicalVolume* gas_logic;
     std::shared_ptr<util::SampleFromSurface>Sampler;
 
-    //Garfield
-    G4String gasFile;
-    G4String ionMobFile;
-    Garfield::MediumMagboltz* fMediumMagboltz;
-    Garfield::AvalancheMC * fAvalancheMC;
-
-    Garfield::Sensor* fSensor;
-    filehandler::FileHandling FileHandler;
 
 };
 #endif

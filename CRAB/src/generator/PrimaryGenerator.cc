@@ -257,12 +257,12 @@ void PrimaryGenerator::GenerateSingleParticle(G4Event * event) {
     //vertexA->Print();
 }
 void PrimaryGenerator::GenerateFromSurface(G4Event* evt){
-    G4int Size=NeedlePoints.size()-1;
+    G4int Size=NeedlePoints->size()-1;
     G4int Index;
     Index= round(G4UniformRand()*Size);
 
     G4double NeedleOffset=1*mm;
-    G4ThreeVector positionA=NeedlePoints[Index];
+    G4ThreeVector positionA=NeedlePoints->at(Index);
     energy_=energy_*MeV;
     G4ParticleDefinition* particleDefinition;
     G4PrimaryParticle* particle1;
@@ -309,6 +309,7 @@ void PrimaryGenerator::GenerateFromSurface(G4Event* evt){
     // This is needed for optical photons
     RandomPolarization(particle1);
     // Add particle to the vertex
+    G4cout<<"Particle Position " << positionA <<G4endl;
     vertexA->SetPrimary(particle1);
     evt->AddPrimaryVertex(vertexA);
 

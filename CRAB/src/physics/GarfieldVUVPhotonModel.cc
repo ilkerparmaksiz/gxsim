@@ -114,35 +114,37 @@ void GarfieldVUVPhotonModel::DoIt(const G4FastTrack& fastTrack, G4FastStep& fast
   
     // G4cout<<"HELLO Garfield"<<G4endl;
     ////The details of the Garfield model are implemented here
-     //fastStep.KillPrimaryTrack();//KILL NEST/DEGRAD/G4 TRACKS
-     fastStep.ProposeTrackStatus(fStopAndKill);
+     fastStep.KillPrimaryTrack();//KILL NEST/DEGRAD/G4 TRACKS
 
      garfPos = fastTrack.GetPrimaryTrack()->GetVertexPosition();
      garfTime = fastTrack.GetPrimaryTrack()->GetGlobalTime();
      //G4cout<<"GLOBAL TIME "<<G4BestUnit(garfTime,"Time")<<" POSITION "<<G4BestUnit(garfPos,"Length")<<G4endl;
      counter[1]++; // maybe not threadsafe
-    if (!(counter[1]%10000))
+    if (!(counter[1]%10000) and counter[1]>0)
        G4cout << "GarfieldVUV: actual NEST thermales: " << counter[1] << G4endl;
 
-     if (!(counter[3]%10000))
-        G4cout << "GarfieldVUV: S2 OpticalPhotons: " << counter[3] << G4endl;
+     if (!(counter[3]%10000) and counter[3]>0) G4cout << "GarfieldVUV: S2 OpticalPhotons: " << counter[3] << G4endl;
 
      // For Debugging
-     if(counter[1]<2) GenerateVUVPhotons(fastTrack,fastStep,garfPos,garfTime);
+    /* if(counter[1]<100) {
 
-     //GenerateVUVPhotons(fastTrack,fastStep,garfPos,garfTime);
+         if(counter[3]>0) G4cout << "GarfieldVUV: S2 OpticalPhotons: " << counter[3] << G4endl;
+         GenerateVUVPhotons(fastTrack,fastStep,garfPos,garfTime);
+     }
+    */
+     GenerateVUVPhotons(fastTrack,fastStep,garfPos,garfTime);
 
 }
 
-unique_ptr<GarfieldExcitationHitsCollection> garfExcHitsCol;
+
 
 void GarfieldVUVPhotonModel::GenerateVUVPhotons(const G4FastTrack& fastTrack, G4FastStep& fastStep,G4ThreeVector garfPos,G4double garfTime)
 {
 
      // Drift in main region, then as LEM region is approached and traversed, avalanche multiplication and excitations  will occur.
 
-  
-  
+
+
     G4double x0=garfPos.getX()*0.1;//Garfield length units are in cm
     G4double y0=garfPos.getY()*0.1;
     G4double z0=garfPos.getZ()*0.1;
@@ -156,22 +158,30 @@ void GarfieldVUVPhotonModel::GenerateVUVPhotons(const G4FastTrack& fastTrack, G4
     //WHY ?
     //if (particleName.find("thermalelectron")!=std::string::npos) particleName = "e-";
 
-    garfExcHitsCol = unique_ptr<GarfieldExcitationHitsCollection>(new GarfieldExcitationHitsCollection());
 
-    
+
     // Debug the electric field
     // std::array<double, 3> ef{0,0,0};
     // std::array<double, 3> bf{0,0,0};
     // std::vector<double> vf{0,0,0};
     // Garfield::Medium* medium = nullptr;
     // int status(0);
-    // fSensor->ElectricField(x0,y0,z0, ef[0], ef[1], ef[2], medium, status);                                        
+    // fSensor->ElectricField(x0,y0,z0, ef[0], ef[1], ef[2], medium, status);
     // std::cout << "GVUVPM: E field in medium " << medium << " at " << x0<<","<<y0<<","<<z0 << " is: " << ef[0]<<","<<ef[1]<<","<<ef[2] << std::endl;
 
     // Need to get the AvalancheMC drift at the High-Field point in z, and then call fAvalanche-AvalancheElectron() to create excitations/VUVphotons.
-    fAvalancheMC->DriftElectron(x0,y0,z0,t0);
+
+    if(!fAvalancheMC->DriftElectron(x0,y0,z0,t0)){
+        std::cout << "No Drift" <<std::endl;
+        return;
+    }
+
 
     //unsigned int n = fAvalancheMC->GetDriftLines();
+    if(fAvalancheMC->GetElectrons().size()<1) {
+        std::cout << "No Electron" <<std::endl;
+        return;
+    }
     unsigned int n = fAvalancheMC->GetElectrons().at(0).path.size();
     if (n==0) return;
     auto DriftLines = fAvalancheMC->GetElectrons().at(0).path;
@@ -179,6 +189,7 @@ void GarfieldVUVPhotonModel::GenerateVUVPhotons(const G4FastTrack& fastTrack, G4
     int status;
     //	std::cout << "Drift(): avalanchetracking, n DLTs is " << n << std::endl;
     // Get zi when in the beginning of the EL region
+    std::unique_ptr<GarfieldExcitationHitsCollection> garfExcHitsCol (new GarfieldExcitationHitsCollection());
 
     for( unsigned int i=0;i<n;i++){
 
@@ -195,28 +206,33 @@ void GarfieldVUVPhotonModel::GenerateVUVPhotons(const G4FastTrack& fastTrack, G4
           break;
       }
       // No drift line point meets criteria, so return
-      else if (i==n-1)
-        return;
+      else if (i==n-1){
+          return;
+      }
+
 
     }  // pts in driftline
 
     // Generate the El photons from a microphys model ran externally in Garfield
     // We sample the output file which contains the timing profile of emission and diffusion
-    if (fGasModelParameters->GetbEL_File())
+
+    if (fGasModelParameters->GetbEL_File()){
         MakeELPhotonsFromFile(fastStep, xi, yi, zi, ti);
+    }
     // Use a simpler model
-    else
+    else{
         MakeELPhotonsSimple(fastStep, xi, yi, zi, ti);
+
+    }
 
 
     // std::cout << "GVUVPM: Avalanching in high field starting at: "  << xi<<"," <<yi<<","<<zi <<"," <<ti << std::endl;
-    
+
     const G4Track* pG4trk = fastTrack.GetPrimaryTrack();
     G4int pntid = pG4trk->GetParentID();
     G4int tid = pG4trk->GetTrackID();
+    garfExcHitsCol.reset();
 
-    //delete garfExcHitsCol;
-    
 }
 
 
@@ -259,11 +275,44 @@ void ePiecewise (const double x, const double y, const double z,
 // Selection of Xenon exitations and ionizations
 void GarfieldVUVPhotonModel::InitialisePhysics(){
     // Set the gas Properties
+    fMediumMagboltz = new Garfield::MediumMagboltz();
+    fMediumMagboltz->SetComposition("Xe", 100.);
+    fMediumMagboltz->DisableDebugging();
 
+    //  --- Load in Ion Mobility file ---
+    ionMobFile = "IonMobility_Ar+_Ar.txt";
+    const std::string path = getenv("GARFIELD_HOME");
+    G4AutoLock lock(&aMutex);
+
+    if(ionMobFile!="")
+        fMediumMagboltz->LoadIonMobility(path + "/Data/" + ionMobFile);
+
+    if(gasFile!=""){
+
+        std::cout << "Loaded gasfile." << std::endl;
+    }
+
+    //  --- Get Xenon file ---
+    char* nexus_path = std::getenv("CRABPATH");
+    if (nexus_path == nullptr) {
+        G4Exception("[GarfieldVUVPhotonModel]", "InitialisePhysics()", FatalException,
+                    "Environment variable CRABPATH not defined!");
+    }
+
+    G4String gas_path(nexus_path);
+    gasFile = gas_path + "/data/Xenon_10Bar.gas";
+    G4cout << gasFile << G4endl;
+    fMediumMagboltz->LoadGasFile(gasFile.c_str());
+    std::cout << "Finished Loading in the gas file" << std::endl;
+
+    // Initialize the gas
+    fMediumMagboltz->Initialise(true);
 
     // Print the gas properties
     // fMediumMagboltz->PrintGas();
-    //G4AutoLock lock(&aMutex);
+
+
+
 
     // Make a box
     DetChamberR= detCon->GetChamberR(); // cm
@@ -272,28 +321,64 @@ void GarfieldVUVPhotonModel::InitialisePhysics(){
     DetActiveR = detCon->GetActiveR(); // cm
     DetActiveL = detCon->GetActiveL(); // cm
 
-    ELPos =  - DetActiveL/2.0 - detCon->GetOffset()/2;
-    FCTop =  + DetActiveL/2.0 - detCon->GetOffset()/2;
-    // Obtain only initialized components
-    fSensor=detCon->getSensor();
-    fAvalancheMC=detCon->getAvalanceMC();
-    fMediumMagboltz=detCon->getMediumMagBoltz();
+    ELPos =  - DetActiveL/2.0;
+    FCTop =  + DetActiveL/2.0;
 
-    //std::cout << "Detector Dimentions: "<< DetChamberR << " " << DetChamberL << "  " << DetActiveR << "  " << DetActiveL << std::endl;
+    std::cout << "Detector Dimentions: "<< DetChamberR << " " << DetChamberL << "  " << DetActiveR << "  " << DetActiveL << std::endl;
+
+    fSensor = new Garfield::Sensor();
+
     if (!fGasModelParameters->GetbComsol()){
+        Garfield::ComponentUser* componentDriftLEM = CreateSimpleGeometry();
+        fSensor->AddComponent(componentDriftLEM);
 
-        std::cout <<"Preparing without comsol .." <<std::endl;
-    }else{
-        std::cout <<"Preparing with comsol .." <<std::endl;
+        // Set the region where the sensor is active -- based on the gas volume
+        fSensor->SetArea(-DetChamberR, -DetChamberR, -DetChamberL/2.0, DetChamberR, DetChamberR, DetChamberL/2.0); // cm
+
+    }
+    else {
+        std::cout << "Initialising Garfiled with a COMSOL geometry" << std::endl;
+
+        G4String home = fGasModelParameters->GetCOMSOL_Path();
+        std::string gridfile   = "CRAB_Mesh.mphtxt";
+        std::string datafile   = "CRAB_Data.txt";
+        std::string fileconfig = "CRABMaterialProperties.txt";
+
+        // Setup the electric potential map
+        Garfield::ComponentComsol* fm = new Garfield::ComponentComsol(); // Field Map
+        fm->Initialise(home + gridfile ,home + fileconfig, home + datafile, "cm");
+
+        // Print some information about the cell dimensions.
+        fm->PrintRange();
+
+        // Associate the gas with the corresponding field map material.
+        fm->SetGas(fMediumMagboltz);
+        fm->PrintMaterials();
+        fm->Check();
+
+        fSensor->AddComponent(fm);
+        // fSensor->SetArea(-DetChamberR, -DetChamberR, -DetChamberL/2.0, DetChamberR, DetChamberR, DetChamberL/2.0); // cm
 
     }
 
 
 
-    if (fGasModelParameters->GetbEL_File()){
-        EL_profiles=detCon->getELProfiles();
-        EL_events=detCon->getELEvents();
-    }
+    // fAvalanche = new Garfield::AvalancheMicroscopic();
+    // fAvalanche->SetUserHandleInelastic(userHandle);
+    // fAvalanche->SetSensor(fSensor);
+
+
+    fAvalancheMC = new Garfield::AvalancheMC(); // drift, not avalanche, to be fair.
+    fAvalancheMC->SetSensor(fSensor);
+    fAvalancheMC->SetTimeSteps(0.05); // nsec, per example
+    fAvalancheMC->SetDistanceSteps(2.e-2); // cm, 10x example
+    fAvalancheMC->EnableDebugging(false); // way too much information.
+    fAvalancheMC->DisableAttachment(); // Currently getting warning messages about the attachment. You can supress those by switching this on.
+
+
+    // Load in the events
+    if (fGasModelParameters->GetbEL_File())
+        FileHandler.GetTimeProfileData(gas_path+"data/CRAB_Profiles_Rotated.csv", EL_profiles, EL_events);
 
 }
 
@@ -311,7 +396,7 @@ void userHandle(double x, double y, double z, double t, int type, int level,Garf
     Pos.setZ(z*10);//back to cm to GEANT4
     newExcHit->SetPos(Pos);
     newExcHit->SetTime(t);
-    garfExcHitsCol->insert(newExcHit);
+    //garfExcHitsCol->insert(newExcHit);
     //If choose to draw change the visualizer from OGL to HepRep in vis.mac file
     //newExcHit->Draw();	
     }// if level
@@ -406,7 +491,7 @@ void GarfieldVUVPhotonModel::MakeELPhotonsFromFile( G4FastStep& fastStep, G4doub
     G4double tig4(0.);
     
     for (G4int i=0;i<colHitsEntries;i++){
-      GarfieldExcitationHit* newExcHit=new GarfieldExcitationHit();
+      GarfieldExcitationHit *newExcHit=new GarfieldExcitationHit();
 
         // std::cout << xi << ", " <<  EL_profile[i][0]  << std::endl;
       G4ThreeVector fakepos ( (xi+ EL_profile[i][0])*10., (yi+ EL_profile[i][1])*10., (zi+ EL_profile[i][2])*10. ); // 0 = x, 1 = y, 2 = z
@@ -443,14 +528,15 @@ void GarfieldVUVPhotonModel::MakeELPhotonsSimple(G4FastStep& fastStep, G4double 
     const G4double YoverP = 140.*fieldLEM/(detCon->GetGasPressure()/torr) - 116.; // yield/cm/bar, with P in Torr ... JINST 2 p05001 (2007).
     colHitsEntries = YoverP * detCon->GetGasPressure()/bar * gapLEM; // with P in bar this time.
     // colHitsEntries*=2; // Max val before G4 cant handle the memory anymore
-    // colHitsEntries=1; // This is to turn down S2 so the vis doesnt get overwelmed
+     //colHitsEntries=1; // This is to turn down S2 so the vis doesnt get overwelmed
 
     colHitsEntries *= (G4RandGauss::shoot(1.0,res));
     
     G4double tig4(0.);
+
     const G4double vd(2.4); // mm/musec, https://arxiv.org/pdf/1902.05544.pdf. Pretty much flat at our E/p..
     for (G4int i=0;i<colHitsEntries;i++){
-      GarfieldExcitationHit* newExcHit=new GarfieldExcitationHit();
+      GarfieldExcitationHit* newExcHit =new GarfieldExcitationHit();
 
       G4ThreeVector fakepos (xi*10,yi*10.,zi*10.-10*gapLEM*float(i)/float(colHitsEntries)); /// ignoring diffusion in small LEM gap, EC 17-June-2022.
       newExcHit->SetPos(fakepos);
@@ -481,6 +567,7 @@ void GarfieldVUVPhotonModel::MakeELPhotonsSimple(G4FastStep& fastStep, G4double 
       }
       counter[3]++;
     }
+
 
 }
 

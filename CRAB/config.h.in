@@ -1,0 +1,2 @@
+//Any Needed Macros defined here
+#cmakedefine With_Opticks

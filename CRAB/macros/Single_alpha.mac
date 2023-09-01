@@ -38,7 +38,7 @@
 /event/verbose 0
 /process/optical/verbose 0
 
-/tracking/storeTrajectory 1
+/tracking/storeTrajectory 0
 
 /Action/SteppingAction/event_shift 0
 /Generator/SingleParticle/ParticleType alpha

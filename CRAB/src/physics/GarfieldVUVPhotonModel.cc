@@ -384,7 +384,7 @@ void GarfieldVUVPhotonModel::InitialisePhysics(){
     fAvalancheMC->SetDistanceSteps(2.e-2); // cm, 10x example
     fAvalancheMC->EnableDebugging(false); // way too much information.
     fAvalancheMC->DisableAttachment(); // Currently getting warning messages about the attachment. You can supress those by switching this on.
-
+    fAvalancheMC->EnableDriftLines();
 
     // Load in the events
     if (fGasModelParameters->GetbEL_File())

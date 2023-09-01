@@ -11,8 +11,13 @@
 #include "G4EventManager.hh"
 #include "GasBoxSD.hh"
 #include "S2Photon.hh"
+#ifdef With_Opticks
+#include "G4CXOpticks.hh"
+#include "SEvt.hh"
+#include "U4.hh"
+#endif
 
-
+namespace {G4Mutex Mutex= G4MUTEX_INITIALIZER;}
 SteppingAction::SteppingAction(EventAction *eva) : fEventAction(eva),  ev_shift(0) {
 
   msg_ = new G4GenericMessenger(this, "/Action/SteppingAction/",

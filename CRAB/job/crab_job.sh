@@ -1,29 +1,31 @@
 #!/bin/bash
 #SBATCH -J CRAB # A single job name for the array
 #SBATCH -c 1 # Number of cores
-#SBATCH --mem 4000 # Memory request (6Gb)
-#SBATCH -t 0-4:00 # Maximum execution time (D-HH:MM)
+#SBATCH -p node2
+#SBATCH --mem 30000 # Memory request (6Gb)
+#SBATCH -t 3-0:00 # Maximum execution time (D-HH:MM)
 #SBATCH -o CRAB_%A_%a.out # Standard output
 #SBATCH -e CRAB_%A_%a.err # Standard error
 
 start=`date +%s`
 
 # Set the configurable variables
-JOBNAME="Alpha_e"
+JOBNAME="Alpha"
 TYPE="CRAB"
 N_EVENTS=5
 
 # Create the directory
-cd /mnt/Krishan/
+source "/home/argon/Projects/Ilker/gxsim/CRAB/macros/run.sh test"
+cd /media/argon/Data/CRAB/Sim
 mkdir -p $JOBNAME/$TYPE/jobid_"${SLURM_ARRAY_TASK_ID}"
 cd $JOBNAME/$TYPE/jobid_"${SLURM_ARRAY_TASK_ID}"
 
 # Copy the macro file
-cp /home/argon/Projects/Krishan/gxsim/CRAB/macros/run1.mac .
+cp $CRABPATH/macros/Single_alpha.mac .
 
 # Setup nexus and run
 echo "Setting Up Code" 2>&1 | tee -a log_crab"${SLURM_ARRAY_TASK_ID}".txt
-source /home/argon/Projects/Krishan/gxsim/CRAB/setup_cluster.sh
+#source /home/argon/Projects/Krishan/gxsim/CRAB/setup_cluster.sh
 
 # Calculate the unique seed number	
 SEED=$((${N_EVENTS}*(${SLURM_ARRAY_TASK_ID} - 1) + ${N_EVENTS}))
@@ -35,7 +37,7 @@ sed -i "s#.*beamOn.*#/run/beamOn ${N_EVENTS}#" run1.mac
 
 # NEXUS
 echo "Running GXeSim" 2>&1 | tee -a log_crab"${SLURM_ARRAY_TASK_ID}".txt
-/home/argon/Projects/Krishan/gxsim/CRAB/build/CRAB run1.mac ${SEED} 2>&1 | tee -a log_crab"${SLURM_ARRAY_TASK_ID}".txt
+$CRABPATH/build/CRAB Single_alpha.mac ${SEED} 2>&1 | tee -a log_crab"${SLURM_ARRAY_TASK_ID}".txt
 
 echo; echo; echo;
 

@@ -29,9 +29,12 @@
 #include "HexagonMeshTools.hh"
 
 #include "SampleFromSurface.hh"
-#define WITH_OPTIX 1
-#ifdef WITH_OPTIX 1
+#include "config.h"
+
+#ifdef With_Opticks
 #include "G4CXOpticks.hh"
+#include <cuda_runtime.h>
+#include "SEventConfig.hh"
 #endif
 
 #include <chrono>
@@ -70,7 +73,6 @@ DetectorConstruction::DetectorConstruction(GasModelParameters* gmp) :
 {
     detectorMessenger = new DetectorMessenger(this);
     Sampler=std::make_shared<util::SampleFromSurface>(util::SampleFromSurface("Needles"));
-
 }
 
 DetectorConstruction::~DetectorConstruction() {
@@ -128,24 +130,24 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
     auto Gas_Lens=CADMesh::TessellatedMesh::FromSTL(crabpath+"data/CRAB_STL/Gas_Lens.stl");
     auto Gas_Window=CADMesh::TessellatedMesh::FromSTL(crabpath+"data/CRAB_STL/Gas_Window.stl");
 
-    auto FieldCage_solid=FieldCage->GetTessellatedSolid();
-    auto Meshes_solid=Meshes->GetTessellatedSolid();
+    auto FieldCage_solid=FieldCage->GetSolid();
+    auto Meshes_solid=Meshes->GetSolid();
     auto Needle4_solid=Needle4->GetTessellatedSolid();
     auto Needle9_solid=Needle9->GetTessellatedSolid();
     auto Needle14_solid=Needle14->GetTessellatedSolid();
-    auto Chamber_solid=Chamber->GetTessellatedSolid();
-    auto MgF2Lens_solid=MgF2Lens->GetTessellatedSolid();
-    auto MgF2Window_solid=MgF2Window->GetTessellatedSolid();
-    auto AnodeTube_solid=AnodeTube->GetTessellatedSolid();
-    auto CathodeTube_solid=CathodeTube->GetTessellatedSolid();
-    auto Peeks_solid=Peeks->GetTessellatedSolid();
-    auto Brackets_solid=Brackets->GetTessellatedSolid();
-    auto Pmt_solid=Pmt->GetTessellatedSolid();
-    auto Camera_solid=Camera->GetTessellatedSolid();
-    auto AnodeVacuum_solid=Anode_Vacuum->GetTessellatedSolid();
-    auto CathodeVacuum_solid=Cathode_Vacuum->GetTessellatedSolid();
-    auto Gas_Lens_solid=Gas_Lens->GetTessellatedSolid();
-    auto Gas_Window_solid=Gas_Window->GetTessellatedSolid();
+    auto Chamber_solid=Chamber->GetSolid();
+    auto MgF2Lens_solid=MgF2Lens->GetSolid();
+    auto MgF2Window_solid=MgF2Window->GetSolid();
+    auto AnodeTube_solid=AnodeTube->GetSolid();
+    auto CathodeTube_solid=CathodeTube->GetSolid();
+    auto Peeks_solid=Peeks->GetSolid();
+    auto Brackets_solid=Brackets->GetSolid();
+    auto Pmt_solid=Pmt->GetSolid();
+    auto Camera_solid=Camera->GetSolid();
+    auto AnodeVacuum_solid=Anode_Vacuum->GetSolid();
+    auto CathodeVacuum_solid=Cathode_Vacuum->GetSolid();
+    auto Gas_Lens_solid=Gas_Lens->GetSolid();
+    auto Gas_Window_solid=Gas_Window->GetSolid();
 
 
 
@@ -253,13 +255,13 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
     new G4LogicalBorderSurface("CameraSurface",CathodeVacuum_physical,Camera_physical,CamSurf);
     new G4LogicalBorderSurface("PMTSurface",AnodeVacuum_physical,Pmt_physical,CamSurf);
 
-    G4OpticalSurface* opXenon_Glass = new G4OpticalSurface("XenonSurface");
+    /*G4OpticalSurface* opXenon_Glass = new G4OpticalSurface("XenonSurface");
     opXenon_Glass->SetModel(glisur);                  // SetModel
     opXenon_Glass->SetType(dielectric_dielectric);   // SetType
     opXenon_Glass->SetFinish(polished);                 // SetFinish
-    new G4LogicalBorderSurface("XenonSurfaceWindow",Gas_Window_pysical,MgF2Window_physical ,opXenon_Glass);
-    new G4LogicalBorderSurface("XenonSurfaceLens",Gas_Lens_pysical , MgF2Lens_physical, opXenon_Glass);
-
+    //new G4LogicalBorderSurface("XenonSurfaceWindow",Gas_Window_pysical,MgF2Window_physical ,opXenon_Glass);
+    //new G4LogicalBorderSurface("XenonSurfaceLens",Gas_Lens_pysical , MgF2Lens_physical, opXenon_Glass);
+    */
 
     // Call the Needles
     if(!HideSourceHolder_){
@@ -284,6 +286,13 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
     //Construct a G4Region, connected to the logical volume in which you want to use the G4FastSimulationModel
     G4Region* regionGas = new G4Region("GasRegion");
     regionGas->AddRootLogicalVolume(gas_logic);
+#ifdef With_Opticks
+    std::cout <<"Setting our detector geometry with opticks" <<std::endl;
+    cudaDeviceReset();
+    G4CXOpticks::SetGeometry(labPhysical);
+
+    std::cout << SEventConfig::Desc() <<std::endl;
+#endif
     return labPhysical;
 
 }
@@ -301,6 +310,7 @@ void DetectorConstruction::ConstructSDandField(){
     new DegradModel(fGasModelParameters,"DegradModel",region,this,myGasBoxSD);
     new GarfieldVUVPhotonModel(fGasModelParameters,"GarfieldVUVPhotonModel",region,this,myGasBoxSD);
 }
+
 
 void DetectorConstruction::AssignVisuals() {
     // Chamber

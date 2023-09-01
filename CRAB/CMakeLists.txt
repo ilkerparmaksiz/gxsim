@@ -10,7 +10,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS ON)
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake/Modules ${CMAKE_MODULE_PATH})
 
-option (With_Opticks OFF)
+option(With_Opticks OFF)
 option(WITH_SYS_TETGEN "WITH_TETGEN" OFF)
 
 
@@ -25,7 +25,6 @@ if(WITH_GEANT4_UIVIS)
 else()
   find_package(Geant4 REQUIRED)
 endif()
-
 #----------------------------------------------------------------------------
 # Setup include directory for this project
 #
@@ -76,6 +75,7 @@ if(With_Opticks)
     find_package(U4 REQUIRED CONFIG)
     find_package(ExtG4 REQUIRED CONFIG)
     find_package(CSG_GGeo REQUIRED CONFIG)
+
 
 endif ()
 
@@ -133,7 +133,10 @@ endif()
 #####################################
 if (With_Opticks)
     target_link_libraries(CRAB Opticks::G4CX Opticks::U4 Opticks::ExtG4 Opticks::CSG_GGeo)
+    include_directories(${CMAKE_CURRENT_BINARY_DIR})
 endif()
+#Configure some of the variables
+configure_file(config.h.in ${PROJECT_SOURCE_DIR}/include/${PROJECT_NAME}/config.h)
 
 #####################################
 

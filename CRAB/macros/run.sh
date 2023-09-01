@@ -3,7 +3,7 @@
 folder=build
 ## Set CRABPATH this is needed for the simulation
 export CRABPATH=${PWD%macros}
-
+alias mc='(cd "${CRABPATH}macros")'
 #echo "CRABPATH is $CRABPATH"
 ## if the folder does nt exist , this will create it
 build(){

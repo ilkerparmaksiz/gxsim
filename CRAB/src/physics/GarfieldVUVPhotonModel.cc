@@ -11,7 +11,7 @@
 #include "G4TransportationManager.hh"
 #include "G4DynamicParticle.hh"
 #include "G4RandomDirection.hh"
-
+#include "config.h"
 #include "globals.hh"
 #include "Garfield/MediumMagboltz.hh"
 #include "Garfield/GeometrySimple.hh"
@@ -35,8 +35,12 @@
 #include "OpAbsorption.hh"
 #include "OpBoundaryProcess.hh"
 #include "OpWLS.hh"
-
 #include "G4AutoLock.hh"
+#ifdef With_Opticks
+#include "G4CXOpticks.hh"
+#include "U4.hh"
+#include "SEvt.hh"
+#endif
 namespace{G4Mutex aMutex = G4MUTEX_INITIALIZER;}
 
 const static G4double torr = 1. / 760. * bar;
@@ -64,6 +68,10 @@ GarfieldVUVPhotonModel::GarfieldVUVPhotonModel(GasModelParameters* gmp, G4String
     OpBoundaryProcess* fBoundaryProcess = new OpBoundaryProcess();
     OpAbsorption* fAbsorptionProcess = new OpAbsorption();
     OpWLS* fTheWLSProcess = new OpWLS();
+    Opticks=false;
+#ifdef With_Opticks
+    Opticks=true;
+#endif
 
 
 }
@@ -110,6 +118,7 @@ void GarfieldVUVPhotonModel::DoIt(const G4FastTrack& fastTrack, G4FastStep& fast
      EC, 2-Dec-2021.
 
    */
+
     fastStep.SetNumberOfSecondaryTracks(1e3);
   
     // G4cout<<"HELLO Garfield"<<G4endl;
@@ -172,14 +181,14 @@ void GarfieldVUVPhotonModel::GenerateVUVPhotons(const G4FastTrack& fastTrack, G4
     // Need to get the AvalancheMC drift at the High-Field point in z, and then call fAvalanche-AvalancheElectron() to create excitations/VUVphotons.
 
     if(!fAvalancheMC->DriftElectron(x0,y0,z0,t0)){
-        std::cout << "No Drift" <<std::endl;
+        //std::cout << "No Drift" <<std::endl;
         return;
     }
 
 
     //unsigned int n = fAvalancheMC->GetDriftLines();
     if(fAvalancheMC->GetElectrons().size()<1) {
-        std::cout << "No Electron" <<std::endl;
+        //std::cout << "No Electron" <<std::endl;
         return;
     }
     unsigned int n = fAvalancheMC->GetElectrons().at(0).path.size();
@@ -346,15 +355,16 @@ void GarfieldVUVPhotonModel::InitialisePhysics(){
 
         // Setup the electric potential map
         Garfield::ComponentComsol* fm = new Garfield::ComponentComsol(); // Field Map
-        fm->Initialise(home + gridfile ,home + fileconfig, home + datafile, "cm");
+        fm->Initialise(home + gridfile ,home + fileconfig, home + datafile, "mm");
+        fm->DisableDebugging();
 
         // Print some information about the cell dimensions.
-        fm->PrintRange();
+        //fm->PrintRange();
 
         // Associate the gas with the corresponding field map material.
         fm->SetGas(fMediumMagboltz);
-        fm->PrintMaterials();
-        fm->Check();
+        //fm->PrintMaterials();
+        //fm->Check();
 
         fSensor->AddComponent(fm);
         // fSensor->SetArea(-DetChamberR, -DetChamberR, -DetChamberL/2.0, DetChamberR, DetChamberR, DetChamberL/2.0); // cm
@@ -528,14 +538,16 @@ void GarfieldVUVPhotonModel::MakeELPhotonsSimple(G4FastStep& fastStep, G4double 
     const G4double YoverP = 140.*fieldLEM/(detCon->GetGasPressure()/torr) - 116.; // yield/cm/bar, with P in Torr ... JINST 2 p05001 (2007).
     colHitsEntries = YoverP * detCon->GetGasPressure()/bar * gapLEM; // with P in bar this time.
     // colHitsEntries*=2; // Max val before G4 cant handle the memory anymore
-     //colHitsEntries=1; // This is to turn down S2 so the vis doesnt get overwelmed
+     //colHitsEntries=100; // This is to turn down S2 so the vis doesnt get overwelmed
+ 
 
     colHitsEntries *= (G4RandGauss::shoot(1.0,res));
     
     G4double tig4(0.);
 
     const G4double vd(2.4); // mm/musec, https://arxiv.org/pdf/1902.05544.pdf. Pretty much flat at our E/p..
-    for (G4int i=0;i<colHitsEntries;i++){
+    if(!Opticks){
+        for (G4int i=0;i<colHitsEntries;i++){
       GarfieldExcitationHit* newExcHit =new GarfieldExcitationHit();
 
       G4ThreeVector fakepos (xi*10,yi*10.,zi*10.-10*gapLEM*float(i)/float(colHitsEntries)); /// ignoring diffusion in small LEM gap, EC 17-June-2022.
@@ -567,7 +579,17 @@ void GarfieldVUVPhotonModel::MakeELPhotonsSimple(G4FastStep& fastStep, G4double 
       }
       counter[3]++;
     }
+    }
 
+#ifdef With_Opticks
+    G4cout << "sending photons to opticks" <<G4endl;
+    G4cout <<" Hit Entries " <<colHitsEntries <<G4endl;
+    const G4Track * track=fastStep.GetCurrentTrack();
+    const G4Step * aStep=track->GetStep();
+    // Add condition that if this is a thermal electron and has any secondaries
+    U4::CollectGenstep_DsG4Scintillation_r4695(track,aStep,colHitsEntries,1,4*ns);
+    G4Exception("","",FatalException,"test");
+#endif
 
 }
 

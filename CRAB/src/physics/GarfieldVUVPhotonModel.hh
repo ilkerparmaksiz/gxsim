@@ -120,6 +120,7 @@ private:
     filehandler::FileHandling FileHandler;
 
     GasModelParameters* fGasModelParameters;
+    G4bool Opticks;
 
 
 };

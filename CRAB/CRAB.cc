@@ -13,6 +13,7 @@ https://svs.icts.kuleuven.be/projects/svs_project014/wiki/Wiki
 #include <time.h>
 
 #include "G4RunManager.hh"
+#include "config.h"
 #include "G4MTRunManager.hh"
 #include "G4UImanager.hh"
 #include "G4VisExecutive.hh"
@@ -27,6 +28,10 @@ https://svs.icts.kuleuven.be/projects/svs_project014/wiki/Wiki
 #include "S2Photon.hh"
 #include "MyUserActionInitialization.hh"
 #include "GasModelParameters.hh"
+#ifdef With_Opticks
+#include "OpticksCfg.hh"
+#include "SEventConfig.hh"
+#endif
 
 int main(int argc, char** argv) {
   G4Random::setTheEngine(new CLHEP::RanecuEngine);
@@ -42,6 +47,11 @@ int main(int argc, char** argv) {
 #else
     G4RunManager* runManager = new G4RunManager();
     G4cout << "Creation of G4RunManager" << G4endl;
+#endif
+
+#ifdef With_Opticks
+   SEventConfig::SetMaxPhoton(600000000);
+   std::cout<< SEventConfig::Desc() << std::endl;
 #endif
 
   G4int randseed;

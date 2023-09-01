@@ -4,6 +4,7 @@
 #include "G4EventManager.hh"
 #include "G4ios.hh"
 #include "RunAction.hh"
+#include "config.h"
 
 #include "G4SDManager.hh"
 #include "G4Threading.hh"
@@ -13,7 +14,12 @@
 #include "G4GlobalFastSimulationManager.hh"
 #include "DegradModel.hh"
 #include "GarfieldVUVPhotonModel.hh"
-
+#ifdef With_Opticks
+#  include "SEvt.hh"
+#  include "NP.hh"
+#  include "G4CXOpticks.hh"
+namespace {G4Mutex opticks_mt =G4MUTEX_INITIALIZER;}
+#endif
 EventAction::EventAction() {
   
 }
@@ -49,6 +55,26 @@ void EventAction::EndOfEventAction(const G4Event *evt) {
 
     G4cout << " EventAction::EndOfEventAction()  " << G4endl;
 
+#ifdef With_Opticks
+
+    G4cout<<" Opticks End of Event Action" <<G4endl;
+    G4AutoLock lock(&opticks_mt);
+    G4CXOpticks * g4cx=G4CXOpticks::Get();
+    G4int eventID=evt->GetEventID();
+    G4int ngenstep=SEvt::GetNumGenstepFromGenstep(eventID);
+    G4int nphotons=SEvt::GetNumPhotonCollected(eventID);
+    G4cout << "Number of Steps Generated " <<ngenstep << G4endl;
+    G4cout << "Number of Photons Generated " <<nphotons << G4endl;
+    // Simulate the photons
+    if(nphotons>0){
+        g4cx->simulate(eventID);
+        cudaDeviceSynchronize();
+    }
+    // Get the hits
+    int nhits=SEvt::GetNumHit(eventID);
+    G4cout << "nhits " <<nhits << G4endl;
+
+#endif
 
     G4int id(3);
     G4double PPID = 0.; G4double PKE = 0.;
@@ -68,6 +94,8 @@ void EventAction::EndOfEventAction(const G4Event *evt) {
     analysisManager->FillNtupleDColumn(id,row, PKE); row++;
     analysisManager->FillNtupleDColumn(id,row, fEDepPrim); row++;
     analysisManager->AddNtupleRow(id);
+
+
 
 }
 

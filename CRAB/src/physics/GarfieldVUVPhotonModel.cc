@@ -120,7 +120,7 @@ void GarfieldVUVPhotonModel::DoIt(const G4FastTrack& fastTrack, G4FastStep& fast
    */
 
     fastStep.SetNumberOfSecondaryTracks(1e3);
-  
+
     // G4cout<<"HELLO Garfield"<<G4endl;
     ////The details of the Garfield model are implemented here
      fastStep.KillPrimaryTrack();//KILL NEST/DEGRAD/G4 TRACKS
@@ -212,11 +212,13 @@ void GarfieldVUVPhotonModel::GenerateVUVPhotons(const G4FastTrack& fastTrack, G4
         // Drift line point entered LEM
       if (zi < ELPos && ( std::sqrt(xi*xi + yi*yi) < DetActiveR/2.0) ){
           //std::cout <<"Success " << xi << " " << yi << " " << zi << " " << ti << " " << status << std::endl;
-          break;
+         DriftLines.clear();
+	      break;
       }
       // No drift line point meets criteria, so return
       else if (i==n-1){
-          return;
+         DriftLines.clear(); 
+	 return;
       }
 
 
@@ -357,7 +359,7 @@ void GarfieldVUVPhotonModel::InitialisePhysics(){
         Garfield::ComponentComsol* fm = new Garfield::ComponentComsol(); // Field Map
         fm->Initialise(home + gridfile ,home + fileconfig, home + datafile, "mm");
         fm->DisableDebugging();
-
+        fm->EnableConvergenceWarnings(false);
         // Print some information about the cell dimensions.
         //fm->PrintRange();
 

@@ -10,8 +10,9 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS ON)
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake/Modules ${CMAKE_MODULE_PATH})
 
-option(With_Opticks OFF)
+option(With_MultiThread "WITH_MultiThread" OFF)
 option(WITH_SYS_TETGEN "WITH_TETGEN" OFF)
+option(With_Opticks OFF)
 
 
 #----------------------------------------------------------------------------

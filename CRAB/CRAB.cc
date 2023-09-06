@@ -41,9 +41,16 @@ int main(int argc, char** argv) {
   if(argc>3){
       thr=atoi(argv[3]);
   }
-  G4MTRunManager* runManager = new G4MTRunManager();
-  //    runManager->SetNumberOfThreads(G4Threading::G4GetNumberOfCores());
-  runManager->SetNumberOfThreads(thr);
+// This is aded so we do not have to worry about loding geometry multiple times
+#ifdef With_MultiThread
+
+     G4MTRunManager* runManager = new G4MTRunManager();
+    //    runManager->SetNumberOfThreads(G4Threading::G4GetNumberOfCores());
+    runManager->SetNumberOfThreads(thr);
+#else
+    G4RunManager* runManager = new G4RunManager();
+    G4cout << "Creation of G4RunManager" << G4endl;
+#endif
 #else
     G4RunManager* runManager = new G4RunManager();
     G4cout << "Creation of G4RunManager" << G4endl;

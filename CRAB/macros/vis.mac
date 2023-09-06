@@ -74,14 +74,14 @@
 /vis/scene/add/axes    # Simple axes: x=red, y=green, z=blue.
 
 /vis/scene/endOfEventAction accumulate 100000
-/tracking/storeTrajectory 1
+/tracking/storeTrajectory 0
 /process/optical/boundary/verbose 0
 
 /Action/SteppingAction/event_shift 0
 ## SingleGenerator
-/Generator/SingleParticle/ParticleType e-
-#/Generator/SingleParticle/ParticleType opticalphoton
-/Generator/SingleParticle/energy 1 keV
+#/Generator/SingleParticle/ParticleType e-
+/Generator/SingleParticle/ParticleType S2Photon
+/Generator/SingleParticle/energy 7 eV
 /Generator/SingleParticle/pos 0 0 0 cm
 /Generator/SingleParticle/Isotropic true
 ## If you need to SampleFromSurface, use the fileNames in the Mode!!

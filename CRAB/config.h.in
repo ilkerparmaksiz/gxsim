@@ -1,2 +1,4 @@
 //Any Needed Macros defined here
 #cmakedefine With_Opticks
+#cmakedefine WITH_SYS_TETGEN
+#cmakedefine With_MultiThread

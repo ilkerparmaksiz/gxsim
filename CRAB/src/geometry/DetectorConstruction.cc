@@ -40,7 +40,7 @@
 #include <chrono>
 
 // Lets use tetgen
-#ifdef tetgen
+#ifdef WITH_SYS_TETGEN
 #define USE_CADMESH_TETGEN 1
 #endif
 #include "CADMesh.hh"
@@ -193,7 +193,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
     auto MgF2Window_physical=new G4PVPlacement(0,G4ThreeVector(),MgF2Window_logic,MgF2Window_solid->GetName(),lab_logic_volume,0,0,false);
 
     // Meshes
-    auto Meshes_physical=new G4PVPlacement(0,G4ThreeVector(),Meshes_logic,Meshes_solid->GetName(),gas_logic,0,0,false);
+    auto Mesh_pysical=new G4PVPlacement(0,G4ThreeVector(),Meshes_logic,Meshes_solid->GetName(),gas_logic,0,0,false);
 
     // Image Plane
     auto Pmt_physical=new G4PVPlacement(0,G4ThreeVector(),Pmt_logic,Pmt_solid->GetName(),AnodeVacuum_logic,0,0,false);
@@ -238,7 +238,8 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
     new G4LogicalBorderSurface("SteelSurface_CathodeChamber",CathodeVacuum_physical,Chamber_physical,OpSteelSurf);
     new G4LogicalBorderSurface("SteelSurface_AnodeChamber",AnodeVacuum_physical,Chamber_physical,OpSteelSurf);
     new G4LogicalBorderSurface("SteelSurface_Chamber",gas_pyhsical,Chamber_physical,OpSteelSurf);
-    new G4LogicalBorderSurface("SteelSurface_RingsAndMesh",gas_pyhsical,FieldCage_physical,OpSteelSurf);
+    new G4LogicalBorderSurface("SteelSurface_Rings",gas_pyhsical,FieldCage_physical,OpSteelSurf);
+    new G4LogicalBorderSurface("SteelSurface_RingsAndMesh",gas_pyhsical,Mesh_pysical,OpSteelSurf);
     new G4LogicalBorderSurface("SteelSurface_Anode",AnodeVacuum_physical,AnodeTube_physical,OpSteelSurf);
     new G4LogicalBorderSurface("SteelSurface_Cathode",CathodeVacuum_physical,CathodeTube_physical,OpSteelSurf);
 
@@ -293,6 +294,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
 
     std::cout << SEventConfig::Desc() <<std::endl;
 #endif
+
     return labPhysical;
 
 }

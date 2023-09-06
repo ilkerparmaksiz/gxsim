@@ -27,7 +27,7 @@
 
 /run/initialize
 
-/analysis/setFileName comsol22.root
+/analysis/setFileName alpha_Comsol.root
 
 ####################################
 ############ Verbosities ###########
@@ -48,6 +48,5 @@
 /Generator/SingleParticle/Isotropic true
 /Generator/SingleParticle/Mode Needles
 /Generator/SingleParticle/Amount 1
-/run/beamOn 10
-
+/run/beamOn 1
 

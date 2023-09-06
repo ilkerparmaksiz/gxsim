@@ -12,7 +12,7 @@ start=`date +%s`
 # Set the configurable variables
 JOBNAME="Alpha"
 TYPE="CRAB"
-N_EVENTS=10
+N_EVENTS=1
 
 # Create the directory
 source "/home/argon/Projects/Ilker/gxsim/CRAB/macros/run.sh test"
@@ -32,8 +32,8 @@ SEED=$((${N_EVENTS}*(${SLURM_ARRAY_TASK_ID} - 1) + ${N_EVENTS}))
 echo "The seed number is: ${SEED}" 2>&1 | tee -a log_crab"${SLURM_ARRAY_TASK_ID}".txt
 
 # Replace the number of events in the file as well as the event index
-sed -i "s#.*event_shift.*#/Action/SteppingAction/event_shift ${SEED}#" run1.mac
-sed -i "s#.*beamOn.*#/run/beamOn ${N_EVENTS}#" run1.mac
+sed -i "s#.*event_shift.*#/Action/SteppingAction/event_shift ${SEED}#" Single_alpha.mac
+sed -i "s#.*beamOn.*#/run/beamOn ${N_EVENTS}#" Single_alpha.mac
 
 # NEXUS
 echo "Running GXeSim" 2>&1 | tee -a log_crab"${SLURM_ARRAY_TASK_ID}".txt

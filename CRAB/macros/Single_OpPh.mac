@@ -27,7 +27,7 @@
 
 /run/initialize
 
-/analysis/setFileName electron.root
+/analysis/setFileName optical.root
 
 ####################################
 ############ Verbosities ###########
@@ -41,21 +41,21 @@
 
 /Action/SteppingAction/event_shift 0
 
-#/Generator/SingleParticle/ParticleType opticalphoton
-#/Generator/SingleParticle/energy 7.0 eV
-#/Generator/SingleParticle/pos 0 -1.6 150 cm
-##/Generator/SingleParticle/pos  -1.6 0 -5 cm
-#/Generator/SingleParticle/momentum 0 0 1
-##/Generator/SingleParticle/Isotropic false
+/Generator/SingleParticle/ParticleType S2Photon
+/Generator/SingleParticle/energy 5.3 MeV
+/Generator/SingleParticle/pos 0 0 30 cm
+#/Generator/SingleParticle/pos  -1.6 0 -5 cm
+/Generator/SingleParticle/Isotropic true
+/Generator/SingleParticle/Mode Single
+/Generator/SingleParticle/Amount 1000000
 
-
-/gps/particle opticalphoton
-/gps/ene/type Mono
-/gps/ene/mono 7 eV
-/gps/direction 0 0 1
-/gps/pos/centre 0 0 0 cm
-/gps/polarization 0 0 1
-
-/run/beamOn 160000000
+#/gps/particle opticalphoton
+#/gps/ene/type Mono
+#/gps/ene/mono 7 eV
+#/gps/pos/type Point
+#/gps/pos/centre 0 0 30 cm
+#/gps/ang/type iso
+#/gps/energy 7eV
+/run/beamOn 100
 
 

@@ -12,7 +12,7 @@ start=`date +%s`
 # Set the configurable variables
 JOBNAME="Alpha"
 TYPE="CRAB"
-N_EVENTS=1
+N_EVENTS=50
 
 # Create the directory
 source "/home/argon/Projects/Ilker/gxsim/CRAB/macros/run.sh test"

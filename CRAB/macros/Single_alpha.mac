@@ -10,7 +10,7 @@
 # For setting the geometry
 /gasModelParameters/geometry/COMSOL_Path /home/argon/Projects/Ilker/CRAB_COMSOL/
 /gasModelParameters/geometry/useEL_File false
-/gasModelParameters/geometry/useComsol true
+/gasModelParameters/geometry/useComsol false
 
 # Threading
 #/run/numberOfThreads 1 # Currently hard-wired in CRAB.cc, cuz not evident thisis doing anything.
@@ -27,7 +27,7 @@
 
 /run/initialize
 
-/analysis/setFileName alpha_Comsol.root
+/analysis/setFileName alpha.root
 
 ####################################
 ############ Verbosities ###########
@@ -42,7 +42,7 @@
 
 /Action/SteppingAction/event_shift 0
 /Generator/SingleParticle/ParticleType alpha
-/Generator/SingleParticle/energy 5.3 MeV
+/Generator/SingleParticle/energy 1 MeV
 /Generator/SingleParticle/pos 0 0 0 cm
 #/Generator/SingleParticle/pos  -1.6 0 -5 cm
 /Generator/SingleParticle/Isotropic true

@@ -1,6 +1,7 @@
 #!/bin/bash
 ## folder Name
 folder=build
+num_photons=100
 ## Set CRABPATH this is needed for the simulation
 export CRABPATH=${PWD%macros}
 alias mc='(cd "${CRABPATH}macros")'

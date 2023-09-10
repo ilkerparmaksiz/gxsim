@@ -71,8 +71,8 @@ void EventAction::EndOfEventAction(const G4Event *evt) {
         cudaDeviceSynchronize();
     }
     // Get the hits
-    int nhits=SEvt::GetNumHit(eventID);
-    G4cout << "nhits " <<nhits << G4endl;
+    //int nhits=SEvt::GetNumHit(eventID);
+    //G4cout << "nhits " <<nhits << G4endl;
 
 #endif
 

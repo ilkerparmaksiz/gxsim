@@ -141,7 +141,15 @@ void GarfieldVUVPhotonModel::DoIt(const G4FastTrack& fastTrack, G4FastStep& fast
          GenerateVUVPhotons(fastTrack,fastStep,garfPos,garfTime);
      }
     */
-     GenerateVUVPhotons(fastTrack,fastStep,garfPos,garfTime);
+#ifdef With_Opticks
+    if(counter[1]>1000) return;
+     G4cout << "sending photons to opticks" <<G4endl;
+    const G4Track * track=fastStep.GetCurrentTrack();
+    const G4Step * aStep=track->GetStep();
+    // Add condition that if this is a thermal electron and has any secondaries
+    U4::CollectGenstep_DsG4Scintillation_r4695(track,aStep,1,1,4*ns);
+#endif
+     //GenerateVUVPhotons(fastTrack,fastStep,garfPos,garfTime);
 
 }
 
@@ -538,9 +546,9 @@ void GarfieldVUVPhotonModel::MakeELPhotonsSimple(G4FastStep& fastStep, G4double 
     //	G4cout<<"GarfExcHits entries "<<colHitsEntries<<G4endl; // This one is not cumulative.
 
     const G4double YoverP = 140.*fieldLEM/(detCon->GetGasPressure()/torr) - 116.; // yield/cm/bar, with P in Torr ... JINST 2 p05001 (2007).
-    colHitsEntries = YoverP * detCon->GetGasPressure()/bar * gapLEM; // with P in bar this time.
+    //colHitsEntries = YoverP * detCon->GetGasPressure()/bar * gapLEM; // with P in bar this time.
     // colHitsEntries*=2; // Max val before G4 cant handle the memory anymore
-     //colHitsEntries=100; // This is to turn down S2 so the vis doesnt get overwelmed
+     colHitsEntries=100; // This is to turn down S2 so the vis doesnt get overwelmed
  
 
     colHitsEntries *= (G4RandGauss::shoot(1.0,res));
@@ -548,6 +556,7 @@ void GarfieldVUVPhotonModel::MakeELPhotonsSimple(G4FastStep& fastStep, G4double 
     G4double tig4(0.);
 
     const G4double vd(2.4); // mm/musec, https://arxiv.org/pdf/1902.05544.pdf. Pretty much flat at our E/p..
+
     if(!Opticks){
         for (G4int i=0;i<colHitsEntries;i++){
       GarfieldExcitationHit* newExcHit =new GarfieldExcitationHit();
@@ -583,15 +592,7 @@ void GarfieldVUVPhotonModel::MakeELPhotonsSimple(G4FastStep& fastStep, G4double 
     }
     }
 
-#ifdef With_Opticks
-    G4cout << "sending photons to opticks" <<G4endl;
-    G4cout <<" Hit Entries " <<colHitsEntries <<G4endl;
-    const G4Track * track=fastStep.GetCurrentTrack();
-    const G4Step * aStep=track->GetStep();
-    // Add condition that if this is a thermal electron and has any secondaries
-    U4::CollectGenstep_DsG4Scintillation_r4695(track,aStep,colHitsEntries,1,4*ns);
-    G4Exception("","",FatalException,"test");
-#endif
+
 
 }
 

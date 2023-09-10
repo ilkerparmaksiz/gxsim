@@ -57,7 +57,7 @@ int main(int argc, char** argv) {
 #endif
 
 #ifdef With_Opticks
-   SEventConfig::SetMaxPhoton(600000000);
+   SEventConfig::SetMaxPhoton(10000000);
    std::cout<< SEventConfig::Desc() << std::endl;
 #endif
 

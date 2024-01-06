@@ -45,8 +45,11 @@
 #include "Garfield/AvalancheMC.hh"
 #include "Garfield/ComponentUser.hh"
 #include "Garfield/ComponentComsol.hh"
+#include "Garfield/ViewDrift.hh"
+#include "Garfield/ViewField.hh"
 
 #include "Garfield/TrackHeed.hh"
+#include "G4AnalysisManager.hh"
 
 class GasModelParameters;
 class DetectorConstruction;
@@ -59,7 +62,7 @@ public:
   // Constructor, destructor
   //-------------------------
     GarfieldVUVPhotonModel(GasModelParameters*, G4String, G4Region*,DetectorConstruction*,GasBoxSD*);
-    ~GarfieldVUVPhotonModel (){};
+    ~GarfieldVUVPhotonModel ();
 
     //void SetPhysics(degradPhysics* fdegradPhysics);
     //void WriteGeometryToGDML(G4VPhysicalVolume* physicalVolume);
@@ -121,6 +124,14 @@ private:
 
     GasModelParameters* fGasModelParameters;
     G4bool Opticks;
+    G4double step;
+    Garfield::ViewField *fFieldView;
+    G4AnalysisManager* analysisManager;
+    G4int event ;
+
+
+
+
 
 
 };

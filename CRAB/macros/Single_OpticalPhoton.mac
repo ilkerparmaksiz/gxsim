@@ -27,7 +27,7 @@
 
 /run/initialize
 
-/analysis/setFileName needles_sep2.root
+/analysis/setFileName optical.root
 
 ####################################
 ############ Verbosities ###########
@@ -41,15 +41,24 @@
 /tracking/storeTrajectory 1
 
 /Action/SteppingAction/event_shift 0
-/Generator/SingleParticle/ParticleType S2Photon
-#/Generator/SingleParticle/ParticleType opticalphoton
-/Generator/SingleParticle/energy 7.29 eV
-/Generator/SingleParticle/pos 0 0 30 cm
-/Generator/SingleParticle/Isotropic true
-/Generator/SingleParticle/Mode Needles
-/Generator/SingleParticle/useNeedle false
-/Generator/SingleParticle/Amount 1000
+#/Generator/SingleParticle/ParticleType S2Photon
+##/Generator/SingleParticle/ParticleType opticalphoton
+#/Generator/SingleParticle/energy 7.29 eV
+#/Generator/SingleParticle/pos 0 0 30 cm
+#/Generator/SingleParticle/Isotropic true
+#/Generator/SingleParticle/Mode Needles
+#/Generator/SingleParticle/useNeedle false
+#/Generator/SingleParticle/Amount 1000
 
-/run/beamOn 100
+/gps/particle S2Photon
+/gps/pos/type Plane
+/gps/pos/shape Circle
+/gps/pos/centre 0 0 -10.5 cm
+/gps/pos/radius 16.52. mm
+/gps/direction 0 0 1
+/gps/polarization 0 0 1
+/gps/ene/mono 7.2 eV
+
+/run/beamOn 1000000
 
 

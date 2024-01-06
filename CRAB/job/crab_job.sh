@@ -3,16 +3,16 @@
 #SBATCH -c 1 # Number of cores
 #SBATCH -p node2
 #SBATCH --mem 30000 # Memory request (6Gb)
-#SBATCH -t 3-0:00 # Maximum execution time (D-HH:MM)
+#SBATCH -t 10-0:00 # Maximum execution time (D-HH:MM)
 #SBATCH -o /dev/null # Standard output
 #SBATCH -e /dev/null # Standard error
 
 start=`date +%s`
 
 # Set the configurable variables
-JOBNAME="Alpha"
+JOBNAME="10_Bar"
 TYPE="CRAB"
-N_EVENTS=50
+N_EVENTS=500
 
 # Create the directory
 source "/home/argon/Projects/Ilker/gxsim/CRAB/macros/run.sh test"

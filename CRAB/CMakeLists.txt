@@ -65,6 +65,9 @@ if(With_Opticks)
     message(STATUS "WITH_OPTICKS is set ON")
     list(APPEND CMAKE_MODULE_PATH "$ENV{OPTICKS_HOME}/cmake/Modules")
     #list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake/Modules")
+    set(OPTICKS_PREFIX "$ENV{OPTICKS_PREFIX}")
+    ### we need to Make sure this OPTICKS_PREFIX matches with the one on OpticksBuildOptions
+    message(STATUS "OPTICKS_PREFIX : $ENV{OPTICKS_PREFIX} ")
     include(OpticksBuildOptions)
     message(STATUS "---- OPTICKS ----")
     message(STATUS "CMAKE_MODULE_PATH --> ${CMAKE_MODULE_PATH}")
@@ -130,7 +133,12 @@ target_link_libraries(CRAB -lgfortran Garfield::Garfield ROOT::RIO ROOT::Net NES
 if(${WITH_SYS_TETGEN} MATCHES "ON")
     target_link_libraries(CRAB tet)
 endif()
-
+find_package(OpenMP)
+if (OPENMP_FOUND)
+    set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+    set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
+endif()
 #####################################
 if (With_Opticks)
     target_link_libraries(CRAB Opticks::G4CX Opticks::U4 Opticks::ExtG4 Opticks::CSG_GGeo)

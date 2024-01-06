@@ -58,12 +58,13 @@
 
 # Draw smooth trajectories at end of event.
 /vis/modeling/trajectories/create/drawByParticleID
-/vis/modeling/trajectories/drawByParticleID-0/set e- red
+/vis/modeling/trajectories/drawByParticleID-0/set e- orange
 /vis/modeling/trajectories/drawByParticleID-0/set thermalelectron orange
 #/vis/modeling/trajectories/drawByParticleID-0/verbose 1
 /vis/modeling/trajectories/drawByParticleID-0/set opticalphoton green
 /vis/modeling/trajectories/drawByParticleID-0/set S2Photon green
 /vis/modeling/trajectories/drawByParticleID-0/set Gamma blue
+/vis/modeling/trajectories/drawByParticleID-0/set alpha orange
 
 
 #/vis/modeling/trajectories/create/drawByCharge
@@ -80,12 +81,12 @@
 /Action/SteppingAction/event_shift 0
 ## SingleGenerator
 #/Generator/SingleParticle/ParticleType e-
-/Generator/SingleParticle/ParticleType S2Photon
-/Generator/SingleParticle/energy 7 eV
+/Generator/SingleParticle/ParticleType alpha
+/Generator/SingleParticle/energy 5.3 MeV
 /Generator/SingleParticle/pos 0 0 0 cm
 /Generator/SingleParticle/Isotropic true
-## If you need to SampleFromSurface, use the fileNames in the Mode!!
-/Generator/SingleParticle/Mode Needles
+# If you need to SampleFromSurface, use the fileNames in the Mode!!
+/Generator/SingleParticle/Mode Single
 /Generator/SingleParticle/Amount 1
 
 ## GPS // For Cool Examples visit --> https://hurel.hanyang.ac.kr/Geant4/Geant4_GPS/reat.space.qinetiq.com/gps/examples/examples.html
@@ -98,13 +99,14 @@
 #/gps/polarization 0 0 1
 
 ### circular Plane
-#/gps/particle opticalphoton
+#/gps/particle S2Photon
 #/gps/pos/type Plane
 #/gps/pos/shape Circle
 #/gps/pos/centre 0 0 -10.5 cm
 #/gps/pos/radius 16.52. mm
 #/gps/direction 0 0 1
-#/gps/ang/mono 7eV
+#/gps/polarization 0 0 1
+#/gps/ene/mono 7.2 eV
 
 
 ## isoTropic

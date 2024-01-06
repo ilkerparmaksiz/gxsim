@@ -25,6 +25,24 @@ namespace materials {
     return mat;
   }
 
+  G4Material * GXeCH4(G4double pressure, G4double temperature,G4double MethaneFraction){
+          G4double density;		
+	  G4double XeFraction=1-MethaneFraction;
+          density=((MethaneFraction*16+XeFraction*132)*pressure)/(0.0831*temperature); // g/L
+	  density=density*0.001; // g/cm3						
+	  G4Material * mat=new G4Material("XeCH4",density,3,kStateGas,temperature,pressure);
+          G4NistManager* nist = G4NistManager::Instance();
+  	  G4Element* Xe = nist->FindOrBuildElement("Xe");
+          G4Element* H = nist->FindOrBuildElement("H");
+   	  G4Element* C = nist->FindOrBuildElement("C");
+
+
+	  mat->AddElement(H,(4/16)*MethaneFraction);
+	  mat->AddElement(C,(12/16)*MethaneFraction);
+	  mat->AddElement(Xe,XeFraction);
+	  return mat;
+  }
+
 
   G4Material* GXe_bydensity(G4double density,
                                           G4double temperature,

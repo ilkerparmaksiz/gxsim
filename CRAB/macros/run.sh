@@ -50,11 +50,16 @@ elif [ "$1" = "alpha" ]; then
 elif [ "$1" = "test" ]; then
   echo "CRABPATH is $CRABPATH";
   echo "Folder Path is $folder";  
-else
+elif [ "$1" = "optical" ]; then
   echo "argument is $1"
   echo "Running Batch Mode"
   build
   ../"$folder"/CRAB Single_OpticalPhoton.mac 100
+else
+  echo "argument is $1"
+  echo "Running Batch Mode"
+  build
+  ../"$folder"/CRAB Single_OpticalPhoton.mac 100	
 fi
 
 

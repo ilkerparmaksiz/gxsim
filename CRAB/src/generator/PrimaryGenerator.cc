@@ -47,11 +47,27 @@
 #include "FileHandling.hh"
 #include "G4OpticalPhoton.hh"
 #include "S2Photon.hh"
-
+#ifdef With_Opticks
+#include "G4CXOpticks.hh"
+#include <cuda_runtime.h>
+#include "SEventConfig.hh"
+#include "OPTICKS_LOG.hh"
+#include "SEvt.hh"
+#include "SSim.hh"
+#include "ssys.h"
+#include "sframe.h"
+#include "U4Material.hh"
+#include "U4VolumeMaker.hh"
+#include "U4Recorder.hh"
+#include "U4Random.hh"
+#include "U4Physics.hh"
+#include "U4VPrimaryGenerator.h"
+const plog::Severity G4CXApp::LEVEL = info ;
+#endif
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 PrimaryGenerator::PrimaryGenerator()
-  : G4VPrimaryGenerator(),momentum_(1,1,1), ParticleType_("opticalphoton"),Position_(0),energy_(0),Iso_(true),useNeedle(true),fAmount_(1),GeneratorMode_("Single")
+  : G4VPrimaryGenerator(),momentum_(1,1,1), ParticleType_("opticalphoton"),Position_(0),energy_(0),Iso_(true),useNeedle(false),fAmount_(1),GeneratorMode_("Single")
 {
 
   msg_ = new G4GenericMessenger(this, "/Generator/SingleParticle/",
@@ -102,6 +118,12 @@ void PrimaryGenerator::Generate(G4Event* event, std::vector<double> &xyz){
       NeedlePoints=f->GetThreeVectorData(NeedlePointPath,',',1);
       if (fAmount_==0) fAmount_=1;
       for (int i=0; i<fAmount_;i++) GenerateFromSurface(event);
+  }else if (GeneratorMode_=="Opticks" and (ParticleType_=="opticalphoton" or ParticleType_=="S2Photon" )){
+#ifdef With_Opticks
+      LOG(LEVEL) << "[" ;
+      U4VPrimaryGenerator::GeneratePrimaries(event);
+      LOG(LEVEL) << "]" ;
+#endif
   }
   else {
     std::cout <<"Generating with Ion Mode for event: " << event->GetEventID() << std::endl;
@@ -169,6 +191,7 @@ void PrimaryGenerator::GeneratePrimaryVertexIon(G4Event* event, std::vector<doub
   event->AddPrimaryVertex(vertexA);
   vertexA->Print();
 }
+
 
 void PrimaryGenerator::GenerateSingleParticle(G4Event * event) {
 

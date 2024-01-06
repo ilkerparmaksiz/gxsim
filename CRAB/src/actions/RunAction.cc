@@ -92,6 +92,33 @@ void RunAction::BeginOfRunAction(const G4Run* aRun) {
   analysisManager->CreateNtupleSColumn("Boundary");  //column 7
   analysisManager->CreateNtupleIColumn("SID");       //column 8
   analysisManager->FinishNtuple();
+
+  analysisManager->CreateNtuple("EL", "EL Hits");
+  analysisManager->CreateNtupleDColumn("Event");     //column 0
+  analysisManager->CreateNtupleDColumn("Time");      //column 2
+  analysisManager->CreateNtupleDColumn("X");         //column 3
+  analysisManager->CreateNtupleDColumn("Y");         //column 4
+  analysisManager->CreateNtupleDColumn("Z");         //column 5
+  analysisManager->FinishNtuple();
+
+  // DT values
+  analysisManager->CreateNtuple("DT", "Simulated DT");
+  analysisManager->CreateNtupleDColumn("Event");     //column 0
+  analysisManager->CreateNtupleDColumn("ie");      //column 2
+  analysisManager->CreateNtupleDColumn("ib");         //column 3
+  analysisManager->CreateNtupleDColumn("ia");         //column 4
+  analysisManager->CreateNtupleDColumn("dt");         //column 5
+  analysisManager->FinishNtuple();
+
+  // DL values
+  analysisManager->CreateNtuple("DL", "Simulated DL");
+  analysisManager->CreateNtupleDColumn("Event");     //column 0
+  analysisManager->CreateNtupleDColumn("ie");      //column 2
+  analysisManager->CreateNtupleDColumn("ib");         //column 3
+  analysisManager->CreateNtupleDColumn("ia");         //column 4
+  analysisManager->CreateNtupleDColumn("dl");         //column 5
+  analysisManager->FinishNtuple();
+
   analysisManager->SetNtupleActivation(true);
 }
 

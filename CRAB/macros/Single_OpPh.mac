@@ -41,21 +41,23 @@
 
 /Action/SteppingAction/event_shift 0
 
-/Generator/SingleParticle/ParticleType S2Photon
-/Generator/SingleParticle/energy 5.3 MeV
-/Generator/SingleParticle/pos 0 0 30 cm
+#/Generator/SingleParticle/ParticleType S2Photon
+#/Generator/SingleParticle/energy 7 eV
+#/Generator/SingleParticle/pos 0 0 0 cm
 #/Generator/SingleParticle/pos  -1.6 0 -5 cm
-/Generator/SingleParticle/Isotropic true
-/Generator/SingleParticle/Mode Single
-/Generator/SingleParticle/Amount 1000000
+#/Generator/SingleParticle/Isotropic true
+#/Generator/SingleParticle/Mode Single
+#/Generator/SingleParticle/Amount 1000000
 
-#/gps/particle opticalphoton
-#/gps/ene/type Mono
-#/gps/ene/mono 7 eV
-#/gps/pos/type Point
-#/gps/pos/centre 0 0 30 cm
-#/gps/ang/type iso
-#/gps/energy 7eV
-/run/beamOn 100
+/gps/particle S2Photon
+/gps/pos/type Plane
+/gps/pos/shape Circle
+/gps/pos/centre 0 0 -10.5 cm
+/gps/pos/radius 16.52. mm
+/gps/direction 0 0 1
+/gps/polarization 0 0 1
+/gps/ene/mono 7eV
+
+/run/beamOn 10000
 
 

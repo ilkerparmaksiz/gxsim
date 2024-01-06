@@ -85,9 +85,15 @@ void SampleFromSurface::SampleFromFacet(G4String n1, G4TessellatedSolid *solid1)
     G4cout <<"Running Facet Sampler For --> "<< n1 <<G4endl;
 
     std::vector<G4ThreeVector> points;
-
+    Hep3Vector tmpvect;
     // Collect facets into a vector
-    for (int i=initial;i<TotalFacets; i++) points.push_back(solid1->GetFacet(i)->GetPointOnFace());
+    for (int i=initial;i<TotalFacets; i++) {
+        //Round up
+        tmpvect[0]=round(solid1->GetFacet(i)->GetPointOnFace()[0]*100)/100;
+        tmpvect[1]=round(solid1->GetFacet(i)->GetPointOnFace()[1]*100)/100;
+        tmpvect[2]=round(solid1->GetFacet(i)->GetPointOnFace()[2]*100)/100;
+        points.push_back(tmpvect);
+    }
 
     // Add it to sample
     if(SamplePoints_== nullptr) SamplePoints_=new std::map<G4String,std::vector<G4ThreeVector>>();
@@ -122,9 +128,14 @@ void SampleFromSurface::SampleFromFacet(G4TessellatedSolid *solid1) {
     G4cout <<"Running Facet Sampler For --> "<< solid1->GetName() <<G4endl;
 
     std::vector<G4ThreeVector> points;
-
+    Hep3Vector tmpvect;
     // Collect facets into a vector
-    for (int i=initial;i<TotalFacets; i++) points.push_back(solid1->GetFacet(i)->GetPointOnFace());
+    for (int i=initial;i<TotalFacets; i++){
+        tmpvect[0]=round(solid1->GetFacet(i)->GetPointOnFace()[0]*100)/100;
+        tmpvect[1]=round(solid1->GetFacet(i)->GetPointOnFace()[1]*100)/100;
+        tmpvect[2]=round(solid1->GetFacet(i)->GetPointOnFace()[2]*100)/100;
+        points.push_back(tmpvect);
+    }
 
     // Add it to sample
     if(SamplePoints_== nullptr) SamplePoints_=new std::map<G4String,std::vector<G4ThreeVector>>();

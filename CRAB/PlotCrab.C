@@ -6,13 +6,24 @@
 #include <TH3.h>
 #include <TCanvas.h>
 #include <TGeoTube.h>
+#include <TMath.h>
 
 void PlotCrab(){
 
 
-
+    double theta;
+    double costet;
+    double sintet;
+    double XRotated,YRotated;
     // TFile *FileIn = TFile::Open("macros/alpha_merge.root", "READ");
-    TFile *FileIn = TFile::Open("macros/alpha_e_t0.root", "READ");
+    //TFile *FileIn = TFile::Open("/media/argon/Data/CRAB/Sim/all_10bar.root", "READ");
+
+    //TFile *FileIn = TFile::Open("/media/argon/Data/CRAB/Sim/Needles/CRAB/all.root", "READ");
+    //TFile *FileIn = TFile::Open("/home/argon/Projects/Ilker/gxsim/CRAB/macros/alpha2.root", "READ");
+    //TFile *FileIn = TFile::Open("/media/argon/Data/CRAB/Sim/Needle_4cm/CRAB/all.root", "READ");
+    TFile *FileIn = TFile::Open("/media/argon/Data/CRAB/Sim/6_Bar/CRAB/jobid_2/alpha2.root", "READ");
+
+    //TFile *FileIn = TFile::Open("macros/optical.root", "READ");
     // TFile *FileIn = TFile::Open("macros/eminus_t0.root", "READ");
     // TFile *FileIn = TFile::Open("macros/eminus_Kr_t0.root", "READ");
     
@@ -28,22 +39,58 @@ void PlotCrab(){
     tCam->SetBranchAddress("Z",&Cam_Z);
     tCam->SetBranchAddress("Event",&Cam_Ev);
 
-    double SF = 4.1/10; // Converts from mm to cm. Then to the size of the object. M = 4.1
 
     //create two histograms
-    TH2F *hCamXY = new TH2F("hCameraXY","Camera X vs Y; Object Size X [cm]; Object Size Y [cm]",100, -5*SF, 5*SF, 100, -5*SF, 5*SF) ;
+    TH2F *hCamXY = new TH2F("hCameraXY","Camera; PixelX; PixelY]",512, 0, 512, 512, 0, 512) ;
 
     //read all entries and fill the histograms
     Long64_t nCam = tCam->GetEntries();
+    theta =-TMath::Pi()/8;
+    costet= TMath::Cos(theta);
+    sintet=TMath::Sin(theta);
+    double pixelsize=0.016; // 16 mm
+    #pragma omp parallel for
     for (Long64_t i=0;i<nCam;i++) {
         tCam->GetEntry(i);
-        if (Cam_Ev ==0 ) hCamXY->Fill(-Cam_X*SF, -Cam_Y*SF);
+        //if (Cam_Ev ==0 )
+        XRotated=(Cam_X*costet-sintet*Cam_Y);
+        YRotated=-(Cam_X*sintet+costet*Cam_Y);
+        XRotated=(XRotated/pixelsize)/3+260+30;
+        YRotated=(YRotated/pixelsize)/3+230+40;
+        hCamXY->Fill(XRotated, YRotated);
+
     }
 
     TCanvas *cCam = new TCanvas();
     hCamXY->Draw("colz");
 
+    //EL Region
+    TH2F *EL = new TH2F("ELXY","EL; Object Size X [cm]; Object Size Y [cm]",512, -5, 5,512, -5, 5) ;
 
+    TTree *tEL = (TTree*)FileIn->Get("ntuple/EL");
+
+    Double_t EL_X, EL_Y, EL_Z, EL_Ev;
+    tEL->SetBranchAddress("X",&EL_X);
+    tEL->SetBranchAddress("Y",&EL_Y);
+    tEL->SetBranchAddress("Z",&EL_Z);
+    tEL->SetBranchAddress("Event",&EL_Ev);
+    Long64_t nEL = tEL->GetEntries();
+    theta =-TMath::Pi()/8;
+    costet= TMath::Cos(theta);
+    sintet=TMath::Sin(theta);
+
+
+
+    #pragma omp parallel for
+    for (Long64_t i=0;i<nEL;i++) {
+        tEL->GetEntry(i);
+        //if (Cam_Ev ==0 )
+        XRotated=EL_X*costet-sintet*EL_Y;
+        YRotated=EL_X*sintet+costet*EL_Y;
+        EL->Fill(-XRotated, -YRotated);
+    }
+    TCanvas *hEL = new TCanvas();
+    EL->Draw("colz");
     // LENS -------------------------------------------------------------------
 
     // TTree *tLens = (TTree*)FileIn->Get("ntuple/Lens");
@@ -99,11 +146,11 @@ void PlotCrab(){
         if (S1_Ev == 0)hS1XY->Fill(S1_X/10, S1_Y/10);
     }
 
-    TCanvas *cS1 = new TCanvas();
-    hS1XYZ->Draw("lego2");
+    //TCanvas *cS1 = new TCanvas();
+    //hS1XYZ->Draw("lego2");
     
-    TCanvas *cS12 = new TCanvas();
-    hS1XY->Draw("colz");
+    //TCanvas *cS12 = new TCanvas();
+    //hS1XY->Draw("colz");
 
 
     // S2 ---------------------------------------------------------------------
@@ -131,8 +178,8 @@ void PlotCrab(){
 
     }
 
-    TCanvas *cS2 = new TCanvas();
-    hS2T->Draw("hist");
+    //TCanvas *cS2 = new TCanvas();
+    //hS2T->Draw("hist");
 
     // PMT --------------------------------------------------------------------
     
@@ -162,11 +209,11 @@ void PlotCrab(){
        hPMT->Fill(PMT_t/1000., QE);
     }
 
-    TCanvas *cPMT= new TCanvas();
-    hPMTXY->Draw("colz");
+    //TCanvas *cPMT= new TCanvas();
+    //hPMTXY->Draw("colz");
 
-    TCanvas *cPMT_t= new TCanvas();
-    hPMT->Draw("hist");
+    //TCanvas *cPMT_t= new TCanvas();
+    //hPMT->Draw("hist");
 
 
 

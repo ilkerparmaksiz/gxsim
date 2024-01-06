@@ -24,6 +24,7 @@ namespace materials {
   // Gaseous xenon
   G4Material* GXe(G4double pressure=STP_Pressure,
 			            G4double temperature=STP_Temperature);
+  G4Material * GXeCH4(G4double pressure, G4double temperature,G4double MethaneFraction);
   G4Material* GXeEnriched(G4double pressure=STP_Pressure,
 			                    G4double temperature=STP_Temperature);
   G4Material* GXeDepleted(G4double pressure=STP_Pressure,

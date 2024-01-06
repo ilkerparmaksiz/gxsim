@@ -38,7 +38,7 @@ void GasBoxSD::Initialize(G4HCofThisEvent * HCE){
     HCE->AddHitsCollection(XHCID,fXenonHitsCollection);
     HCE->AddHitsCollection(GEHCID,fGarfieldExcitationHitsCollection);
 
-    G4cout << "GasBoxSD Intialized!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << G4endl;
+    G4cout << "!!!!!!!!!!! GasBoxSD Intialized  !!!!!!!!!!!!!" << G4endl;
 }
 
 G4bool GasBoxSD::ProcessHits(G4Step* aStep, G4TouchableHistory* hist){
@@ -47,8 +47,11 @@ G4bool GasBoxSD::ProcessHits(G4Step* aStep, G4TouchableHistory* hist){
     G4double edep=aStep->GetTotalEnergyDeposit();
     // do not worry if there is no energy in the detector
     if (edep<=0) return false;
-    if (currDeff==G4OpticalPhoton::Definition() || currDeff==S2Photon::Definition() || currDeff == NEST::NESTThermalElectron::Definition()) return false;
-    G4bool isPrint=false;
+    //
+    if (currDeff==G4OpticalPhoton::Definition() || currDeff==S2Photon::Definition() || currDeff==NEST::NESTThermalElectron::Definition()) return false;
+    G4bool isPrint=true;
+
+    G4cout<<"Processing the hit after" <<G4endl;
     if(isPrint){
         G4cout << "GasBox Hit!!" << G4endl;
         G4cout << "Particle ID: " << aTrack->GetTrackID() << G4endl;

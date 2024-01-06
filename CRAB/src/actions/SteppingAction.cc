@@ -2,7 +2,7 @@
 #include "G4VPhysicalVolume.hh"
 #include "G4VTouchable.hh"
 #include "G4Step.hh"
-#include "DetectorConstruction.hh"
+#include "../geometry/OldCRAB.hh"
 #include "G4Track.hh"
 #include "G4OpticalPhoton.hh"
 #include "G4StepPoint.hh"
@@ -66,7 +66,7 @@ void SteppingAction::UserSteppingAction(const G4Step *aStep)
   G4OpBoundaryProcess* boundary = 0;
   Detected= false;
   // if (!boundary &&  particle->GetParticleName() == "S2Photon") {
-  if (!boundary){
+  if (boundary){
       
       G4ProcessVector* pv = particle->GetProcessManager()->GetProcessList();
       for (size_t i=0; i<pv->size(); i++) {
@@ -94,7 +94,7 @@ void SteppingAction::UserSteppingAction(const G4Step *aStep)
               if(aStep->GetPreStepPoint()->GetMaterial()->GetName() == "MgF2" && boundary->GetStatus() == TotalInternalReflection){
                 reflected = true;
                 Material_Store = aStep->GetPreStepPoint()->GetTouchableHandle()->GetVolume()->GetLogicalVolume()->GetName();
-              } */
+              }*/
               if(boundary->GetStatus() == Detection)  Detected=true;
               break;
           }
@@ -116,6 +116,7 @@ void SteppingAction::UserSteppingAction(const G4Step *aStep)
    
   G4TouchableHandle touch = endPoint->GetTouchableHandle();
   G4VPhysicalVolume* eVolume = touch->GetVolume();
+  //G4VPhysicalVolume* eVolume = nullptr;
   G4String eVname("null");
 
   if (pID==11 && track->GetKineticEnergy()/keV>0.100 && (lVolume->GetName().find("GAS")!=std::string::npos)) // don't count the thermale's, just G4 e's
@@ -141,8 +142,9 @@ void SteppingAction::UserSteppingAction(const G4Step *aStep)
     // Camera
     //if (lVolume->GetName().find("camLogical")!=std::string::npos){
     id=0;
-    if (eVname.find("Camera")!=std::string::npos and Detected){
-      //track->SetTrackStatus(fStopAndKill);
+    //if (eVname.find("Camera")!=std::string::npos){
+    if (lVolume->GetName().find("Camera_logic")!=std::string::npos){
+      track->SetTrackStatus(fStopAndKill);
       analysisManager->FillNtupleDColumn(id,0, event+ev_shift);
       analysisManager->FillNtupleDColumn(id,1, pID);
       analysisManager->FillNtupleDColumn(id,2, time/ns);
@@ -155,7 +157,8 @@ void SteppingAction::UserSteppingAction(const G4Step *aStep)
       // else  std::cout << "Photon arrived but was not reflected: " << track->GetTrackID() << std::endl;
     }
     id = 4;
-    if (eVname.find("PMT")!=std::string::npos and Detected){
+    if (lVolume->GetName().find("Pmt_logic")!=std::string::npos){
+      track->SetTrackStatus(fStopAndKill);
       analysisManager->FillNtupleDColumn(id,0, event+ev_shift);
       analysisManager->FillNtupleDColumn(id,1, pID);
       analysisManager->FillNtupleDColumn(id,2, time/ns);

@@ -2,7 +2,7 @@
 #include "G4VPhysicalVolume.hh"
 #include "G4VTouchable.hh"
 
-#include "DetectorConstruction.hh"
+#include "../geometry/OldCRAB.hh"
 #include "G4Track.hh"
 #include "G4OpticalPhoton.hh"
 
@@ -11,7 +11,7 @@
 #include "G4EventManager.hh"
 #include "GasBoxSD.hh"
 #include "S2Photon.hh"
-
+#include "PrimaryGenerator.hh"
 void TrackingAction::PreUserTrackingAction(const G4Track *aTrack) {
   auto const* evt = G4EventManager::GetEventManager()->GetConstCurrentEvent();
   G4AnalysisManager* analysisManager = G4AnalysisManager::Instance();

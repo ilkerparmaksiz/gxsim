@@ -1,5 +1,5 @@
 #include "MyUserActionInitialization.hh"
-#include "DetectorConstruction.hh"
+#include "../geometry/OldCRAB.hh"
 #include "RunAction.hh"
 #include "PrimaryGeneratorAction.hh"
 #include "EventAction.hh"

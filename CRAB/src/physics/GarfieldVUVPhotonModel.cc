@@ -139,10 +139,10 @@ void GarfieldVUVPhotonModel::DoIt(const G4FastTrack& fastTrack, G4FastStep& fast
      if (!(counter[3]%10000) and counter[3]>0) G4cout << "GarfieldVUV: S2 OpticalPhotons: " << counter[3] << G4endl;
 
      // For Debugging
-     /*if(counter[1]<200) {
+     if(counter[1]<1000) {
          if(counter[3]>0) G4cout << "GarfieldVUV: S2 OpticalPhotons: " << counter[3] << G4endl;
          GenerateVUVPhotons(fastTrack,fastStep,garfPos,garfTime);
-     }*/
+     }
 
 #ifdef With_Opticks
     if(counter[1]>1000) return;
@@ -153,7 +153,7 @@ void GarfieldVUVPhotonModel::DoIt(const G4FastTrack& fastTrack, G4FastStep& fast
     U4::CollectGenstep_DsG4Scintillation_r4695(track,aStep,1,1,4*ns);
 #endif
      fastStep.KillPrimaryTrack();//KILL NEST/DEGRAD/G4 TRACKS
-     GenerateVUVPhotons(fastTrack,fastStep,garfPos,garfTime);
+     //GenerateVUVPhotons(fastTrack,fastStep,garfPos,garfTime);
 
 
 
@@ -197,6 +197,7 @@ void GarfieldVUVPhotonModel::GenerateVUVPhotons(const G4FastTrack& fastTrack, G4
     // std::cout << "GVUVPM: E field in medium " << medium << " at " << x0<<","<<y0<<","<<z0 << " is: " << ef[0]<<","<<ef[1]<<","<<ef[2] << std::endl;
 
     // Need to get the AvalancheMC drift at the High-Field point in z, and then call fAvalanche-AvalancheElectron() to create excitations/VUVphotons.
+    fAvalancheMC->ClearDiffusionParameters();
 
     if(!fAvalancheMC->DriftElectron(x0,y0,z0,t0)){
         //std::cout << "No Drift" <<std::endl;
@@ -206,6 +207,7 @@ void GarfieldVUVPhotonModel::GenerateVUVPhotons(const G4FastTrack& fastTrack, G4
     }
 
     //unsigned int n = fAvalancheMC->GetDriftLines();
+    fAvalancheMC->SaveDiffusion(true);
     if(fAvalancheMC->GetElectrons().size()<1 ) {
         //std::cout << "No Electron" <<std::endl;
         return;
@@ -213,13 +215,22 @@ void GarfieldVUVPhotonModel::GenerateVUVPhotons(const G4FastTrack& fastTrack, G4
     unsigned int n = fAvalancheMC->GetElectrons().at(0).path.size();
     if (n==0) return;
     auto DriftLines = fAvalancheMC->GetElectrons().at(0).path;
+    auto Diffusion=fAvalancheMC->GetDiffusionParameters();
+
+    if(Diffusion.size()>0){
+        //Fill the Diffusion info
+        for (unsigned idf=0;idf<Diffusion.size();idf++){
+            DiffusionFill(Diffusion[idf].Efield,Diffusion[idf].dl,Diffusion[idf].dt,Diffusion[idf].vd);
+        }
+    }
+
     double xi,yi,zi,ti;
     int status;
     //	std::cout << "Drift(): avalanchetracking, n DLTs is " << n << std::endl;
     // Get zi when in the beginning of the EL region
     //std::unique_ptr<GarfieldExcitationHitsCollection> garfExcHitsCol (new GarfieldExcitationHitsCollection());
     //#pragma omp parallel for
-    fAvalancheMC->G
+
     for( unsigned int i=0;i<n;i++){
 
         xi=DriftLines.at(i).x;
@@ -544,6 +555,21 @@ void GarfieldVUVPhotonModel::S1Fill(const G4FastTrack& ftrk)
       if (pID!=11)
         std::cout << "GVUV::FillS1S2: non-electron pID,name is: " << pID << ", " << track->GetParticleDefinition()->GetParticleName() <<  std::endl;
     }
+
+}
+void GarfieldVUVPhotonModel::DiffusionFill(const double Efield,const double dl,const double dt,const double vd )
+{
+
+  G4AnalysisManager* analysisManager = G4AnalysisManager::Instance();
+  G4int  event = G4EventManager::GetEventManager()->GetConstCurrentEvent()->GetEventID();
+
+  // Weirdly, S1 is filled in two places. Here for the thermal e's and in TrackingAction::PreSteppingAction() for optphotons.
+  analysisManager->FillNtupleDColumn(6,0, event);
+  analysisManager->FillNtupleDColumn(6,1, Efield);
+  analysisManager->FillNtupleDColumn(6,2, dl);
+  analysisManager->FillNtupleDColumn(6,3, dt);
+  analysisManager->FillNtupleDColumn(6,4, vd);
+  analysisManager->AddNtupleRow(6);
 
 }
 

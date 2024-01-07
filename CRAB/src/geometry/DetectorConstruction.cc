@@ -316,7 +316,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
     OldCRAB *geo=new OldCRAB(fGasModelParameters);
     geo->SetMotherLab(lab_logic_volume);
     geo->SetOffset(0.2*cm);
-    geo->Construct();
+    //geo->Construct();
 
 #ifdef With_Opticks
     std::cout <<"Setting our detector geometry with opticks" <<std::endl;

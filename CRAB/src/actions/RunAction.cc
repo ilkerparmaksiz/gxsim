@@ -101,22 +101,15 @@ void RunAction::BeginOfRunAction(const G4Run* aRun) {
   analysisManager->CreateNtupleDColumn("Z");         //column 5
   analysisManager->FinishNtuple();
 
-  // DT values
-  analysisManager->CreateNtuple("DT", "Simulated DT");
-  analysisManager->CreateNtupleDColumn("Event");     //column 0
-  analysisManager->CreateNtupleDColumn("ie");      //column 2
-  analysisManager->CreateNtupleDColumn("ib");         //column 3
-  analysisManager->CreateNtupleDColumn("ia");         //column 4
-  analysisManager->CreateNtupleDColumn("dt");         //column 5
-  analysisManager->FinishNtuple();
 
-  // DL values
-  analysisManager->CreateNtuple("DL", "Simulated DL");
+
+  // Diffusion values
+  analysisManager->CreateNtuple("Diffusion", "Simulated DL");
   analysisManager->CreateNtupleDColumn("Event");     //column 0
-  analysisManager->CreateNtupleDColumn("ie");      //column 2
-  analysisManager->CreateNtupleDColumn("ib");         //column 3
-  analysisManager->CreateNtupleDColumn("ia");         //column 4
-  analysisManager->CreateNtupleDColumn("dl");         //column 5
+  analysisManager->CreateNtupleDColumn("Efield");     //column 1
+  analysisManager->CreateNtupleDColumn("dl");      //column 2
+  analysisManager->CreateNtupleDColumn("dt");         //column 3
+  analysisManager->CreateNtupleDColumn("vd");         //column 4
   analysisManager->FinishNtuple();
 
   analysisManager->SetNtupleActivation(true);

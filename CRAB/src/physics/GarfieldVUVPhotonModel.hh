@@ -86,6 +86,8 @@ public:
 
     void RandomPolarization(G4Track *trk) ;
 
+    void DiffusionFill(const double Efield,const double dl,const double dt,const double vd );
+
     void ELRandomTimeSampling(G4Track *trk);
 private:
 

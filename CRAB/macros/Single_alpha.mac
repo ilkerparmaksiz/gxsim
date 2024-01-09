@@ -49,5 +49,5 @@
 /Generator/SingleParticle/Mode Needles
 /Generator/SingleParticle/useNeedle false
 /Generator/SingleParticle/Amount 1
-/run/beamOn 3
+/run/beamOn 100
 

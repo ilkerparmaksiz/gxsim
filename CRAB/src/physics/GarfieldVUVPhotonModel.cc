@@ -139,21 +139,14 @@ void GarfieldVUVPhotonModel::DoIt(const G4FastTrack& fastTrack, G4FastStep& fast
      if (!(counter[3]%10000) and counter[3]>0) G4cout << "GarfieldVUV: S2 OpticalPhotons: " << counter[3] << G4endl;
 
      // For Debugging
-     if(counter[1]<1000) {
+     /*if(counter[1]<1000) {
          if(counter[3]>0) G4cout << "GarfieldVUV: S2 OpticalPhotons: " << counter[3] << G4endl;
          GenerateVUVPhotons(fastTrack,fastStep,garfPos,garfTime);
-     }
+     }*/
 
-#ifdef With_Opticks
-    if(counter[1]>1000) return;
-     G4cout << "sending photons to opticks" <<G4endl;
-    const G4Track * track=fastStep.GetCurrentTrack();
-    const G4Step * aStep=track->GetStep();
-    // Add condition that if this is a thermal electron and has any secondaries
-    U4::CollectGenstep_DsG4Scintillation_r4695(track,aStep,1,1,4*ns);
-#endif
+
      fastStep.KillPrimaryTrack();//KILL NEST/DEGRAD/G4 TRACKS
-     //GenerateVUVPhotons(fastTrack,fastStep,garfPos,garfTime);
+     GenerateVUVPhotons(fastTrack,fastStep,garfPos,garfTime);
 
 
 
@@ -306,7 +299,7 @@ void GarfieldVUVPhotonModel::GenerateVUVPhotons(const G4FastTrack& fastTrack, G4
     // Use a simpler model
     else{
 
-        MakeELPhotonsSimple(fastStep, xi, yi, zi, ti);
+        //MakeELPhotonsSimple(fastStep, xi, yi, zi, ti);
 
     }
 
@@ -620,33 +613,50 @@ void GarfieldVUVPhotonModel::MakeELPhotonsFromFile( G4FastStep& fastStep, G4doub
     // colHitsEntries=1 ;
 
     G4double tig4(0.);
-    #pragma omp parallel for
-    for (G4int i=0;i<colHitsEntries;i++){
-      GarfieldExcitationHit *newExcHit=new GarfieldExcitationHit();
+    if(!Opticks){
 
-        // std::cout << xi << ", " <<  EL_profile[i][0]  << std::endl;
-      G4ThreeVector fakepos ( (xi+ EL_profile[i][0])*10., (yi+ EL_profile[i][1])*10., (zi+ EL_profile[i][2])*10. ); // 0 = x, 1 = y, 2 = z
-      newExcHit->SetPos(fakepos);
-     
-      
-      if (i % (colHitsEntries/colHitsEntries ) == 0){ // 50. Need to uncomment this condition, along with one in degradmodel.cc. EC, 2-Dec-2021.
-      
-        auto* optphot = S2Photon::OpticalPhotonDefinition();
-        
-        G4DynamicParticle VUVphoton(optphot,G4RandomDirection(), 7.2*eV);
-       
-        tig4 = ti + EL_profile[i][3]; // in nsec, t = index 3 in vector. Units are ns, so just add it on
-        // std::cout <<  "fakepos,time is " << fakepos[0] << ", " << fakepos[1] << ", " << fakepos[2] << ", " << tig4 << std::endl;
-        
-        newExcHit->SetTime(tig4);
-        fGasBoxSD->InsertGarfieldExcitationHit(newExcHit);
-        G4Track *newTrack=fastStep.CreateSecondaryTrack(VUVphoton, fakepos, tig4 ,false);
-        newTrack->SetPolarization(G4ThreeVector(0.,0.,1.0)); // Needs some pol'n, else we will only ever reflect at an OpBoundary. EC, 8-Aug-2022.
-        //RandomPolarization(newTrack);
-        //	G4ProcessManager* pm= newTrack->GetDefinition()->GetProcessManager();
-        //	G4ProcessVectorfAtRestDoItVector = pm->GetAtRestProcessVector(typeDoIt);
-      }
-      counter[3]++;
+	    for (G4int i=0;i<colHitsEntries;i++){
+	      GarfieldExcitationHit *newExcHit=new GarfieldExcitationHit();
+
+		// std::cout << xi << ", " <<  EL_profile[i][0]  << std::endl;
+	      G4ThreeVector fakepos ( (xi+ EL_profile[i][0])*10., (yi+ EL_profile[i][1])*10., (zi+ EL_profile[i][2])*10. ); // 0 = x, 1 = y, 2 = z
+	      newExcHit->SetPos(fakepos);
+	     
+	      
+	      if (i % (colHitsEntries/colHitsEntries ) == 0){ // 50. Need to uncomment this condition, along with one in degradmodel.cc. EC, 2-Dec-2021.
+	      
+		auto* optphot = S2Photon::OpticalPhotonDefinition();
+		
+		G4DynamicParticle VUVphoton(optphot,G4RandomDirection(), 7.2*eV);
+	       
+		tig4 = ti + EL_profile[i][3]; // in nsec, t = index 3 in vector. Units are ns, so just add it on
+		// std::cout <<  "fakepos,time is " << fakepos[0] << ", " << fakepos[1] << ", " << fakepos[2] << ", " << tig4 << std::endl;
+		
+		newExcHit->SetTime(tig4);
+		fGasBoxSD->InsertGarfieldExcitationHit(newExcHit);
+		G4Track *newTrack=fastStep.CreateSecondaryTrack(VUVphoton, fakepos, tig4 ,false);
+		newTrack->SetPolarization(G4ThreeVector(0.,0.,1.0)); // Needs some pol'n, else we will only ever reflect at an OpBoundary. EC, 8-Aug-2022.
+		//RandomPolarization(newTrack);
+		//	G4ProcessManager* pm= newTrack->GetDefinition()->GetProcessManager();
+		//	G4ProcessVectorfAtRestDoItVector = pm->GetAtRestProcessVector(typeDoIt);
+	      }
+	      counter[3]++;
+	    }
+	    }else {
+	    
+		 #ifdef With_Opticks
+		    G4cout << "sending photons to opticks" <<G4endl;
+		    const G4Track * track=fastStep.GetCurrentTrack();
+		    const G4Step * aStep=track->GetStep();
+		   // Add condition that if this is a thermal electron and has any secondaries
+		    U4::CollectGenstep_DsG4Scintillation_r4695(track,aStep,colHitsEntries,1,4*ns);
+		    std::cout<<SEvt::GetNumPhotonsCollected(eventID);	
+		    if(SEvt::GetNumPhotonCollected(eventID)<maxPhoton){
+		    	G4CXOpticks * g4xc=G4CXOpticks::Get();
+			
+		    }
+		 #endif 
+	     }
     }
 }
 
@@ -701,6 +711,15 @@ void GarfieldVUVPhotonModel::MakeELPhotonsSimple(G4FastStep& fastStep, G4double 
           //}
           counter[3]++;
      }
+    }else {
+    
+     #ifdef With_Opticks
+     G4cout << "sending photons to opticks" <<G4endl;
+    const G4Track * track=fastStep.GetCurrentTrack();
+    const G4Step * aStep=track->GetStep();
+    // Add condition that if this is a thermal electron and has any secondaries
+    U4::CollectGenstep_DsG4Scintillation_r4695(track,aStep,colHitsEntries,1,4*ns);
+    #endif 
     }
 
 

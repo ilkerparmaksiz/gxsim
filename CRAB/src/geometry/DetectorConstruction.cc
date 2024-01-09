@@ -291,7 +291,6 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
     // Call the Needles
     if(!HideSourceHolder_){
         // Particle Source Holder
-
         //Grab Points needed to sample from each or all the needles
         Sampler->SampleFromFacet(Needle4_solid);
         Sampler->SampleFromFacet(Needle9_solid);
@@ -321,7 +320,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
 #ifdef With_Opticks
     std::cout <<"Setting our detector geometry with opticks" <<std::endl;
     cudaDeviceReset();
-    G4CXOpticks::SetGeometry(labPhysical);
+    G4CXOpticks::Get()->SetGeometry(labPhysical);
 
     std::cout << SEventConfig::Desc() <<std::endl;
 #endif

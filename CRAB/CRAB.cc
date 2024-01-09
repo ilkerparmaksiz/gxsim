@@ -31,10 +31,20 @@ https://svs.icts.kuleuven.be/projects/svs_project014/wiki/Wiki
 #ifdef With_Opticks
 #include "OpticksCfg.hh"
 #include "SEventConfig.hh"
+#include "OPTICKS_LOG.hh"
 #endif
 
 int main(int argc, char** argv) {
-  G4Random::setTheEngine(new CLHEP::RanecuEngine);
+
+#ifdef With_Opticks 
+   SEventConfig::SetMaxPhoton(10000000);
+   SEventConfig::SetRGModeSimulate();
+   SEventConfig::SetIntegrationMode(3);
+   SEventConfig::Save(".");
+   std::cout<< SEventConfig::Desc() << std::endl;
+#endif      	
+       
+G4Random::setTheEngine(new CLHEP::RanecuEngine);
   
 #ifdef G4MULTITHREADED
   G4int thr=1;
@@ -56,10 +66,7 @@ int main(int argc, char** argv) {
     G4cout << "Creation of G4RunManager" << G4endl;
 #endif
 
-#ifdef With_Opticks
-   SEventConfig::SetMaxPhoton(10000000);
-   std::cout<< SEventConfig::Desc() << std::endl;
-#endif
+
 
   G4int randseed;
  //Fix RandSeed is not define issue

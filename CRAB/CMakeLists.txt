@@ -60,8 +60,8 @@ if(NOT NEST_FOUND)
     return()
 endif()
 
-if(With_Opticks)
 
+if(With_Opticks)
     message(STATUS "WITH_OPTICKS is set ON")
     list(APPEND CMAKE_MODULE_PATH "$ENV{OPTICKS_HOME}/cmake/Modules")
     #list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake/Modules")
@@ -77,10 +77,8 @@ if(With_Opticks)
     ## These are needed for opticks
     find_package(G4CX REQUIRED CONFIG)
     find_package(U4 REQUIRED CONFIG)
-    find_package(ExtG4 REQUIRED CONFIG)
-    find_package(CSG_GGeo REQUIRED CONFIG)
-
-
+    #find_package(ExtG4 REQUIRED CONFIG)
+    #find_package(CSG_GGeo REQUIRED CONFIG)
 endif ()
 
 # Setup Geant4 include directories and compile definitions
@@ -141,7 +139,7 @@ if (OPENMP_FOUND)
 endif()
 #####################################
 if (With_Opticks)
-    target_link_libraries(CRAB Opticks::G4CX Opticks::U4 Opticks::ExtG4 Opticks::CSG_GGeo)
+    target_link_libraries(CRAB Opticks::G4CX Opticks::U4)
     include_directories(${CMAKE_CURRENT_BINARY_DIR})
 endif()
 #Configure some of the variables

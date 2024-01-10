@@ -2,7 +2,7 @@
 #include "G4VPhysicalVolume.hh"
 #include "G4VTouchable.hh"
 #include "G4Step.hh"
-#include "../geometry/OldCRAB.hh"
+#include "../geometry/CRAB_CSG.hh"
 #include "G4Track.hh"
 #include "G4OpticalPhoton.hh"
 #include "G4StepPoint.hh"

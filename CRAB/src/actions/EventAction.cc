@@ -54,7 +54,6 @@ void EventAction::EndOfEventAction(const G4Event *evt) {
       gvm->Reset(); // zero out the sensor: meaning reset the nexcitations, which is cumulative.
 
     G4cout << " EventAction::EndOfEventAction()  " << G4endl;
-
 #ifdef With_Opticks
 
     G4cout<<" Opticks End of Event Action" <<G4endl;
@@ -67,7 +66,7 @@ void EventAction::EndOfEventAction(const G4Event *evt) {
     G4cout << "Number of Photons Generated " <<nphotons << G4endl;
     // Simulate the photons
     if(nphotons>0){
-        g4cx->simulate(eventID);
+        g4cx->simulate(eventID,0);
         cudaDeviceSynchronize();
     }
     // Get the hits

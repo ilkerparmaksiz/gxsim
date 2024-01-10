@@ -11,7 +11,7 @@
 #include "G4VUserPrimaryGeneratorAction.hh"
 #include "G4ParticleGun.hh"
 #include "G4Navigator.hh"
-#include "../geometry/OldCRAB.hh"
+#include "../geometry/CRAB_CSG.hh"
 #include "G4ParticleTable.hh"
 #include "G4GeneralParticleSource.hh"
 #include "PrimaryGenerator.hh"

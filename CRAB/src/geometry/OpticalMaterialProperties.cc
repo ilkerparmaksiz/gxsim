@@ -240,8 +240,10 @@ namespace opticalprops {
       sc_energy.push_back(6.20625 * eV + 0.01 * i * eV);
     }
     std::vector<G4double> intensity;
+    std::vector<G4double> REmisProb;
     for (G4int i=0; i<sc_entries; i++) {
       intensity.push_back(GXeScintillation(sc_energy[i], pressure));
+      REmisProb.push_back(0);
     }
     //for (int i=0; i<sc_entries; i++) {
     //  G4cout << "* GXe Scint:  " << std::setw(7) << sc_energy[i]/eV
@@ -250,8 +252,11 @@ namespace opticalprops {
     mpt->AddProperty("SCINTILLATIONCOMPONENT1", sc_energy, intensity);
     mpt->AddProperty("SCINTILLATIONCOMPONENT2", sc_energy, intensity);
     mpt->AddProperty("ELSPECTRUM"             , sc_energy, intensity, 1);
+    mpt->AddProperty("FASTCOMPONENT", sc_energy, intensity,1);
+    mpt->AddProperty("SLOWCOMPONENT", sc_energy, intensity,1);
+    mpt->AddProperty("REEMISSIONPROB", sc_energy, intensity,1);
 
-    // CONST PROPERTIES
+      // CONST PROPERTIES
     mpt->AddConstProperty("SCINTILLATIONYIELD", sc_yield);
     mpt->AddConstProperty("RESOLUTIONSCALE",    1.0);
     mpt->AddConstProperty("SCINTILLATIONTIMECONSTANT1",   4.5  * ns);

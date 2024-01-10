@@ -39,10 +39,13 @@
 #include "G4AutoLock.hh"
 #include <stdio.h>
 #include <omp.h>
+#include "G4RunManager.hh"
+
 #ifdef With_Opticks
 #include "G4CXOpticks.hh"
 #include "U4.hh"
 #include "SEvt.hh"
+#include "SEventConfig.hh"
 #endif
 namespace{G4Mutex aMutex = G4MUTEX_INITIALIZER;}
 
@@ -176,7 +179,7 @@ void GarfieldVUVPhotonModel::GenerateVUVPhotons(const G4FastTrack& fastTrack, G4
     G4String particleName = fastTrack.GetPrimaryTrack()->GetParticleDefinition()->GetParticleName();
 
     //WHY ?
-    //if (particleName.find("thermalelectron")!=std::string::npos) particleName = "e-";
+    if (particleName.find("thermalelectron")!=std::string::npos) particleName = "e-";
 
 
 
@@ -200,7 +203,7 @@ void GarfieldVUVPhotonModel::GenerateVUVPhotons(const G4FastTrack& fastTrack, G4
     }
 
     //unsigned int n = fAvalancheMC->GetDriftLines();
-    fAvalancheMC->SaveDiffusion(true);
+    fAvalancheMC->SaveDiffusion(false);
     if(fAvalancheMC->GetElectrons().size()<1 ) {
         //std::cout << "No Electron" <<std::endl;
         return;
@@ -232,21 +235,14 @@ void GarfieldVUVPhotonModel::GenerateVUVPhotons(const G4FastTrack& fastTrack, G4
         ti=DriftLines.at(i).t;
 
         //fAvalancheMC->GetDriftLinePoint(i,xi,yi,zi,ti);
-        // std::cout << "GVUVPM: positions are " << xi<<"," <<yi<<","<<zi <<"," <<ti<< std::endl;
+         //std::cout << "GVUVPM: positions are " << xi<<"," <<yi<<","<<zi <<"," <<ti<< std::endl;
         //std::cout <<"drift " << xi << " " << yi << " " << zi << " " << ti << " " << status << " " << ELPos << std::endl;
         // Drift line point entered LEM
-         /*
-
-         size_t ie;
-         size_t ib;
-         size_t ia;
-         double dl;
-
-          */
-        //fMediumMagboltz->GetElectronLongitudinalDiffusion(ie,ib,ia,dl);
+      //std::cout<<"Zi " << zi << " ELPos " <<  ELPos <<  std::endl;
+      //std::cout << "EL "<<  (zi < ELPos)  << " Area "<< ( std::sqrt(xi*xi + yi*yi)) <<std::endl;
 
       if (zi < ELPos && ( std::sqrt(xi*xi + yi*yi) <= DetActiveR) ){
-
+          //std::cout<<"Photon is being produced"<<std::endl;
           // Electrons in EL
           event=G4EventManager::GetEventManager()->GetConstCurrentEvent()->GetEventID();
           analysisManager->FillNtupleDColumn(5,0,event );
@@ -255,29 +251,6 @@ void GarfieldVUVPhotonModel::GenerateVUVPhotons(const G4FastTrack& fastTrack, G4
           analysisManager->FillNtupleDColumn(5,3, yi);
           analysisManager->FillNtupleDColumn(5,4, zi);
           analysisManager->AddNtupleRow(5);
-
-          /*
-          // DT values
-          analysisManager->FillNtupleDColumn(6,0,event);     //column 0
-          analysisManager->FillNtupleDColumn(6,1,);      //column 2
-          analysisManager->FillNtupleDColumn(6,2,;         //column 3
-          analysisManager->FillNtupleDColumn(6,3,);         //column 4
-          analysisManager->FillNtupleDColumn(6,4);         //column 5
-          analysisManager->AddNtupleRow(6);
-
-          // DL values
-          analysisManager->FillNtupleDColumn(7,0,event);     //column 0
-          analysisManager->FillNtupleDColumn(7,1);      //column 2
-          analysisManager->FillNtupleDColumn(7,2,;         //column 3
-          analysisManager->FillNtupleDColumn(7,3);         //column 4
-          analysisManager->FillNtupleDColumn(7,4);         //column 5
-          analysisManager->AddNtupleRow(7);
-
-            */
-
-
-          //std::cout <<"Success " << xi << " " << yi << " " << zi << " " << ti << " " << status << std::endl;
-         //DriftLines.clear();
 	      break;
       }
       // No drift line point meets criteria, so return
@@ -288,7 +261,7 @@ void GarfieldVUVPhotonModel::GenerateVUVPhotons(const G4FastTrack& fastTrack, G4
 
 
     }  // pts in driftline
-    DriftLines.clear();
+
     // Generate the El photons from a microphys model ran externally in Garfield
     // We sample the output file which contains the timing profile of emission and diffusion
 
@@ -299,7 +272,7 @@ void GarfieldVUVPhotonModel::GenerateVUVPhotons(const G4FastTrack& fastTrack, G4
     // Use a simpler model
     else{
 
-        //MakeELPhotonsSimple(fastStep, xi, yi, zi, ti);
+        MakeELPhotonsSimple(fastStep, xi, yi, zi, ti);
 
     }
 
@@ -310,6 +283,7 @@ void GarfieldVUVPhotonModel::GenerateVUVPhotons(const G4FastTrack& fastTrack, G4
     G4int pntid = pG4trk->GetParentID();
     G4int tid = pG4trk->GetTrackID();
    // garfExcHitsCol.reset();
+    DriftLines.clear();
 
 
 }
@@ -383,13 +357,13 @@ void GarfieldVUVPhotonModel::InitialisePhysics(){
     G4String gas_path(nexus_path);
     std::cout << "Gas Pressure is " << detCon->GetGasPressure() <<std::endl;
     if(detCon->GetGasPressure()/bar==10)
-        gasFile = gas_path + "/data/Xe_100_10bar.gas";
+        gasFile = gas_path + "data/Xe_100_10bar.gas";
     else if(detCon->GetGasPressure()/bar==8)
-        gasFile = gas_path + "/data/Xe_100_8bar.gas";
+        gasFile = gas_path + "data/Xe_100_8bar.gas";
     else if(detCon->GetGasPressure()/bar==6)
-        gasFile = gas_path + "/data/Xe_100_6bar.gas";
+        gasFile = gas_path + "data/Xe_100_6bar.gas";
     else
-        gasFile = gas_path + "/data/Xe_100_10bar.gas";
+        gasFile = gas_path + "data/Xe_100_10bar.gas";
     G4cout << gasFile << G4endl;
     fMediumMagboltz->LoadGasFile(gasFile.c_str());
     std::cout << "Finished Loading in the gas file --> " <<  gasFile <<std::endl;
@@ -642,23 +616,29 @@ void GarfieldVUVPhotonModel::MakeELPhotonsFromFile( G4FastStep& fastStep, G4doub
 	      }
 	      counter[3]++;
 	    }
-	    }else {
-	    
-		 #ifdef With_Opticks
-		    G4cout << "sending photons to opticks" <<G4endl;
-		    const G4Track * track=fastStep.GetCurrentTrack();
-		    const G4Step * aStep=track->GetStep();
-		   // Add condition that if this is a thermal electron and has any secondaries
-		    U4::CollectGenstep_DsG4Scintillation_r4695(track,aStep,colHitsEntries,1,4*ns);
-		    std::cout<<SEvt::GetNumPhotonsCollected(eventID);	
-		    if(SEvt::GetNumPhotonCollected(eventID)<maxPhoton){
-		    	G4CXOpticks * g4xc=G4CXOpticks::Get();
-			
-		    }
-		 #endif 
-	     }
     }
+	    
+     #ifdef With_Opticks
+        //G4cout << "sending photons to opticks" <<G4endl;
+
+        const G4Track * track=fastStep.GetCurrentTrack();
+        const G4Step * aStep=track->GetStep();
+        G4RunManager * runmng=G4RunManager::GetRunManager();
+        const int eventID=runmng->GetCurrentEvent()->GetEventID();
+        // Add condition that if this is a thermal electron and has any secondaries
+        U4::CollectGenstep_DsG4Scintillation_r4695(track,aStep,colHitsEntries,1,4*ns);
+        int CollectedPhotons=SEvt::GetNumPhotonCollected(eventID);
+        counter[3]=counter[3]+colHitsEntries;
+        int maxPhoton=SEventConfig::MaxPhoton();
+        std::cout <<"Collected Photons is " <<CollectedPhotons <<std::endl;
+        if(CollectedPhotons>=(maxPhoton-colHitsEntries)){
+            std::cout<<"Initiating the simulation ..." <<std::endl;
+            G4CXOpticks * g4xc=G4CXOpticks::Get();
+            g4xc->simulate(eventID,0);
+        }
+     #endif
 }
+
 
 
 void GarfieldVUVPhotonModel::MakeELPhotonsSimple(G4FastStep& fastStep, G4double xi, G4double yi, G4double zi, G4double ti){
@@ -670,7 +650,7 @@ void GarfieldVUVPhotonModel::MakeELPhotonsSimple(G4FastStep& fastStep, G4double 
     colHitsEntries = YoverP * detCon->GetGasPressure()/bar * gapLEM; // with P in bar this time.
     // colHitsEntries*=2; // Max val before G4 cant handle the memory anymore
     //colHitsEntries=1; // This is to turn down S2 so the vis does not get overwelmed
-    colHitsEntries=300;
+    //colHitsEntries=300;
 
     colHitsEntries *= (G4RandGauss::shoot(1.0,res));
 
@@ -711,20 +691,28 @@ void GarfieldVUVPhotonModel::MakeELPhotonsSimple(G4FastStep& fastStep, G4double 
           //}
           counter[3]++;
      }
-    }else {
-    
-     #ifdef With_Opticks
-     G4cout << "sending photons to opticks" <<G4endl;
-    const G4Track * track=fastStep.GetCurrentTrack();
-    const G4Step * aStep=track->GetStep();
-    // Add condition that if this is a thermal electron and has any secondaries
-    U4::CollectGenstep_DsG4Scintillation_r4695(track,aStep,colHitsEntries,1,4*ns);
-    #endif 
     }
+        #ifdef With_Opticks
+            //G4cout << "sending photons to opticks" <<G4endl;
 
-
-
+            const G4Track * track=fastStep.GetCurrentTrack();
+            const G4Step * aStep=track->GetStep();
+            G4RunManager * runmng=G4RunManager::GetRunManager();
+            const int eventID=runmng->GetCurrentEvent()->GetEventID();
+            // Add condition that if this is a thermal electron and has any secondaries
+            U4::CollectGenstep_DsG4Scintillation_r4695(track,aStep,colHitsEntries,1,4*ns);
+            int CollectedPhotons=SEvt::GetNumPhotonCollected(eventID);
+            int maxPhoton=SEventConfig::MaxPhoton();
+            //std::cout<< "Collected Photons: " <<CollectedPhotons<<std::endl;
+            counter[3]+=colHitsEntries;
+            if(CollectedPhotons>=(maxPhoton-colHitsEntries)){
+                std::cout<<"Initiating the simulation ..." <<std::endl;
+                G4CXOpticks * g4xc=G4CXOpticks::Get();
+                g4xc->simulate(eventID,0);
+            }
+        #endif
 }
+
 
 void GarfieldVUVPhotonModel::RandomPolarization(G4Track* trk){
     // Just making sure that particle is photon

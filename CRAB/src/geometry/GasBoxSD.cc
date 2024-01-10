@@ -49,17 +49,16 @@ G4bool GasBoxSD::ProcessHits(G4Step* aStep, G4TouchableHistory* hist){
     if (edep<=0) return false;
     //
     if (currDeff==G4OpticalPhoton::Definition() || currDeff==S2Photon::Definition() || currDeff==NEST::NESTThermalElectron::Definition()) return false;
-    G4bool isPrint=true;
+    G4bool isPrint=false;
 
-    G4cout<<"Processing the hit after" <<G4endl;
     if(isPrint){
+        G4cout<<"Processing the hit after" <<G4endl;
         G4cout << "GasBox Hit!!" << G4endl;
         G4cout << "Particle ID: " << aTrack->GetTrackID() << G4endl;
         G4cout << "Particle Name: " << currDeff->GetParticleName() << G4endl;
         G4cout << "Particle electron: " << aTrack->GetKineticEnergy() << G4endl;
 
         G4cout << "Particle Deposit: " << edep << G4endl;
-        aTrack->GetCreatorProcess()->DumpInfo();
     }
     return true;
 

@@ -1,4 +1,4 @@
-#include "OldCRAB.hh"
+#include "CRAB_CSG.hh"
 #include "G4PVParameterised.hh"
 #include "G4PVReplica.hh"
 #include "G4RotationMatrix.hh"
@@ -31,7 +31,7 @@
 
 
 
-OldCRAB::OldCRAB(GasModelParameters* gmp) :
+CRAB_CSG::CRAB_CSG(GasModelParameters* gmp) :
     fGasModelParameters(gmp),
     checkOverlaps(1),
     temperature(300*kelvin), // temperature
@@ -68,11 +68,11 @@ OldCRAB::OldCRAB(GasModelParameters* gmp) :
     //detectorMessenger = new DetectorMessenger(this);
 }
 
-OldCRAB::~OldCRAB() {
+CRAB_CSG::~CRAB_CSG() {
    // delete detectorMessenger;
 }
 
-G4VPhysicalVolume* OldCRAB::Construct(){
+G4VPhysicalVolume* CRAB_CSG::Construct(){
     
     //Materials
     G4Material *gxe    = materials::GXe(gas_pressure_,68);
@@ -88,8 +88,6 @@ G4VPhysicalVolume* OldCRAB::Construct(){
     gxe->SetMaterialPropertiesTable(opticalprops::GXe(gas_pressure_, 68,sc_yield_,e_lifetime_));
 
     // Constructing Lab Space
-    G4String lab_name="LAB";
-    G4Box * lab_solid_volume = new G4Box(lab_name,Lab_size/2,Lab_size/2,Lab_size/2);
     G4LogicalVolume * lab_logic_volume = Mother;
 
     // Creating the Steel Cylinder that we need
@@ -127,8 +125,8 @@ G4VPhysicalVolume* OldCRAB::Construct(){
     FielCageGap=21.26*cm;
 
     // Placing the gas in the chamber
-    G4Tubs* gas_solid =new G4Tubs("GAS", 0., chamber_diam/2., chamber_length/2. + chamber_thickn, 0., twopi);
-    gas_logic = new G4LogicalVolume(gas_solid, gxe, "GAS");
+    G4Tubs* gas_solid =new G4Tubs("GAS_", 0., chamber_diam/2., chamber_length/2. + chamber_thickn, 0., twopi);
+    gas_logic = new G4LogicalVolume(gas_solid, gxe, "GAS_");
 
 
     // EL Region
@@ -157,16 +155,16 @@ G4VPhysicalVolume* OldCRAB::Construct(){
     // Define the Stainless steel mesh cylinder to subtract hex pattern from
     G4Tubs* Mesh_Disk = new G4Tubs("Mesh_Disk", 0., EL_OD/2.0 , EL_mesh_thick/2., 0., twopi); // Use OD so mesh stays within the logical
 
-    HexagonMeshTools::HexagonMeshTools* HexCreator; // Hexagonal Mesh Tool
+    //HexagonMeshTools::HexagonMeshTools* HexCreator; // Hexagonal Mesh Tool
 
     // Define a hexagonal prism
-    G4ExtrudedSolid* HexPrism = HexCreator->CreateHexagon(EL_mesh_thick, hex_circumR);
+    //G4ExtrudedSolid* HexPrism = HexCreator->CreateHexagon(EL_mesh_thick, hex_circumR);
 
 
     G4LogicalVolume *ELP_Disk_logic     = new G4LogicalVolume(Mesh_Disk, Steel, "ELP_Mesh_Logic");
     G4LogicalVolume *ELPP_Disk_logic    = new G4LogicalVolume(Mesh_Disk, Steel, "ELPP_Mesh_Logic");
     G4LogicalVolume *Cathode_Disk_logic = new G4LogicalVolume(Mesh_Disk, Steel, "Cathode_Mesh_Logic");
-    G4LogicalVolume *EL_Hex_logic       = new G4LogicalVolume(HexPrism, gxe,    "Mesh_Hex");
+    //G4LogicalVolume *EL_Hex_logic       = new G4LogicalVolume(HexPrism, gxe,    "Mesh_Hex");
 
 
     // FieldCage -- needs to be updated to rings and PEEK rods
@@ -424,13 +422,13 @@ G4VPhysicalVolume* OldCRAB::Construct(){
 
     // Place the Mesh bits
     G4VPhysicalVolume * EL_Mesh_Plus_plus = new G4PVPlacement(rotateMesh, G4ThreeVector(0.,0., EL_thick/2.0 - FR_thick - 4*(FR_thick + PEEK_Rod_thick) - 2.5*cm - EL_thick - EL_thick/2.0+Offset), ELP_Disk_logic, ELP_Disk_logic->GetName(), gas_logic, 0,0, false);
-    HexCreator->PlaceHexagons(nHole, EL_hex_size,  EL_mesh_thick, ELP_Disk_logic, EL_Hex_logic);
+    //HexCreator->PlaceHexagons(nHole, EL_hex_size,  EL_mesh_thick, ELP_Disk_logic, EL_Hex_logic);
 
     G4VPhysicalVolume * EL_Ring_Plus_plus   = new G4PVPlacement(0, G4ThreeVector(0.,0., EL_thick/2.0 - FR_thick - 4*(FR_thick + PEEK_Rod_thick) - 2.5*cm - EL_thick - ElGap_ - EL_thick+Offset), EL_ring_logic, EL_solid->GetName(), gas_logic, 0,0, false);
 
     // Place the Mesh bits
     G4VPhysicalVolume * EL_Mesh_Plus = new G4PVPlacement(0, G4ThreeVector(0.,0.,  EL_thick/2.0 - FR_thick - 4*(FR_thick + PEEK_Rod_thick) - 2.5*cm - EL_thick - ElGap_ - EL_thick + EL_thick/2.0+Offset), ELPP_Disk_logic, ELPP_Disk_logic->GetName(), gas_logic, 0,0, false);
-    HexCreator->PlaceHexagons(nHole, EL_hex_size,  EL_mesh_thick, ELPP_Disk_logic, EL_Hex_logic);
+    //HexCreator->PlaceHexagons(nHole, EL_hex_size,  EL_mesh_thick, ELPP_Disk_logic, EL_Hex_logic);
 
 
     // Cathode
@@ -438,7 +436,7 @@ G4VPhysicalVolume* OldCRAB::Construct(){
 
     // Place the Mesh bits
     G4VPhysicalVolume * Cathode_EL_Mesh = new G4PVPlacement(rotateMesh, G4ThreeVector(0.,0.,  EL_thick/2.0 + 1*cm + 5*(FR_thick + PEEK_Rod_thick ) - EL_thick/2.0+Offset), Cathode_Disk_logic, Cathode_Disk_logic->GetName(), gas_logic, 0,0, false);
-    HexCreator->PlaceHexagons(nHole, EL_hex_size,  EL_mesh_thick, Cathode_Disk_logic, EL_Hex_logic);
+    //HexCreator->PlaceHexagons(nHole, EL_hex_size,  EL_mesh_thick, Cathode_Disk_logic, EL_Hex_logic);
 
 
     // MgF2 Windows
@@ -489,14 +487,6 @@ G4VPhysicalVolume* OldCRAB::Construct(){
     G4VPhysicalVolume* bracketPhysical3 = new G4PVPlacement(rotateZ_m120,  G4ThreeVector (x_rot_3, y_rot_3, EL_pos+Offset),bracket_logical,"bracketPhysical",gas_logic, false,0,false);
 
 
-    // Define this volume as an ionization sensitive detector
-    //FieldCage_Logic->SetUserLimits(new G4UserLimits(1*mm));
-    // IonizationSD* sensdet = new IonizationSD("/CRAB/FIELDCAGE");
-    // //Active_logic->SetSensitiveDetector(sensdet);
-    // FieldCage_Logic->SetSensitiveDetector(sensdet);
-    // G4SDManager::GetSDMpointer()->AddNewDetector(sensdet);
-
-    // Source Holder
 
     G4VPhysicalVolume * Needle_Phys;
     if(!HideSourceHolder_){
@@ -564,6 +554,7 @@ G4VPhysicalVolume* OldCRAB::Construct(){
 
     // Camera
     G4OpticalSurface* opXenon_Glass = new G4OpticalSurface("XenonCamSurface");
+    opXenon_Glass->SetMaterialPropertiesTable(opticalprops::Vacuum());
     opXenon_Glass->SetModel(glisur);                  // SetModel
     opXenon_Glass->SetType(dielectric_dielectric);   // SetType
     opXenon_Glass->SetFinish(ground);                 // SetFinish
@@ -572,6 +563,7 @@ G4VPhysicalVolume* OldCRAB::Construct(){
 
     // Lens
     G4OpticalSurface* opXenon_Glass2 = new G4OpticalSurface("XenonLensSurface");
+    opXenon_Glass2->SetMaterialPropertiesTable(opticalprops::Vacuum());
     opXenon_Glass2->SetModel(glisur);                  // SetModel
     opXenon_Glass2->SetType(dielectric_dielectric);   // SetType
     opXenon_Glass2->SetFinish(polished);                 // SetFinish
@@ -582,30 +574,14 @@ G4VPhysicalVolume* OldCRAB::Construct(){
 
     AssignVisuals();
 
-    //Construct a G4Region, connected to the logical volume in which you want to use the G4FastSimulationModel
-    G4Region* regionGas = new G4Region("GasRegion");
-    regionGas->AddRootLogicalVolume(gas_logic);
 
 
 
 }
 
-void OldCRAB::ConstructSDandField(){
-    G4SDManager* SDManager = G4SDManager::GetSDMpointer();
-    G4String GasBoxSDname = "interface/GasBoxSD";
-    GasBoxSD* myGasBoxSD = new GasBoxSD(GasBoxSDname);
-    SDManager->SetVerboseLevel(1);
-    SDManager->AddNewDetector(myGasBoxSD);
-    SetSensitiveDetector(gas_logic,myGasBoxSD);
 
-    //These commands generate the four gas models and connect it to the GasRegion
-    G4Region* region = G4RegionStore::GetInstance()->GetRegion("GasRegion");
-    //new DegradModel(fGasModelParameters,"DegradModel",region,this,myGasBoxSD);
-    //new GarfieldVUVPhotonModel(fGasModelParameters,"GarfieldVUVPhotonModel",region,this,myGasBoxSD);
 
-}
-
-void OldCRAB::AssignVisuals() {
+void CRAB_CSG::AssignVisuals() {
     // Chamber
     G4LogicalVolumeStore* lvStore = G4LogicalVolumeStore::GetInstance();
 
@@ -622,7 +598,7 @@ void OldCRAB::AssignVisuals() {
 
 
     //GAS
-    G4LogicalVolume* Gas = lvStore->GetVolume("GAS");
+    G4LogicalVolume* Gas = lvStore->GetVolume("GAS_");
     G4VisAttributes *GasVa=new G4VisAttributes(colours::WhiteAlpha());
     GasVa->SetForceCloud(true);
     Gas->SetVisAttributes(GasVa);

@@ -73,7 +73,7 @@ CRAB_CSG::~CRAB_CSG() {
 }
 
 G4VPhysicalVolume* CRAB_CSG::Construct(){
-    
+    double offsetTest=16.9*mm;
     //Materials
     G4Material *gxe    = materials::GXe(gas_pressure_,68);
     G4Material *MgF2   = materials::MgF2();
@@ -97,7 +97,7 @@ G4VPhysicalVolume* CRAB_CSG::Construct(){
     G4LogicalVolume* chamber_flange_logic =new G4LogicalVolume(chamber_flange_solid,materials::Steel(), "CHAMBER_FLANGE");
 
     // Now Creating The Chamber with Without Ends
-    G4Tubs* chamber_solid =new G4Tubs("CHAMBER", chamber_diam/2., (chamber_diam/2. + chamber_thickn),(chamber_length/2), 0.,twopi);
+    G4Tubs* chamber_solid =new G4Tubs("CHAMBER", chamber_diam/2., (chamber_diam/2. + chamber_thickn),(chamber_length/2)+offsetTest, 0.,twopi);
     G4LogicalVolume* chamber_logic =new G4LogicalVolume(chamber_solid,materials::Steel(), "CHAMBER"); //
 
 
@@ -154,18 +154,20 @@ G4VPhysicalVolume* CRAB_CSG::Construct(){
 
     // Define the Stainless steel mesh cylinder to subtract hex pattern from
     G4Tubs* Mesh_Disk = new G4Tubs("Mesh_Disk", 0., EL_OD/2.0 , EL_mesh_thick/2., 0., twopi); // Use OD so mesh stays within the logical
-
-    //HexagonMeshTools::HexagonMeshTools* HexCreator; // Hexagonal Mesh Tool
-
+#ifndef With_Opticks
+    HexagonMeshTools::HexagonMeshTools* HexCreator; // Hexagonal Mesh Tool
+#endif
     // Define a hexagonal prism
-    //G4ExtrudedSolid* HexPrism = HexCreator->CreateHexagon(EL_mesh_thick, hex_circumR);
-
+#ifndef With_Opticks
+    G4ExtrudedSolid* HexPrism = HexCreator->CreateHexagon(EL_mesh_thick, hex_circumR);
+#endif
 
     G4LogicalVolume *ELP_Disk_logic     = new G4LogicalVolume(Mesh_Disk, Steel, "ELP_Mesh_Logic");
     G4LogicalVolume *ELPP_Disk_logic    = new G4LogicalVolume(Mesh_Disk, Steel, "ELPP_Mesh_Logic");
     G4LogicalVolume *Cathode_Disk_logic = new G4LogicalVolume(Mesh_Disk, Steel, "Cathode_Mesh_Logic");
-    //G4LogicalVolume *EL_Hex_logic       = new G4LogicalVolume(HexPrism, gxe,    "Mesh_Hex");
-
+#ifndef With_Opticks
+    G4LogicalVolume *EL_Hex_logic       = new G4LogicalVolume(HexPrism, gxe,    "Mesh_Hex");
+#endif
 
     // FieldCage -- needs to be updated to rings and PEEK rods
     G4Tubs* FieldCage_Solid =new G4Tubs("FIELDCAGE", 0., Active_diam/2.,FielCageGap/2 , 0., twopi);
@@ -315,15 +317,15 @@ G4VPhysicalVolume* CRAB_CSG::Construct(){
 
 
     // Xenon Gas in Active Area and Non-Active Area
-    G4VPhysicalVolume * gas_phys= new G4PVPlacement(0, G4ThreeVector(0.,0.,Offset), gas_logic, gas_solid->GetName(),lab_logic_volume, false, 0, false);
+    G4VPhysicalVolume * gas_phys= new G4PVPlacement(0, G4ThreeVector(0.,0.,Offset+offsetTest/2), gas_logic, gas_solid->GetName(),lab_logic_volume, false, 0, false);
     //new G4PVPlacement(0, G4ThreeVector(0.,0.,0.), Active_logic, Active_solid->GetName(),gas_logic, false, 0, false);
 
     // Flanges on the Chamber, place in the gas logic so we include the aperature region
-    G4VPhysicalVolume *Left_Flange_phys  = new G4PVPlacement(0,G4ThreeVector(0, 0, chamber_length/2 + chamber_thickn/2.0+Offset),chamber_flange_logic,chamber_flange_solid->GetName(),gas_logic,true,0,false);
+    G4VPhysicalVolume *Left_Flange_phys  = new G4PVPlacement(0,G4ThreeVector(0, 0, chamber_length/2 + chamber_thickn/2.0+Offset+offsetTest),chamber_flange_logic,chamber_flange_solid->GetName(),gas_logic,true,0,false);
     G4VPhysicalVolume *Right_Flange_phys = new G4PVPlacement(0,G4ThreeVector(0,0, -chamber_length/2 - chamber_thickn/2.0+Offset),chamber_flange_logic,chamber_flange_solid->GetName(),gas_logic,true,1,false);
 
     // Chamber
-    G4VPhysicalVolume * chamber_phys=  new G4PVPlacement(0,G4ThreeVector(0.,0.,Offset) ,chamber_logic, chamber_solid->GetName(), lab_logic_volume, false, 0,false);
+    G4VPhysicalVolume * chamber_phys=  new G4PVPlacement(0,G4ThreeVector(0.,0.,Offset+offsetTest/2) ,chamber_logic, chamber_solid->GetName(), lab_logic_volume, false, 0,false);
 
 
 
@@ -422,28 +424,32 @@ G4VPhysicalVolume* CRAB_CSG::Construct(){
 
     // Place the Mesh bits
     G4VPhysicalVolume * EL_Mesh_Plus_plus = new G4PVPlacement(rotateMesh, G4ThreeVector(0.,0., EL_thick/2.0 - FR_thick - 4*(FR_thick + PEEK_Rod_thick) - 2.5*cm - EL_thick - EL_thick/2.0+Offset), ELP_Disk_logic, ELP_Disk_logic->GetName(), gas_logic, 0,0, false);
-    //HexCreator->PlaceHexagons(nHole, EL_hex_size,  EL_mesh_thick, ELP_Disk_logic, EL_Hex_logic);
-
+#ifndef With_Opticks
+    HexCreator->PlaceHexagons(nHole, EL_hex_size,  EL_mesh_thick, ELP_Disk_logic, EL_Hex_logic);
+#endif
     G4VPhysicalVolume * EL_Ring_Plus_plus   = new G4PVPlacement(0, G4ThreeVector(0.,0., EL_thick/2.0 - FR_thick - 4*(FR_thick + PEEK_Rod_thick) - 2.5*cm - EL_thick - ElGap_ - EL_thick+Offset), EL_ring_logic, EL_solid->GetName(), gas_logic, 0,0, false);
 
     // Place the Mesh bits
     G4VPhysicalVolume * EL_Mesh_Plus = new G4PVPlacement(0, G4ThreeVector(0.,0.,  EL_thick/2.0 - FR_thick - 4*(FR_thick + PEEK_Rod_thick) - 2.5*cm - EL_thick - ElGap_ - EL_thick + EL_thick/2.0+Offset), ELPP_Disk_logic, ELPP_Disk_logic->GetName(), gas_logic, 0,0, false);
-    //HexCreator->PlaceHexagons(nHole, EL_hex_size,  EL_mesh_thick, ELPP_Disk_logic, EL_Hex_logic);
-
+#ifndef With_Opticks
+    HexCreator->PlaceHexagons(nHole, EL_hex_size,  EL_mesh_thick, ELPP_Disk_logic, EL_Hex_logic);
+#endif
 
     // Cathode
     G4VPhysicalVolume * Cathode       = new G4PVPlacement(0, G4ThreeVector(0.,0., EL_thick/2.0 + 1*cm + 5*(FR_thick + PEEK_Rod_thick)+Offset), Cathode_ring_logic, EL_solid->GetName(), gas_logic, 0,0, false);
 
     // Place the Mesh bits
     G4VPhysicalVolume * Cathode_EL_Mesh = new G4PVPlacement(rotateMesh, G4ThreeVector(0.,0.,  EL_thick/2.0 + 1*cm + 5*(FR_thick + PEEK_Rod_thick ) - EL_thick/2.0+Offset), Cathode_Disk_logic, Cathode_Disk_logic->GetName(), gas_logic, 0,0, false);
-    //HexCreator->PlaceHexagons(nHole, EL_hex_size,  EL_mesh_thick, Cathode_Disk_logic, EL_Hex_logic);
+#ifndef With_Opticks
 
+    HexCreator->PlaceHexagons(nHole, EL_hex_size,  EL_mesh_thick, Cathode_Disk_logic, EL_Hex_logic);
+#endif
 
     // MgF2 Windows
     G4double window_posz = chamber_length/2 + chamber_thickn;
     // G4VPhysicalVolume* lensPhysical = new G4PVPlacement(0, G4ThreeVector(0., 0., window_posz), MgF2_window_logic,"MgF2_WINDOW1", lab_logic_volume,false, 0, false);
 
-    G4VPhysicalVolume* lensPhysical = new G4PVPlacement(0, G4ThreeVector(0., 0., window_posz+ maxLensLength/2.0+Offset), lensLogical,"MgF2_WINDOW1_", gas_logic,false, 0, false);
+    G4VPhysicalVolume* lensPhysical = new G4PVPlacement(0, G4ThreeVector(0., 0., window_posz+ maxLensLength/2.0+Offset+offsetTest), lensLogical,"MgF2_WINDOW1_", gas_logic,false, 0, false);
     new G4PVPlacement(0, G4ThreeVector(0., 0., -window_posz+Offset), MgF2_window_logic,"MgF2_WINDOW2_", gas_logic, false, 1, false);
 
 
@@ -452,7 +458,7 @@ G4VPhysicalVolume* CRAB_CSG::Construct(){
     G4VPhysicalVolume *PMT_Tube_Phys1=new G4PVPlacement(0,G4ThreeVector(0, 0, -(PMT_pos - PMT_offset) - offset+Offset),PMT_Tube_Logic1,PMT_Tube_Logic1->GetName(),lab_logic_volume,false,0,false);
 
     // PMT Tube Vacuum
-    G4VPhysicalVolume *PMT_Tube_Vacuum_Phys0=new G4PVPlacement(0,G4ThreeVector(0, 0, PMT_pos+LongPMTTubeOffset+Offset),   InsideThePMT_Tube_Logic0,"PMT_TUBE_VACUUM0",lab_logic_volume,false,0,false);
+    G4VPhysicalVolume *PMT_Tube_Vacuum_Phys0=new G4PVPlacement(0,G4ThreeVector(0, 0, PMT_pos+LongPMTTubeOffset+Offset+offsetTest),   InsideThePMT_Tube_Logic0,"PMT_TUBE_VACUUM0",lab_logic_volume,false,0,false);
     G4VPhysicalVolume *PMT_Tube_Vacuum_Phys1=new G4PVPlacement(0,G4ThreeVector(0, 0, -(PMT_pos-PMT_offset)-offset+Offset),InsideThePMT_Tube_Logic1,"PMT_TUBE_VACUUM1",lab_logic_volume,false,0,false);
 
     // PMT Tube Block
@@ -594,7 +600,8 @@ void CRAB_CSG::AssignVisuals() {
     G4LogicalVolume* Chamber = lvStore->GetVolume("CHAMBER");
     G4VisAttributes *ChamberVa=new G4VisAttributes(G4Colour(1,1,1));
     ChamberVa->SetForceSolid(true);
-    Chamber->SetVisAttributes(G4VisAttributes::GetInvisible());
+    //Chamber->SetVisAttributes(G4VisAttributes::GetInvisible());
+    Chamber->SetVisAttributes(ChamberVa);
 
 
     //GAS

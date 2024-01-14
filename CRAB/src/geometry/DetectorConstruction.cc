@@ -92,7 +92,6 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
 
 
     CRAB_CSG *geo=new CRAB_CSG(fGasModelParameters);
-
     //CRAB_HybridGeo *geo=new CRAB_HybridGeo(fGasModelParameters);
 
     geo->SetMotherLab(lab_logic_volume);

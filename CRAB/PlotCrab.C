@@ -21,7 +21,8 @@ void PlotCrab(){
     //TFile *FileIn = TFile::Open("/media/argon/Data/CRAB/Sim/Needles/CRAB/all.root", "READ");
     //TFile *FileIn = TFile::Open("/home/argon/Projects/Ilker/gxsim/CRAB/macros/alpha2.root", "READ");
     //TFile *FileIn = TFile::Open("/media/argon/Data/CRAB/Sim/Needle_4cm/CRAB/all.root", "READ");
-    TFile *FileIn = TFile::Open("/media/argon/Data/CRAB/Sim/6_Bar/CRAB/jobid_2/alpha2.root", "READ");
+    //TFile *FileIn = TFile::Open("/media/argon/Data/CRAB/Sim/6_Bar/CRAB/jobid_2/alpha2.root", "READ");
+    TFile *FileIn = TFile::Open("/home/argon/Projects/Ilker/gxsim/CRAB/macros/alpha2.root", "READ");
 
     //TFile *FileIn = TFile::Open("macros/optical.root", "READ");
     // TFile *FileIn = TFile::Open("macros/eminus_t0.root", "READ");

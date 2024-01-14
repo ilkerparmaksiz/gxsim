@@ -80,7 +80,7 @@ CRAB_HybridGeo::~CRAB_HybridGeo() {
 }
 
 G4VPhysicalVolume* CRAB_HybridGeo::Construct(){
-
+    //double offsetTest=16.9*mm;
     //Materials
     G4Material *gxe    = materials::GXe(gas_pressure_,68);
     G4Material *MgF2   = materials::MgF2();
@@ -96,7 +96,7 @@ G4VPhysicalVolume* CRAB_HybridGeo::Construct(){
 
 
     //G4Tubs* gas_solid =new G4Tubs("GAS_", 0., chamber_diam/2., chamber_length/2. + chamber_thickn+3*cm/2, 0., twopi);
-    G4Tubs* gas_solid =new G4Tubs("GAS_", 0., Gas_diam/2., Gas_length/2. + chamber_thickn, 0., twopi);
+    G4Tubs* gas_solid =new G4Tubs("GAS_", 0., Gas_diam/2., Gas_length/2. + chamber_thickn+offsetTest/2, 0., twopi);
 
 
     // Optical Properties Assigned here
@@ -193,7 +193,7 @@ G4VPhysicalVolume* CRAB_HybridGeo::Construct(){
     G4double Offset=0.2*cm;
 
     auto Chamber_physical=new G4PVPlacement(0,G4ThreeVector(),Chamber_logic,Chamber_solid->GetName(),Mother,0,0,false);
-    auto gas_pyhsical=new G4PVPlacement(0,G4ThreeVector(0,0,0),gas_logic,gas_logic->GetName(),Mother,0,0,false);
+    auto gas_pyhsical=new G4PVPlacement(0,G4ThreeVector(0,0,0+offsetTest/2),gas_logic,gas_logic->GetName(),Mother,0,0,false);
 
     //auto FieldCage_physical=new G4PVPlacement(0,G4ThreeVector(),FieldCage_logic,FieldCage_solid->GetName(),gas_logic,false,0,false);
 
@@ -201,14 +201,15 @@ G4VPhysicalVolume* CRAB_HybridGeo::Construct(){
     //auto Peeks_physical=new G4PVPlacement(0,G4ThreeVector(),Peeks_logic,Peeks_solid->GetName(),gas_logic,0,0,false);
     //auto Brackets_physical=new G4PVPlacement(0,G4ThreeVector(),Brackets_logic,Brackets_solid->GetName(),gas_logic,0,0,false);
     // Gas Filling the Gaps
-    auto Gas_Lens_pysical=new G4PVPlacement(0,G4ThreeVector(0,0,-1*mm/2-Offset+1*mm/2),Gas_Lens_logic,Gas_Lens_solid->GetName(),Mother,0,0,false);
+    auto Gas_Lens_pysical=new G4PVPlacement(0,G4ThreeVector(0,0,-1*mm/2-Offset+1*mm/2+offsetTest),Gas_Lens_logic,Gas_Lens_solid->GetName(),Mother,0,0,false);
     //auto Gas_Lens_pysical=new G4PVPlacement(0,G4ThreeVector(0,0,1.5*mm/2+-Offset),Gas_Lens_logic,Gas_Lens_solid->GetName(),Mother,0,0,false);
     auto Gas_Window_pysical=new G4PVPlacement(0,G4ThreeVector(0,0,1.5*mm/2),Gas_Window_logic,Gas_Window_solid->GetName(),Mother,0,0,false);
 
     //Lens and Window
     //auto MgF2Lens_physical=new G4PVPlacement(0,G4ThreeVector(0,0,-Offset-0.1*cm),MgF2Lens_logic,MgF2Lens_solid->GetName(),Mother,0,0,false);
     auto MgF2Window_physical=new G4PVPlacement(0,G4ThreeVector(),MgF2Window_logic,MgF2Window_solid->GetName(),Mother,0,0,false);
-    G4VPhysicalVolume* lensPhysical = new G4PVPlacement(0, G4ThreeVector(-1.1*mm,0.2*mm , 23.03*cm+ maxLensLength/2.0-Offset-2*mm/2), lensLogical,"MgF2_WINDOW1", Mother,false, 0, false);
+
+    G4VPhysicalVolume* lensPhysical = new G4PVPlacement(0, G4ThreeVector(-1.1*mm,0.2*mm , 23.03*cm+ maxLensLength/2.0-Offset-2*mm/2+offsetTest), lensLogical,"MgF2_WINDOW1", Mother,false, 0, false);
 
     // Meshes
     //auto Mesh_pysical=new G4PVPlacement(0,G4ThreeVector(),Meshes_logic,Meshes_solid->GetName(),gas_logic,0,0,false);
@@ -220,10 +221,10 @@ G4VPhysicalVolume* CRAB_HybridGeo::Construct(){
 
     // Steel Tubes
     auto AnodeTube_physical=new G4PVPlacement(0,G4ThreeVector(),AnodeTube_logic,AnodeTube_solid->GetName(),AnodeVacuum_logic,0,0,false);
-    auto CathodeTube_physical=new G4PVPlacement(0,G4ThreeVector(0,0,-Offset-0.1*cm),CathodeTube_logic,CathodeTube_solid->GetName(),CathodeVacuum_logic,0,0,false);
+    auto CathodeTube_physical=new G4PVPlacement(0,G4ThreeVector(0,0,-Offset-0.1*cm-offsetTest/2),CathodeTube_logic,CathodeTube_solid->GetName(),CathodeVacuum_logic,0,0,false);
     // Vacuum in the Tubes
     auto AnodeVacuum_physical=new G4PVPlacement(0,G4ThreeVector(0,0,1*mm),AnodeVacuum_logic,AnodeVacuum_solid->GetName(),Mother,0,0,false);
-    auto CathodeVacuum_physical=new G4PVPlacement(0,G4ThreeVector(0,0,-Offset-0.1*cm),CathodeVacuum_logic,CathodeVacuum_solid->GetName(),Mother,0,0,false);
+    auto CathodeVacuum_physical=new G4PVPlacement(0,G4ThreeVector(0,0,-Offset-0.1*cm+offsetTest),CathodeVacuum_logic,CathodeVacuum_solid->GetName(),Mother,0,0,false);
 
     // Needle Placement
     auto Needle4_physical= new G4PVPlacement(0,G4ThreeVector(),Needle4_logic,Needle4_solid->GetName(),gas_logic,0,0,false);

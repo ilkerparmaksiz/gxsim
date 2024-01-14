@@ -203,7 +203,7 @@ void GarfieldVUVPhotonModel::GenerateVUVPhotons(const G4FastTrack& fastTrack, G4
     }
 
     //unsigned int n = fAvalancheMC->GetDriftLines();
-    fAvalancheMC->SaveDiffusion(false);
+    fAvalancheMC->SaveDiffusion(true);
     if(fAvalancheMC->GetElectrons().size()<1 ) {
         //std::cout << "No Electron" <<std::endl;
         return;
@@ -214,10 +214,27 @@ void GarfieldVUVPhotonModel::GenerateVUVPhotons(const G4FastTrack& fastTrack, G4
     auto Diffusion=fAvalancheMC->GetDiffusionParameters();
 
     if(Diffusion.size()>0){
+        double MEfield,Mdl,Mdt,Mvd;
+        int cnt=0;
         //Fill the Diffusion info
         for (unsigned idf=0;idf<Diffusion.size();idf++){
-            DiffusionFill(Diffusion[idf].Efield,Diffusion[idf].dl,Diffusion[idf].dt,Diffusion[idf].vd);
+            if(Diffusion[idf].Efield<600){
+                MEfield+=Diffusion[idf].Efield;
+                Mdl+=Diffusion[idf].dl;
+                Mdt+=Diffusion[idf].dt;
+                Mvd+=Diffusion[idf].vd;
+                cnt++;
+            }
+
         }
+        MEfield=MEfield/cnt;
+        Mdl=Mdl/cnt;
+        Mdt=Mdt/cnt;
+        Mvd=Mvd/cnt;
+
+        if(MEfield>0)
+            DiffusionFill(MEfield,Mdl,Mdt,Mvd);
+
     }
 
     double xi,yi,zi,ti;
@@ -583,7 +600,7 @@ void GarfieldVUVPhotonModel::MakeELPhotonsFromFile( G4FastStep& fastStep, G4doub
 
     // Now loop over and make the photons
     G4int colHitsEntries = EL_profile.size();
-    // std::cout <<  colHitsEntries<< std::endl;
+
     // colHitsEntries=1 ;
 
     G4double tig4(0.);
@@ -596,7 +613,8 @@ void GarfieldVUVPhotonModel::MakeELPhotonsFromFile( G4FastStep& fastStep, G4doub
 	      G4ThreeVector fakepos ( (xi+ EL_profile[i][0])*10., (yi+ EL_profile[i][1])*10., (zi+ EL_profile[i][2])*10. ); // 0 = x, 1 = y, 2 = z
 	      newExcHit->SetPos(fakepos);
 	     
-	      
+	      //std::cout<< "X "<<xi << " Xi " << (xi+ EL_profile[i][0]) <<" Y " <<yi << " Yi "<<yi+ EL_profile[i][1] <<" Z " <<zi<< " Zi " <<(zi+ EL_profile[i][2]) <<std::endl;
+
 	      if (i % (colHitsEntries/colHitsEntries ) == 0){ // 50. Need to uncomment this condition, along with one in degradmodel.cc. EC, 2-Dec-2021.
 	      
 		auto* optphot = S2Photon::OpticalPhotonDefinition();

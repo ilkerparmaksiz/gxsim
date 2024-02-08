@@ -42,8 +42,14 @@
 
 /Action/SteppingAction/event_shift 0
 /Generator/SingleParticle/ParticleType Ion
+/Generator/SingleParticle/Mode Needles
 /Generator/SingleParticle/pos 0 0 0 cm
-/Generator/SingleParticle/Mode Ion
-/run/beamOn 1
+/Generator/SingleParticle/Isotropic true
+/Generator/SingleParticle/useNeedle true
+
+### Pb-210
+/Generator/SingleParticle/Z 82
+/Generator/SingleParticle/A 210
+/run/beamOn 6
 
 

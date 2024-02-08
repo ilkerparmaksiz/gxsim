@@ -9,7 +9,7 @@
 
 # For setting the geometry
 /gasModelParameters/geometry/COMSOL_Path /home/argon/Projects/Ilker/CRAB_COMSOL/With_Needles/17k_8k_7k/
-/gasModelParameters/geometry/useEL_File false
+/gasModelParameters/geometry/useEL_File true
 /gasModelParameters/geometry/useComsol true
 
 # Threading
@@ -27,7 +27,7 @@
 
 /run/initialize
 
-/analysis/setFileName alpha2.root
+/analysis/setFileName alpha.root
 
 ####################################
 ############ Verbosities ###########
@@ -49,5 +49,5 @@
 /Generator/SingleParticle/Mode Needles
 /Generator/SingleParticle/useNeedle false
 /Generator/SingleParticle/Amount 1
-/run/beamOn 100
+/run/beamOn 5
 

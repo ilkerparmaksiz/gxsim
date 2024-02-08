@@ -103,6 +103,43 @@ namespace sensorsd {
     return pmtid;
   }
 
+  void SensorSD::OpticksHits()
+    {
+#ifdef With_Opticks
+        SEvt* sev             = SEvt::Get_EGPU();
+        unsigned int num_hits = sev->GetNumHit(0);
+        auto ana=G4AnalysisManager::Instance();
+        auto run= G4RunManager::GetRunManager();
+        fOpticksHits=sev->GetNumHit(0);
+        int id=8;
+        if(this->GetName()=="Camera") id=7;
+        for(int idx = 0; idx < int(num_hits); idx++)
+        {
+            sphoton hit;
+            sev->getHit(hit, idx);
+            G4ThreeVector position     = G4ThreeVector(hit.pos.x, hit.pos.y, hit.pos.z);
+            G4ThreeVector direction    = G4ThreeVector(hit.mom.x, hit.mom.y, hit.mom.z);
+            G4ThreeVector polarization = G4ThreeVector(hit.pol.x, hit.pol.y, hit.pol.z);
+
+
+            // Lets save the hits
+            ana->FillNtupleIColumn(id,0,run->GetCurrentEvent()->GetEventID());
+            ana->FillNtupleIColumn(id,1,hit.iindex);
+            ana->FillNtupleFColumn(id,2,hit.pos.x);
+            ana->FillNtupleFColumn(id,3,hit.pos.y);
+            ana->FillNtupleFColumn(id,4,hit.pos.z);
+            ana->FillNtupleFColumn(id,5,hit.time);
+            ana->FillNtupleFColumn(id,6,hit.mom.x);
+            ana->FillNtupleFColumn(id,7,hit.mom.y);
+            ana->FillNtupleFColumn(id,8,hit.mom.z);
+            ana->FillNtupleFColumn(id,9,hit.pol.x);
+            ana->FillNtupleFColumn(id,10,hit.pol.y);
+            ana->FillNtupleFColumn(id,11,hit.pol.z);
+            ana->FillNtupleFColumn(id,12,hit.wavelength);
+            ana->AddNtupleRow(id);
+        }
+#endif
+    }
 
   void SensorSD::EndOfEvent(G4HCofThisEvent* /*HCE*/)
   {

@@ -67,7 +67,7 @@ const plog::Severity G4CXApp::LEVEL = info ;
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 PrimaryGenerator::PrimaryGenerator()
-  : G4VPrimaryGenerator(),momentum_(1,1,1), ParticleType_("opticalphoton"),Position_(0),energy_(0),Iso_(true),useNeedle(false),fAmount_(1),GeneratorMode_("Single")
+  : G4VPrimaryGenerator(),momentum_(1,1,1), ParticleType_("opticalphoton"),Position_(0),energy_(0),Iso_(true),useNeedle(false),fAmount_(1),fAtomicmass_(84),fMassNumber_(210),GeneratorMode_("Single")
 {
 
   msg_ = new G4GenericMessenger(this, "/Generator/SingleParticle/",
@@ -81,6 +81,8 @@ PrimaryGenerator::PrimaryGenerator()
   msg_->DeclareProperty("useNeedle",  useNeedle, "Isotropic Distribution");
   msg_->DeclareProperty("Mode",  GeneratorMode_, "The mode of the generator to run");
   msg_->DeclareProperty("Amount",  fAmount_, "Amount of particles at a time");
+  msg_->DeclareProperty("Z",  fAtomicmass_, "Ion Atomic Mass");
+  msg_->DeclareProperty("A",  fMassNumber_, "Mass Number");
 
     //msg_->DeclareProperty("pos", "cm",  Position_, "Set Position x,y,z");
   //  --- Get Xenon file --- 
@@ -114,7 +116,7 @@ void PrimaryGenerator::Generate(G4Event* event, std::vector<double> &xyz){
       if (fAmount_==0) fAmount_=1;
       for (int i=0; i<fAmount_;i++) GenerateSingleParticle(event);
   }
-  else if(GeneratorMode_!=" " && f->FileCheck(NeedlePointPath)){
+  else if(GeneratorMode_!=" " && f->FileCheck(NeedlePointPath) && ParticleType_!="Ion"){
       NeedlePoints=f->GetThreeVectorData(NeedlePointPath,',',1);
       if (fAmount_==0) fAmount_=1;
       for (int i=0; i<fAmount_;i++) GenerateFromSurface(event);
@@ -125,9 +127,12 @@ void PrimaryGenerator::Generate(G4Event* event, std::vector<double> &xyz){
       LOG(LEVEL) << "]" ;
 #endif
   }
-  else {
+  else if(GeneratorMode_!=" " and ParticleType_=="Ion") {
     std::cout <<"Generating with Ion Mode for event: " << event->GetEventID() << std::endl;
-    GeneratePrimaryVertexIon(event, xyz);
+      NeedlePoints=f->GetThreeVectorData(NeedlePointPath,',',1);
+      if (fAmount_==0) fAmount_=1;
+      for (int i=0; i<fAmount_;i++) GeneratePrimaryVertexIon(event, xyz);
+
   }
 
 }
@@ -139,14 +144,18 @@ void PrimaryGenerator::Generate(G4Event* event, std::vector<double> &xyz){
 void PrimaryGenerator::GeneratePrimaryVertexIon(G4Event* event, std::vector<double> &xyzb){
 
 
-  G4ThreeVector positionA( xyzb.at(0), xyzb.at(1), xyzb.at(2));
-  G4double timeA = 0*s;
-
+    G4double timeA = 0*s;
+    G4ThreeVector positionA;
   // Generate events off the surface of the needle
   if (useNeedle){
 
-    
-    G4double maxRad_ = (0.42)*mm + 2*nm;
+      G4int Size=NeedlePoints->size()-1;
+      G4int Index;
+      Index= round(G4UniformRand()*Size);
+
+      G4double NeedleOffset=1*mm;
+      positionA=NeedlePoints->at(Index);
+    /*G4double maxRad_ = (0.42)*mm + 2*nm;
     G4double halfLength = 1 * mm;
     G4double iniPhi_ = 0;
     G4double deltaPhi_ = twopi;
@@ -165,8 +174,13 @@ void PrimaryGenerator::GeneratePrimaryVertexIon(G4Event* event, std::vector<doub
     
     // Translating
     positionA += origin_;
-    
+    */
+  }else{
+      positionA=G4ThreeVector ( xyzb.at(0), xyzb.at(1), xyzb.at(2));
+
   }
+
+
 
   G4PrimaryVertex* vertexA = new G4PrimaryVertex(positionA, timeA);
 
@@ -177,12 +191,28 @@ void PrimaryGenerator::GeneratePrimaryVertexIon(G4Event* event, std::vector<doub
   G4double pmod;
   G4ThreeVector p;
 
-  pmod = 500*keV;
-  p = pmod * momentum_;
+  //pmod = 500*keV;
+  //p = pmod * momentum_;
 
+    if(Iso_){
+        G4ThreeVector SphericalCoord;
+        G4double iniPhi=0;
+        G4double deltaPhi_=pi;
+        G4double deltatheta=twopi;
+
+        G4double phi = (iniPhi + (G4UniformRand() * deltaPhi_));
+        G4double theta=(iniPhi+(G4UniformRand() * deltatheta));
+        G4double rad = 1;
+        SphericalCoord ={rad*sin(phi)*cos(theta),rad*sin(phi)*sin(theta),rad*cos(phi)};
+        p=SphericalCoord*pmod;
+
+    }else{
+        p = pmod * momentum_;
+
+    }
   // Initialise the alpha
-  particleDefinition = G4IonTable::GetIonTable()->GetIon(84, 210, 0.); // Po210 decay of 5.3 MeV alpha
-  particleDefinition->SetPDGLifeTime(1.*ps); 
+  particleDefinition = G4IonTable::GetIonTable()->GetIon(fAtomicmass_, fMassNumber_ ,0); // Po210 decay of 5.3 MeV alpha
+  particleDefinition->SetPDGLifeTime(1.*ps);
   G4PrimaryParticle* ion = new G4PrimaryParticle(particleDefinition);
   ion->SetMomentum(p.x(), p.y(), p.z());
   

@@ -112,7 +112,41 @@ void RunAction::BeginOfRunAction(const G4Run* aRun) {
   analysisManager->CreateNtupleDColumn("vd");         //column 4
   analysisManager->FinishNtuple();
 
-  analysisManager->SetNtupleActivation(true);
+#ifdef With_Opticks
+    // Opticks PMT Hits
+    analysisManager->CreateNtuple("Opticks_Camera_Hits", "Opticks Camera Hits");
+    analysisManager->CreateNtupleIColumn("Event");
+    analysisManager->CreateNtupleIColumn("id");
+    analysisManager->CreateNtupleFColumn("x");
+    analysisManager->CreateNtupleFColumn("y");
+    analysisManager->CreateNtupleFColumn("z");
+    analysisManager->CreateNtupleFColumn("t");
+    analysisManager->CreateNtupleFColumn("mx");
+    analysisManager->CreateNtupleFColumn("my");
+    analysisManager->CreateNtupleFColumn("mz");
+    analysisManager->CreateNtupleFColumn("px");
+    analysisManager->CreateNtupleFColumn("py");
+    analysisManager->CreateNtupleFColumn("pz");
+    analysisManager->CreateNtupleFColumn("wavelength");
+    analysisManager->FinishNtuple();
+
+    analysisManager->CreateNtuple("Opticks_PMT_Hits", "Opticks PMT Hits");
+    analysisManager->CreateNtupleIColumn("Event");
+    analysisManager->CreateNtupleIColumn("id");
+    analysisManager->CreateNtupleFColumn("x");
+    analysisManager->CreateNtupleFColumn("y");
+    analysisManager->CreateNtupleFColumn("z");
+    analysisManager->CreateNtupleFColumn("t");
+    analysisManager->CreateNtupleFColumn("mx");
+    analysisManager->CreateNtupleFColumn("my");
+    analysisManager->CreateNtupleFColumn("mz");
+    analysisManager->CreateNtupleFColumn("px");
+    analysisManager->CreateNtupleFColumn("py");
+    analysisManager->CreateNtupleFColumn("pz");
+    analysisManager->CreateNtupleFColumn("wavelength");
+    analysisManager->FinishNtuple();
+#endif
+    analysisManager->SetNtupleActivation(true);
 }
 
 void RunAction::EndOfRunAction(const G4Run* aRun) {

@@ -61,7 +61,7 @@ namespace sensorsd {
     /// by this sensitive detector. This will be used by the
     /// persistency manager to select the collection.
     static G4String GetCollectionUniqueName();
-
+    void OpticksHits();
   private:
 
     G4bool ProcessHits(G4Step*, G4TouchableHistory*);

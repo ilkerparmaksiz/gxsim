@@ -81,6 +81,7 @@ CRAB_HybridGeo::~CRAB_HybridGeo() {
 
 G4VPhysicalVolume* CRAB_HybridGeo::Construct(){
     //double offsetTest=16.9*mm;
+    double offsetTest=0;
     //Materials
     G4Material *gxe    = materials::GXe(gas_pressure_,68);
     G4Material *MgF2   = materials::MgF2();

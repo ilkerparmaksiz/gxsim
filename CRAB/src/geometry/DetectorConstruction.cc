@@ -91,8 +91,13 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
     // Visuals
 
 
+#ifdef With_Opticks
     CRAB_CSG *geo=new CRAB_CSG(fGasModelParameters);
-    //CRAB_HybridGeo *geo=new CRAB_HybridGeo(fGasModelParameters);
+#endif
+
+#ifndef With_Opticks
+    CRAB_HybridGeo *geo=new CRAB_HybridGeo(fGasModelParameters);
+#endif
 
     geo->SetMotherLab(lab_logic_volume);
     geo->SetOffset(0.2*cm);

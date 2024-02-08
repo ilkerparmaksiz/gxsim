@@ -82,6 +82,8 @@ private:
     G4bool Iso_;
     G4bool useNeedle;
     G4int fAmount_;
+    G4int fAtomicmass_;
+    G4int fMassNumber_;
     G4bool fIstracking;
     G4String GeneratorMode_;
     std::unique_ptr<std::vector<G4ThreeVector>> NeedlePoints;

@@ -46,6 +46,7 @@
 #include "U4.hh"
 #include "SEvt.hh"
 #include "SEventConfig.hh"
+#include "G4StepPoint.hh"
 #endif
 namespace{G4Mutex aMutex = G4MUTEX_INITIALIZER;}
 
@@ -182,7 +183,6 @@ void GarfieldVUVPhotonModel::GenerateVUVPhotons(const G4FastTrack& fastTrack, G4
     if (particleName.find("thermalelectron")!=std::string::npos) particleName = "e-";
 
 
-
     // Debug the electric field
     // std::array<double, 3> ef{0,0,0};
     // std::array<double, 3> bf{0,0,0};
@@ -296,10 +296,7 @@ void GarfieldVUVPhotonModel::GenerateVUVPhotons(const G4FastTrack& fastTrack, G4
 
     // std::cout << "GVUVPM: Avalanching in high field starting at: "  << xi<<"," <<yi<<","<<zi <<"," <<ti << std::endl;
 
-    const G4Track* pG4trk = fastTrack.GetPrimaryTrack();
-    G4int pntid = pG4trk->GetParentID();
-    G4int tid = pG4trk->GetTrackID();
-   // garfExcHitsCol.reset();
+
     DriftLines.clear();
 
 
@@ -703,7 +700,6 @@ void GarfieldVUVPhotonModel::MakeELPhotonsSimple(G4FastStep& fastStep, G4double 
             //fGasBoxSD->InsertGarfieldExcitationHit(newExcHit);
             G4Track *newTrack=fastStep.CreateSecondaryTrack(VUVphoton, fakepos, tig4 ,false);
             newTrack->SetPolarization(G4ThreeVector(0.,0.,1.0)); // Needs some pol'n, else we will only ever reflect at an OpBoundary. EC, 8-Aug-2022.
-
               //	G4ProcessManager* pm= newTrack->GetDefinition()->GetProcessManager();
             //	G4ProcessVectorfAtRestDoItVector = pm->GetAtRestProcessVector(typeDoIt);
           //}
@@ -712,13 +708,31 @@ void GarfieldVUVPhotonModel::MakeELPhotonsSimple(G4FastStep& fastStep, G4double 
     }
         #ifdef With_Opticks
             //G4cout << "sending photons to opticks" <<G4endl;
+            G4ThreeVector fakepos (xi*10,yi*10.,zi*10.-10*gapLEM*float(i)/float(colHitsEntries)); /// ignoring diffusion in small LEM gap, EC 17-June-2022.
 
+            G4Step * newStep = new G4Step();
+            G4StepPoint *PoststepPoint= new G4StepPoint();
+            PoststepPoint->SetPosition(fakepos);
+            PoststepPoint->
+            G4StepPoint *PrestepPoint= new G4StepPoint();
+            PrestepPoint
+
+            newStep->SetPreStepPoint(PrestepPoint);
+            newStep->SetPostStepPoint(PoststepPoint);
+            auto* optphot = S2Photon::OpticalPhotonDefinition();
+
+            G4DynamicParticle VUVphoton(optphot,G4RandomDirection(), 7.2*eV);
+
+            G4Track *newTrack=fastStep.CreateSecondaryTrack(VUVphoton, fakepos, tig4 ,false);
+            newTrack->SetPolarization(G4ThreeVector(0.,0.,1.0));
+            newTrack->SetStep(newStep);
             const G4Track * track=fastStep.GetCurrentTrack();
+
             const G4Step * aStep=track->GetStep();
             G4RunManager * runmng=G4RunManager::GetRunManager();
             const int eventID=runmng->GetCurrentEvent()->GetEventID();
             // Add condition that if this is a thermal electron and has any secondaries
-            U4::CollectGenstep_DsG4Scintillation_r4695(track,aStep,colHitsEntries,1,4*ns);
+            U4::CollectGenstep_DsG4Scintillation_r4695(track,aStep,colHitsEntries,0,4*ns);
             int CollectedPhotons=SEvt::GetNumPhotonCollected(eventID);
             int maxPhoton=SEventConfig::MaxPhoton();
             //std::cout<< "Collected Photons: " <<CollectedPhotons<<std::endl;

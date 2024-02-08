@@ -27,8 +27,8 @@
 #include "G4MultiUnion.hh"
 #include "Visibilities.hh"
 #include "HexagonMeshTools.hh"
-
-
+#include "SensorSD.hh"
+#include "G4SDManager.hh"
 
 
 CRAB_CSG::CRAB_CSG(GasModelParameters* gmp) :
@@ -576,8 +576,16 @@ G4VPhysicalVolume* CRAB_CSG::Construct(){
     opXenon_Glass2->SetPolish(0.0);
     new G4LogicalBorderSurface("XenonLensSurface",gas_phys,lensPhysical,opXenon_Glass2);
 
-    // Visuals
 
+    /// Camera as Sensitive Detector
+    G4SDManager *SDManager=G4SDManager::GetSDMpointer();
+    sensorsd::SensorSD* CameraSD=new sensorsd::SensorSD("/Sensor/Camera");
+    SDManager->AddNewDetector(CameraSD);
+    camLogical->SetSensitiveDetector(CameraSD);
+
+
+
+    // Visuals
     AssignVisuals();
 
 

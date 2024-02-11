@@ -11,10 +11,12 @@
 #include "G4EventManager.hh"
 #include "GasBoxSD.hh"
 #include "S2Photon.hh"
+#include "config.h"
 #ifdef With_Opticks
 #include "G4CXOpticks.hh"
 #include "SEvt.hh"
 #include "U4.hh"
+#include "G4Scintillation.hh"
 #endif
 
 namespace {G4Mutex Mutex= G4MUTEX_INITIALIZER;}
@@ -101,7 +103,42 @@ void SteppingAction::UserSteppingAction(const G4Step *aStep)
       }
   }
 
-  G4int id(0);
+    #ifdef With_Opticks
+    SEvt::AddTorchGenstep();
+
+    G4SteppingManager * sMg=G4EventManager::GetEventManager()->GetTrackingManager()->GetSteppingManager();
+    G4StepStatus stepStatus=sMg->GetfStepStatus();
+    if(stepStatus!=fAtRestDoItProc){
+        G4ProcessVector * PostStepProc=sMg->GetfPostStepDoItVector();
+        size_t MaxSteps=sMg->GetMAXofPostStepLoops();
+        for (int stp=0;stp<MaxSteps;stp++){
+            if((*PostStepProc)[stp]->GetProcessName()=="Scintillation"){
+                G4Scintillation *ScintProc= (G4Scintillation*) (*PostStepProc)[stp];
+                G4int num_photons=ScintProc->GetNumPhotons();
+                std::cout << "Scintilation "<< num_photons <<std::endl;
+
+                if(num_photons>0){
+                    G4MaterialPropertiesTable * MPT = track->GetMaterial()->GetMaterialPropertiesTable();
+                    G4double t1,t2=0;
+                    G4int singlets,triplets=0;
+                    t1=MPT->GetConstProperty(kSCINTILLATIONTIMECONSTANT1);
+                    t2=MPT->GetConstProperty(kSCINTILLATIONTIMECONSTANT2);
+                    singlets= floor(MPT->GetConstProperty(kSCINTILLATIONYIELD1)*num_photons);
+                    triplets= ceil(MPT->GetConstProperty(kSCINTILLATIONYIELD2)*num_photons);
+                    std::cout << "Scintilation "<< num_photons <<" Amount of Singlets " <<singlets <<" Triplets " << triplets <<std::endl;
+                    if(singlets>0)
+                        U4::CollectGenstep_DsG4Scintillation_r4695(track,aStep,singlets,0,t1);
+                    if(triplets>0)
+                        U4::CollectGenstep_DsG4Scintillation_r4695(track,aStep,triplets,1,t2);
+                    //U4::CollectGenstep_DsG4Scintillation_r4695(atrack,step,num_photons,1,t2);
+                }
+
+            }
+        }
+    }
+    #endif
+
+    G4int id(0);
 
   
   if (sprocess)
@@ -168,7 +205,8 @@ void SteppingAction::UserSteppingAction(const G4Step *aStep)
       analysisManager->AddNtupleRow(id);
     }
   }
-  
+
+
   // if particle == thermale, opticalphoton and parent == primary and stepID==1, or trackID<=2
   // count the NEST e-s/photons into a class variable from the primary particle. Retrieve at EndEvent().
 }

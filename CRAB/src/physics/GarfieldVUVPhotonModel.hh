@@ -130,6 +130,8 @@ private:
     Garfield::ViewField *fFieldView;
     G4AnalysisManager* analysisManager;
     G4int event ;
+    G4LogicalVolume * LogicalVolumeGasXe;
+    G4Material * MaterialGasXe;
 
 
 

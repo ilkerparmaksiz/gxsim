@@ -73,7 +73,7 @@ CRAB_CSG::~CRAB_CSG() {
 }
 
 G4VPhysicalVolume* CRAB_CSG::Construct(){
-    double offsetTest=16.9*mm;
+    double offsetTest=0;//16.9*mm;
     //Materials
     G4Material *gxe    = materials::GXe(gas_pressure_,68);
     G4Material *MgF2   = materials::MgF2();
@@ -152,21 +152,21 @@ G4VPhysicalVolume* CRAB_CSG::Construct(){
     // Number of hexagons needed -- need to use fixed amount, too many and nexus will crash
     G4int nHole = 16;
 
-    // Define the Stainless steel mesh cylinder to subtract hex pattern from
-    G4Tubs* Mesh_Disk = new G4Tubs("Mesh_Disk", 0., EL_OD/2.0 , EL_mesh_thick/2., 0., twopi); // Use OD so mesh stays within the logical
-#ifndef With_Opticks
-    HexagonMeshTools::HexagonMeshTools* HexCreator; // Hexagonal Mesh Tool
-#endif
-    // Define a hexagonal prism
-#ifndef With_Opticks
-    G4ExtrudedSolid* HexPrism = HexCreator->CreateHexagon(EL_mesh_thick, hex_circumR);
-#endif
 
-    G4LogicalVolume *ELP_Disk_logic     = new G4LogicalVolume(Mesh_Disk, Steel, "ELP_Mesh_Logic");
-    G4LogicalVolume *ELPP_Disk_logic    = new G4LogicalVolume(Mesh_Disk, Steel, "ELPP_Mesh_Logic");
-    G4LogicalVolume *Cathode_Disk_logic = new G4LogicalVolume(Mesh_Disk, Steel, "Cathode_Mesh_Logic");
+
+
 #ifndef With_Opticks
-    G4LogicalVolume *EL_Hex_logic       = new G4LogicalVolume(HexPrism, gxe,    "Mesh_Hex");
+    // Define the Stainless steel mesh cylinder to subtract hex pattern from
+
+    //G4Tubs* Mesh_Disk = new G4Tubs("Mesh_Disk", 0., EL_OD/2.0 , EL_mesh_thick/2., 0., twopi); // Use OD so mesh stays within the logical
+
+    //HexagonMeshTools::HexagonMeshTools* HexCreator; // Hexagonal Mesh Tool
+    //G4ExtrudedSolid* HexPrism = HexCreator->CreateHexagon(EL_mesh_thick, hex_circumR);
+
+    //G4LogicalVolume *ELP_Disk_logic     = new G4LogicalVolume(Mesh_Disk, Steel, "ELP_Mesh_Logic");
+    //G4LogicalVolume *ELPP_Disk_logic    = new G4LogicalVolume(Mesh_Disk, Steel, "ELPP_Mesh_Logic");
+    //G4LogicalVolume *Cathode_Disk_logic = new G4LogicalVolume(Mesh_Disk, Steel, "Cathode_Mesh_Logic");
+    //G4LogicalVolume *EL_Hex_logic       = new G4LogicalVolume(HexPrism, gxe,    "Mesh_Hex");
 #endif
 
     // FieldCage -- needs to be updated to rings and PEEK rods
@@ -423,26 +423,28 @@ G4VPhysicalVolume* CRAB_CSG::Construct(){
     G4VPhysicalVolume * EL_Ring_Plus        = new G4PVPlacement(0, G4ThreeVector(0.,0., EL_thick/2.0 - FR_thick - 4*(FR_thick + PEEK_Rod_thick) - 2.5*cm - EL_thick+Offset), EL_ring_logic, EL_solid->GetName(), gas_logic, 0,0, false);
 
     // Place the Mesh bits
-    G4VPhysicalVolume * EL_Mesh_Plus_plus = new G4PVPlacement(rotateMesh, G4ThreeVector(0.,0., EL_thick/2.0 - FR_thick - 4*(FR_thick + PEEK_Rod_thick) - 2.5*cm - EL_thick - EL_thick/2.0+Offset), ELP_Disk_logic, ELP_Disk_logic->GetName(), gas_logic, 0,0, false);
 #ifndef With_Opticks
-    HexCreator->PlaceHexagons(nHole, EL_hex_size,  EL_mesh_thick, ELP_Disk_logic, EL_Hex_logic);
+    //G4VPhysicalVolume * EL_Mesh_Plus_plus = new G4PVPlacement(rotateMesh, G4ThreeVector(0.,0., EL_thick/2.0 - FR_thick - 4*(FR_thick + PEEK_Rod_thick) - 2.5*cm - EL_thick - EL_thick/2.0+Offset), ELP_Disk_logic, ELP_Disk_logic->GetName(), gas_logic, 0,0, false);
+
+    //HexCreator->PlaceHexagons(nHole, EL_hex_size,  EL_mesh_thick, ELP_Disk_logic, EL_Hex_logic);
 #endif
     G4VPhysicalVolume * EL_Ring_Plus_plus   = new G4PVPlacement(0, G4ThreeVector(0.,0., EL_thick/2.0 - FR_thick - 4*(FR_thick + PEEK_Rod_thick) - 2.5*cm - EL_thick - ElGap_ - EL_thick+Offset), EL_ring_logic, EL_solid->GetName(), gas_logic, 0,0, false);
 
     // Place the Mesh bits
-    G4VPhysicalVolume * EL_Mesh_Plus = new G4PVPlacement(0, G4ThreeVector(0.,0.,  EL_thick/2.0 - FR_thick - 4*(FR_thick + PEEK_Rod_thick) - 2.5*cm - EL_thick - ElGap_ - EL_thick + EL_thick/2.0+Offset), ELPP_Disk_logic, ELPP_Disk_logic->GetName(), gas_logic, 0,0, false);
 #ifndef With_Opticks
-    HexCreator->PlaceHexagons(nHole, EL_hex_size,  EL_mesh_thick, ELPP_Disk_logic, EL_Hex_logic);
+    //G4VPhysicalVolume * EL_Mesh_Plus = new G4PVPlacement(0, G4ThreeVector(0.,0.,  EL_thick/2.0 - FR_thick - 4*(FR_thick + PEEK_Rod_thick) - 2.5*cm - EL_thick - ElGap_ - EL_thick + EL_thick/2.0+Offset), ELPP_Disk_logic, ELPP_Disk_logic->GetName(), gas_logic, 0,0, false);
+
+    //HexCreator->PlaceHexagons(nHole, EL_hex_size,  EL_mesh_thick, ELPP_Disk_logic, EL_Hex_logic);
 #endif
 
     // Cathode
     G4VPhysicalVolume * Cathode       = new G4PVPlacement(0, G4ThreeVector(0.,0., EL_thick/2.0 + 1*cm + 5*(FR_thick + PEEK_Rod_thick)+Offset), Cathode_ring_logic, EL_solid->GetName(), gas_logic, 0,0, false);
 
     // Place the Mesh bits
-    G4VPhysicalVolume * Cathode_EL_Mesh = new G4PVPlacement(rotateMesh, G4ThreeVector(0.,0.,  EL_thick/2.0 + 1*cm + 5*(FR_thick + PEEK_Rod_thick ) - EL_thick/2.0+Offset), Cathode_Disk_logic, Cathode_Disk_logic->GetName(), gas_logic, 0,0, false);
 #ifndef With_Opticks
+    //G4VPhysicalVolume * Cathode_EL_Mesh = new G4PVPlacement(rotateMesh, G4ThreeVector(0.,0.,  EL_thick/2.0 + 1*cm + 5*(FR_thick + PEEK_Rod_thick ) - EL_thick/2.0+Offset), Cathode_Disk_logic, Cathode_Disk_logic->GetName(), gas_logic, 0,0, false);
 
-    HexCreator->PlaceHexagons(nHole, EL_hex_size,  EL_mesh_thick, Cathode_Disk_logic, EL_Hex_logic);
+    //HexCreator->PlaceHexagons(nHole, EL_hex_size,  EL_mesh_thick, Cathode_Disk_logic, EL_Hex_logic);
 #endif
 
     // MgF2 Windows

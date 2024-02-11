@@ -32,7 +32,7 @@ EventAction::~EventAction() {
 
 
 void EventAction::BeginOfEventAction(const G4Event *ev) {
-  G4cout << " EventAction::BeginOfEventAction()  0 " << G4endl;
+  G4cout << " EventAction::BeginOfEventAction() "<< ev->GetEventID() << G4endl;
     DegradModel* dm = (DegradModel*)(G4GlobalFastSimulationManager::GetInstance()->GetFastSimulationModel("DegradModel"));
     if(dm)
         dm->Reset();
@@ -46,7 +46,6 @@ void EventAction::BeginOfEventAction(const G4Event *ev) {
       }
 
     fEDepPrim = 0.0;
-    G4cout << " EventAction::BeginOfEventAction()  1 " << G4endl;
 }
 
 void EventAction::EndOfEventAction(const G4Event *evt) {
@@ -55,12 +54,13 @@ void EventAction::EndOfEventAction(const G4Event *evt) {
     if(gvm)
       gvm->Reset(); // zero out the sensor: meaning reset the nexcitations, which is cumulative.
 
-    G4cout << " EventAction::EndOfEventAction()  " << G4endl;
+    G4cout << " EventAction::EndOfEventAction()  "  << evt->GetEventID()<< G4endl;
 #ifdef With_Opticks
 
     G4cout<<" Opticks End of Event Action" <<G4endl;
     G4AutoLock lock(&opticks_mt);
     G4CXOpticks * g4cx=G4CXOpticks::Get();
+
     G4int eventID=evt->GetEventID();
     G4int ngenstep=SEvt::GetNumGenstepFromGenstep(eventID);
     G4int nphotons=SEvt::GetNumPhotonCollected(eventID);
@@ -74,23 +74,25 @@ void EventAction::EndOfEventAction(const G4Event *evt) {
           g4cx->simulate(eventID,0); // For Simulation
           cudaDeviceSynchronize();
           //g4cx->render();  // For Rendering
+
       }
 
 
-    SensorSD* PMT = (SensorSD*) G4SDManager::GetSDMpointer()->FindSensitiveDetector("PMT");
-    SensorSD* Camera = (SensorSD*) G4SDManager::GetSDMpointer()->FindSensitiveDetector("Camera");
-    if(SEvt::GetNumHit(eventID)>0){
-        PMT->OpticksHits();
-        Camera->OpticksHits();
-
-    }
+    //SensorSD* PMT = (SensorSD*) G4SDManager::GetSDMpointer()->FindSensitiveDetector("PMT");
+    SensorSD* Camera = (SensorSD*) G4SDManager::GetSDMpointer()->FindSensitiveDetector("/Sensor/Camera");
 
     G4cout << "Number of Steps Generated " <<ngenstep << G4endl;
     G4cout << "Number of Photons Generated " <<nphotons << G4endl;
     G4cout << "Number of Hits Opticks  " <<SEvt::GetNumHit(eventID)<< G4endl;
-    //G4cout << "Number of Hits GEANT4  " <<PMT->GetGEANT4Hits()<< G4endl;
-    //G4cout << "Number of Hits GEANT4  " <<PMT->GetGEANT4Hits()<< G4endl;
-    G4CXOpticks::Get()->reset(eventID);
+    if(SEvt::GetNumHit(eventID)>0){
+        //PMT->OpticksHits();
+        Camera->OpticksHits();
+
+
+        G4CXOpticks::Get()->reset(eventID);
+
+    }
+
 
 #endif
 

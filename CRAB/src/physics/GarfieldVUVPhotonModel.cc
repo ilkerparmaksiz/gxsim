@@ -47,6 +47,10 @@
 #include "SEvt.hh"
 #include "SEventConfig.hh"
 #include "G4StepPoint.hh"
+#include "MaterialsList.hh"
+#include "OpticalMaterialProperties.hh"
+#include "NEST.hh"
+#include "NESTProc.hh"
 #endif
 namespace{G4Mutex aMutex = G4MUTEX_INITIALIZER;}
 
@@ -398,6 +402,7 @@ void GarfieldVUVPhotonModel::InitialisePhysics(){
     DetActiveR = detCon->GetActiveR(); // cm
     DetActiveL = detCon->GetActiveL(); // cm
 
+
     ELPos =  - DetActiveL/2.0;
     FCTop =  + DetActiveL/2.0;
 
@@ -438,7 +443,8 @@ void GarfieldVUVPhotonModel::InitialisePhysics(){
 
 
         fSensor->AddComponent(fm);
-
+        MaterialGasXe=materials::MgF2();
+        MaterialGasXe->SetMaterialPropertiesTable(opticalprops::MgF2());
         // fSensor->SetArea(-DetChamberR, -DetChamberR, -DetChamberL/2.0, DetChamberR, DetChamberR, DetChamberL/2.0); // cm
 
         /*Vfield.SetArea(-DetChamberR, -DetChamberR, -DetChamberL/2.0, DetChamberR, DetChamberR, DetChamberL/2.0);
@@ -641,7 +647,7 @@ void GarfieldVUVPhotonModel::MakeELPhotonsFromFile( G4FastStep& fastStep, G4doub
         G4RunManager * runmng=G4RunManager::GetRunManager();
         const int eventID=runmng->GetCurrentEvent()->GetEventID();
         // Add condition that if this is a thermal electron and has any secondaries
-        U4::CollectGenstep_DsG4Scintillation_r4695(track,aStep,colHitsEntries,1,4*ns);
+        //U4::CollectGenstep_DsG4Scintillation_r4695(track,aStep,colHitsEntries,1,4*ns);
         int CollectedPhotons=SEvt::GetNumPhotonCollected(eventID);
         counter[3]=counter[3]+colHitsEntries;
         int maxPhoton=SEventConfig::MaxPhoton();
@@ -664,7 +670,7 @@ void GarfieldVUVPhotonModel::MakeELPhotonsSimple(G4FastStep& fastStep, G4double 
     const G4double YoverP = 140.*fieldLEM/(detCon->GetGasPressure()/torr) - 116.; // yield/cm/bar, with P in Torr ... JINST 2 p05001 (2007).
     colHitsEntries = YoverP * detCon->GetGasPressure()/bar * gapLEM; // with P in bar this time.
     // colHitsEntries*=2; // Max val before G4 cant handle the memory anymore
-    //colHitsEntries=1; // This is to turn down S2 so the vis does not get overwelmed
+    colHitsEntries=1; // This is to turn down S2 so the vis does not get overwelmed
     //colHitsEntries=300;
 
     colHitsEntries *= (G4RandGauss::shoot(1.0,res));
@@ -708,39 +714,39 @@ void GarfieldVUVPhotonModel::MakeELPhotonsSimple(G4FastStep& fastStep, G4double 
     }
         #ifdef With_Opticks
             //G4cout << "sending photons to opticks" <<G4endl;
-            G4ThreeVector fakepos (xi*10,yi*10.,zi*10.-10*gapLEM*float(i)/float(colHitsEntries)); /// ignoring diffusion in small LEM gap, EC 17-June-2022.
-
+            G4ThreeVector fakepos (xi*10,yi*10.,zi*10); /// ignoring diffusion in small LEM gap, EC 17-June-2022.
             G4Step * newStep = new G4Step();
             G4StepPoint *PoststepPoint= new G4StepPoint();
             PoststepPoint->SetPosition(fakepos);
-            PoststepPoint->
+            PoststepPoint->SetMaterial(MaterialGasXe);
             G4StepPoint *PrestepPoint= new G4StepPoint();
-            PrestepPoint
-
+            PrestepPoint->SetPosition(G4ThreeVector(fakepos[0]-2*mm,fakepos[0]-2*mm,zi-2*mm));
+            PrestepPoint->SetMaterial(MaterialGasXe);
             newStep->SetPreStepPoint(PrestepPoint);
             newStep->SetPostStepPoint(PoststepPoint);
-            auto* optphot = S2Photon::OpticalPhotonDefinition();
+            auto* thermal = NEST::NESTThermalElectron::Definition();
 
-            G4DynamicParticle VUVphoton(optphot,G4RandomDirection(), 7.2*eV);
+            //G4DynamicParticle Thermalelectron(thermal,G4RandomDirection(), 1.3*eV);
 
-            G4Track *newTrack=fastStep.CreateSecondaryTrack(VUVphoton, fakepos, tig4 ,false);
-            newTrack->SetPolarization(G4ThreeVector(0.,0.,1.0));
-            newTrack->SetStep(newStep);
-            const G4Track * track=fastStep.GetCurrentTrack();
+            //G4Track *newTrack=fastStep.CreateSecondaryTrack(Thermalelectron, fakepos, tig4 ,false);
+            //newTrack->SetPolarization(G4ThreeVector(0.,0.,1.0));
+            //newTrack->SetStep(newStep);
+            //const G4Track * track=fastStep.GetCurrentTrack();
 
-            const G4Step * aStep=track->GetStep();
+            //const G4Step * aStep=track->GetStep();
             G4RunManager * runmng=G4RunManager::GetRunManager();
             const int eventID=runmng->GetCurrentEvent()->GetEventID();
             // Add condition that if this is a thermal electron and has any secondaries
-            U4::CollectGenstep_DsG4Scintillation_r4695(track,aStep,colHitsEntries,0,4*ns);
+            //U4::CollectGenstep_DsG4Scintillation_r4695(track,aStep,colHitsEntries,0,4*ns);
             int CollectedPhotons=SEvt::GetNumPhotonCollected(eventID);
             int maxPhoton=SEventConfig::MaxPhoton();
             //std::cout<< "Collected Photons: " <<CollectedPhotons<<std::endl;
             counter[3]+=colHitsEntries;
+            //std::cout<<colHitsEntries<<std::endl;
             if(CollectedPhotons>=(maxPhoton-colHitsEntries)){
                 std::cout<<"Initiating the simulation ..." <<std::endl;
                 G4CXOpticks * g4xc=G4CXOpticks::Get();
-                g4xc->simulate(eventID,0);
+                //g4xc->simulate(eventID,0);
             }
         #endif
 }

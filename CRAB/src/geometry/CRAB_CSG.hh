@@ -43,13 +43,13 @@ using namespace std;
 /*! \class  DetectorConstruction*/
 /*! \brief class derived from G4VUserDetectorConstruction*/
 
-class CRAB_CSG : public G4VUserDetectorConstruction {
+class CRAB_CSG  {
  public:
     CRAB_CSG(GasModelParameters*);
     virtual ~CRAB_CSG();
 
     // Mandatory methods
-    virtual G4VPhysicalVolume* Construct();
+    void  Construct();
 
     virtual void AssignVisuals();
 

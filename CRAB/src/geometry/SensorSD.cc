@@ -14,9 +14,12 @@
 #include <G4ProcessManager.hh>
 #include <G4OpBoundaryProcess.hh>
 #include <G4RunManager.hh>
-#include <G4RunManager.hh>
-
-
+#include <G4AnalysisManager.hh>
+#include "config.h"
+#ifdef With_Opticks
+#include "SEvt.hh"
+#include "sphoton.h"
+#endif
 namespace sensorsd {
 
 
@@ -110,7 +113,7 @@ namespace sensorsd {
         unsigned int num_hits = sev->GetNumHit(0);
         auto ana=G4AnalysisManager::Instance();
         auto run= G4RunManager::GetRunManager();
-        fOpticksHits=sev->GetNumHit(0);
+        sev->GetNumHit(0);
         int id=8;
         if(this->GetName()=="Camera") id=7;
         for(int idx = 0; idx < int(num_hits); idx++)

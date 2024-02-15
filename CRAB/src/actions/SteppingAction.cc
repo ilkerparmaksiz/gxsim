@@ -18,7 +18,7 @@
 #include "U4.hh"
 #include "G4Scintillation.hh"
 #endif
-
+#include "G4Alpha.hh"
 namespace {G4Mutex Mutex= G4MUTEX_INITIALIZER;}
 SteppingAction::SteppingAction(EventAction *eva) : fEventAction(eva),  ev_shift(0) {
 
@@ -67,6 +67,7 @@ void SteppingAction::UserSteppingAction(const G4Step *aStep)
 
   G4OpBoundaryProcess* boundary = 0;
   Detected= false;
+
   // if (!boundary &&  particle->GetParticleName() == "S2Photon") {
   if (boundary){
       
@@ -104,8 +105,9 @@ void SteppingAction::UserSteppingAction(const G4Step *aStep)
   }
 
     #ifdef With_Opticks
-    SEvt::AddTorchGenstep();
 
+
+    //if(particle==G4Alpha::Definition())  SEvt::AddTorchGenstep();
     G4SteppingManager * sMg=G4EventManager::GetEventManager()->GetTrackingManager()->GetSteppingManager();
     G4StepStatus stepStatus=sMg->GetfStepStatus();
     if(stepStatus!=fAtRestDoItProc){
@@ -118,6 +120,7 @@ void SteppingAction::UserSteppingAction(const G4Step *aStep)
                 std::cout << "Scintilation "<< num_photons <<std::endl;
 
                 if(num_photons>0){
+
                     G4MaterialPropertiesTable * MPT = track->GetMaterial()->GetMaterialPropertiesTable();
                     G4double t1,t2=0;
                     G4int singlets,triplets=0;
@@ -126,10 +129,11 @@ void SteppingAction::UserSteppingAction(const G4Step *aStep)
                     singlets= floor(MPT->GetConstProperty(kSCINTILLATIONYIELD1)*num_photons);
                     triplets= ceil(MPT->GetConstProperty(kSCINTILLATIONYIELD2)*num_photons);
                     std::cout << "Scintilation "<< num_photons <<" Amount of Singlets " <<singlets <<" Triplets " << triplets <<std::endl;
-                    if(singlets>0)
+                   /* if(singlets>0)
                         U4::CollectGenstep_DsG4Scintillation_r4695(track,aStep,singlets,0,t1);
                     if(triplets>0)
                         U4::CollectGenstep_DsG4Scintillation_r4695(track,aStep,triplets,1,t2);
+                    */
                     //U4::CollectGenstep_DsG4Scintillation_r4695(atrack,step,num_photons,1,t2);
                 }
 

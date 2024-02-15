@@ -5,7 +5,7 @@
 #include "PrimaryGeneratorAction.hh"
 #include "Analysis.hh"
 #include "EventAction.hh"
-
+#include "config.h"
 #include "GasBoxSD.hh"
 #include "G4SDManager.hh"
 #include "G4RunManager.hh"

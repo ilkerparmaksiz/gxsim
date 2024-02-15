@@ -72,7 +72,7 @@ CRAB_CSG::~CRAB_CSG() {
    // delete detectorMessenger;
 }
 
-G4VPhysicalVolume* CRAB_CSG::Construct(){
+void CRAB_CSG::Construct(){
     double offsetTest=0;//16.9*mm;
     //Materials
     G4Material *gxe    = materials::GXe(gas_pressure_,68);
@@ -589,7 +589,6 @@ G4VPhysicalVolume* CRAB_CSG::Construct(){
 
     // Visuals
     AssignVisuals();
-
 
 
 

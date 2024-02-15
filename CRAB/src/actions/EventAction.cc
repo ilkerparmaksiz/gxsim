@@ -53,7 +53,6 @@ void EventAction::EndOfEventAction(const G4Event *evt) {
     GarfieldVUVPhotonModel* gvm = (GarfieldVUVPhotonModel*)(G4GlobalFastSimulationManager::GetInstance()->GetFastSimulationModel("GarfieldVUVPhotonModel"));
     if(gvm)
       gvm->Reset(); // zero out the sensor: meaning reset the nexcitations, which is cumulative.
-
     G4cout << " EventAction::EndOfEventAction()  "  << evt->GetEventID()<< G4endl;
 #ifdef With_Opticks
 
@@ -72,7 +71,7 @@ void EventAction::EndOfEventAction(const G4Event *evt) {
           std::cout<<g4cx->desc()<<std::endl;
           std::cout<<"--- G4Optickx ---" << g4cx->descSimulate() <<std::endl;
           g4cx->simulate(eventID,0); // For Simulation
-          cudaDeviceSynchronize();
+          //cudaDeviceSynchronize();
           //g4cx->render();  // For Rendering
 
       }
@@ -84,11 +83,10 @@ void EventAction::EndOfEventAction(const G4Event *evt) {
     G4cout << "Number of Steps Generated " <<ngenstep << G4endl;
     G4cout << "Number of Photons Generated " <<nphotons << G4endl;
     G4cout << "Number of Hits Opticks  " <<SEvt::GetNumHit(eventID)<< G4endl;
+
     if(SEvt::GetNumHit(eventID)>0){
         //PMT->OpticksHits();
         Camera->OpticksHits();
-
-
         G4CXOpticks::Get()->reset(eventID);
 
     }

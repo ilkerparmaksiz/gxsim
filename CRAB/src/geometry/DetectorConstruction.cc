@@ -50,7 +50,7 @@
 #include "Garfield/GeometrySimple.hh"
 #include "Garfield/SolidTube.hh"
 #include "CRAB_CSG.hh"
-
+#include "SimpleBoxGeo.hh"
 
 DetectorConstruction::DetectorConstruction(GasModelParameters* gmp) :
     fGasModelParameters(gmp),
@@ -60,7 +60,8 @@ DetectorConstruction::DetectorConstruction(GasModelParameters* gmp) :
     chamber_thickn (7. * mm),
     gas_pressure_(10 * bar),
     FielCageGap(21.26*cm),
-    Active_diam(8.6 * cm)
+    Active_diam(8.6 * cm),
+    temperature(293*kelvin)
 {
     detectorMessenger = new DetectorMessenger(this);
 
@@ -75,6 +76,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
     //Materials
 
     G4Material *air = G4NistManager::Instance()->FindOrBuildMaterial("G4_AIR");
+    air->SetMaterialPropertiesTable(opticalprops::Vacuum());
 
     // Constructing Lab Space
     G4String lab_name="LAB";
@@ -93,6 +95,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
 
 #ifdef With_Opticks
     CRAB_CSG *geo=new CRAB_CSG(fGasModelParameters);
+    //SimpleBoxGeo *geo = new SimpleBoxGeo();
 #endif
 
 #ifndef With_Opticks
@@ -101,13 +104,16 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
 
     geo->SetMotherLab(lab_logic_volume);
     geo->SetOffset(0.2*cm);
+    //geo->SetYield(10);
     geo->SetGasPressure(gas_pressure_);
+    geo->SetTemperature(temperature);
     geo->Construct();
-
     gas_logic=geo->GasLogic();
     //Construct a G4Region, connected to the logical volume in which you want to use the G4FastSimulationModel
     G4Region* regionGas = new G4Region("GasRegion");
     regionGas->AddRootLogicalVolume(gas_logic);
+
+
 
 
 
@@ -121,17 +127,19 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
 
 }
 void DetectorConstruction::ConstructSDandField(){
+
     G4SDManager* SDManager = G4SDManager::GetSDMpointer();
     G4String GasBoxSDname = "interface/GasBoxSD";
 
     GasBoxSD* myGasBoxSD = new GasBoxSD(GasBoxSDname);
     SDManager->SetVerboseLevel(1);
-    SDManager->AddNewDetector(myGasBoxSD);
+    //SDManager->AddNewDetector(myGasBoxSD);
     SetSensitiveDetector(gas_logic,myGasBoxSD);
 
     //These commands generate the four gas models and connect it to the GasRegion
     G4Region* region = G4RegionStore::GetInstance()->GetRegion("GasRegion");
     new DegradModel(fGasModelParameters,"DegradModel",region,this,myGasBoxSD);
     new GarfieldVUVPhotonModel(fGasModelParameters,"GarfieldVUVPhotonModel",region,this,myGasBoxSD);
+
 }
 

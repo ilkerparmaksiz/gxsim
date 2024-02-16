@@ -86,6 +86,7 @@ void CRAB_CSG::Construct(){
     MgF2->SetMaterialPropertiesTable(opticalprops::MgF2());
     vacuum->SetMaterialPropertiesTable(opticalprops::Vacuum());
     gxe->SetMaterialPropertiesTable(opticalprops::GXe(gas_pressure_, 68,sc_yield_,e_lifetime_));
+    Steel->SetMaterialPropertiesTable(opticalprops::STEEL());
 
     // Constructing Lab Space
     G4LogicalVolume * lab_logic_volume = Mother;
@@ -235,12 +236,12 @@ void CRAB_CSG::Construct(){
     pmt2_=new pmt::PmtR7378A();
     pmt1_->SetPMTName("S2");
     pmt2_->SetPMTName("S1");
-    pmt1_->Construct();
+    //pmt1_->Construct();
     pmt2_->Construct();
 
 
     // Adding Logical Volumes for PMTs
-    G4LogicalVolume * pmt1_logic=pmt1_->GetLogicalVolume();
+    //G4LogicalVolume * pmt1_logic=pmt1_->GetLogicalVolume();
     G4LogicalVolume * pmt2_logic=pmt2_->GetLogicalVolume();
 
 
@@ -288,7 +289,7 @@ void CRAB_CSG::Construct(){
     G4double camHalfLength=0.5*mm;
     G4double camRadius= 12.7*mm;
     G4VSolid* camSolid = new G4Tubs("camWindow",0.,camRadius,camHalfLength,0.,twopi);
-    G4LogicalVolume* camLogical = new G4LogicalVolume(camSolid,MgF2,"camLogical");
+    G4LogicalVolume* camLogical = new G4LogicalVolume(camSolid,MgF2,"Camera_logic");
 
 
     // Bracket
@@ -714,7 +715,7 @@ void CRAB_CSG::AssignVisuals() {
     */
 
     // Camera
-    G4LogicalVolume* CAMLog = lvStore->GetVolume("camLogical");
+    G4LogicalVolume* CAMLog = lvStore->GetVolume("Camera_logic");
     G4VisAttributes CAMVis=colours::DarkRedAlpha();
     CAMVis.SetForceSolid(true);
     CAMLog->SetVisAttributes(CAMLog);

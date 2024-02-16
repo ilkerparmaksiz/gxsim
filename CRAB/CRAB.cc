@@ -37,7 +37,7 @@ int main(int argc, char** argv) {
 
 #ifdef With_Opticks
    OPTICKS_LOG(argc,argv); // This is needed
-   SEventConfig::SetMaxPhoton(170000000);
+   SEventConfig::SetMaxPhoton(1000000);
    SEventConfig::SetRGModeSimulate();
    SEventConfig::SetIntegrationMode(3);
    std::cout<< SEventConfig::Desc() << std::endl;
@@ -69,7 +69,7 @@ G4Random::setTheEngine(new CLHEP::RanecuEngine);
 
   G4int randseed;
  //Fix RandSeed is not define issue
- (argc>3) ? randseed = atoi(argv[2]) : randseed =20;
+ (argc>3) ? randseed = atoi(argv[2]) : randseed =10;
  G4Random::setTheSeed(randseed);
   G4cout << "Setting the Random seed: " << randseed << G4endl;
   G4cout << "Creation of the gas model parameter class" << G4endl;

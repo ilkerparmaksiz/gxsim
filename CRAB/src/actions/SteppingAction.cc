@@ -160,7 +160,7 @@ void SteppingAction::UserSteppingAction(const G4Step *aStep)
   //G4VPhysicalVolume* eVolume = nullptr;
   G4String eVname("null");
 
-  if (pID==11 && track->GetKineticEnergy()/keV>0.100 && (lVolume->GetName().find("GAS")!=std::string::npos)) // don't count the thermale's, just G4 e's
+  if (pID==11 && track->GetKineticEnergy()/keV>0.100 && (lVolume->GetName().find("GAS_")!=std::string::npos)) // don't count the thermale's, just G4 e's
     fEventAction->EDepPrim(aStep->GetTotalEnergyDeposit());
 
 

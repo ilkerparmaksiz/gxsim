@@ -669,7 +669,7 @@ void GarfieldVUVPhotonModel::MakeELPhotonsSimple(G4FastStep& fastStep, G4double 
     colHitsEntries = YoverP * detCon->GetGasPressure()/bar * gapLEM; // with P in bar this time.
     // colHitsEntries*=2; // Max val before G4 cant handle the memory anymore
     //colHitsEntries=1; // This is to turn down S2 so the vis does not get overwelmed
-    //colHitsEntries=300;
+    colHitsEntries=300;
 
     colHitsEntries *= (G4RandGauss::shoot(1.0,res));
 
@@ -677,7 +677,7 @@ void GarfieldVUVPhotonModel::MakeELPhotonsSimple(G4FastStep& fastStep, G4double 
 
     const G4double vd(2.4); // mm/musec, https://arxiv.org/pdf/1902.05544.pdf. Pretty much flat at our E/p..
 
-    if(!Opticks){
+    //if(!Opticks){
         auto* optphot = S2Photon::OpticalPhotonDefinition();
         //std::cout << colHitsEntries << std::endl;
         //#pragma omp parallel for
@@ -702,16 +702,17 @@ void GarfieldVUVPhotonModel::MakeELPhotonsSimple(G4FastStep& fastStep, G4double 
 
             //newExcHit->SetTime(tig4);
             //fGasBoxSD->InsertGarfieldExcitationHit(newExcHit);
-            G4Track *newTrack=fastStep.CreateSecondaryTrack(VUVphoton, fakepos, tig4 ,false);
-            newTrack->SetPolarization(G4ThreeVector(0.,0.,1.0)); // Needs some pol'n, else we will only ever reflect at an OpBoundary. EC, 8-Aug-2022.
+            G4Track *newTrk=fastStep.CreateSecondaryTrack(VUVphoton, fakepos,tig4 ,false);
+            newTrk->SetPolarization(G4ThreeVector(0.,0.,1.0)); // Needs some pol'n, else we will only ever reflect at an OpBoundary. EC, 8-Aug-2022.
               //	G4ProcessManager* pm= newTrack->GetDefinition()->GetProcessManager();
             //	G4ProcessVectorfAtRestDoItVector = pm->GetAtRestProcessVector(typeDoIt);
           //}
           counter[3]++;
-     }
+    // }
     }
         #ifdef With_Opticks
             //G4cout << "sending photons to opticks" <<G4endl;
+            tig4 = fastStep.GetCurrentTrack()->GetProperTime() + gapLEM*10./vd*1E3;
             G4ThreeVector fakepos (xi*10,yi*10.,zi*10); /// ignoring diffusion in small LEM gap, EC 17-June-2022.
 
             G4Step * newStep = new G4Step();
@@ -722,7 +723,7 @@ void GarfieldVUVPhotonModel::MakeELPhotonsSimple(G4FastStep& fastStep, G4double 
             G4StepPoint *PrestepPoint= new G4StepPoint();
             PrestepPoint->SetPosition(G4ThreeVector(fakepos[0]-2*mm,fakepos[0]-2*mm,zi-2*mm));
             PrestepPoint->SetMaterial(MaterialGasXe);
-            PrestepPoint->SetProperTime(ti);
+            PrestepPoint->SetProperTime(fastStep.GetCurrentTrack()->GetProperTime());
             newStep->SetPreStepPoint(PrestepPoint);
             newStep->SetPostStepPoint(PoststepPoint);
             auto* thermal = NEST::NESTThermalElectron::Definition();
@@ -730,7 +731,7 @@ void GarfieldVUVPhotonModel::MakeELPhotonsSimple(G4FastStep& fastStep, G4double 
             G4DynamicParticle Thermalelectron(thermal,G4RandomDirection(), 1.3*eV);
 
             G4Track *newTrack=fastStep.CreateSecondaryTrack(Thermalelectron, fakepos, tig4 ,false);
-            newTrack->SetPolarization(G4ThreeVector(0.,0.,1.0));
+            //newTrack->SetPolarization(G4ThreeVector(0.,0.,1.0));
             newTrack->SetStep(newStep);
             const G4Track * track=fastStep.GetCurrentTrack();
 

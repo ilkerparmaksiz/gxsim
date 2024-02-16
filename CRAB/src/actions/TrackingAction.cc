@@ -63,7 +63,7 @@ void TrackingAction::PreUserTrackingAction(const G4Track *aTrack) {
   G4int row(0);
 
   // Turn off the S2 fill since its heavy!
-  /*
+
   analysisManager->FillNtupleDColumn(id,row, event); row++;
 
   analysisManager->FillNtupleDColumn(id,row, (G4double)pID); row++;
@@ -74,7 +74,7 @@ void TrackingAction::PreUserTrackingAction(const G4Track *aTrack) {
   analysisManager->FillNtupleSColumn(id,row, startp); row++;
 
   analysisManager->AddNtupleRow(id);
-  */
+
 
 
   }

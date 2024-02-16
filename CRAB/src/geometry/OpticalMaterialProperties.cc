@@ -254,7 +254,7 @@ namespace opticalprops {
     mpt->AddProperty("ELSPECTRUM"             , sc_energy, intensity, 1);
     mpt->AddProperty("FASTCOMPONENT", sc_energy, intensity,1);
     mpt->AddProperty("SLOWCOMPONENT", sc_energy, intensity,1);
-    mpt->AddProperty("REEMISSIONPROB", sc_energy, intensity,1);
+    mpt->AddProperty("REEMISSIONPROB", sc_energy, REmisProb,1);
 
       // CONST PROPERTIES
     mpt->AddConstProperty("SCINTILLATIONYIELD", sc_yield);

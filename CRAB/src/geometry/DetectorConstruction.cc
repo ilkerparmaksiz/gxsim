@@ -54,7 +54,7 @@
 
 DetectorConstruction::DetectorConstruction(GasModelParameters* gmp) :
     fGasModelParameters(gmp),
-    Lab_size(5. *m),
+    Lab_size(1 *m),
     chamber_diam(16.4 * cm),
     chamber_length (43.18* cm), // Config files vary
     chamber_thickn (7. * mm),
@@ -134,7 +134,7 @@ void DetectorConstruction::ConstructSDandField(){
     GasBoxSD* myGasBoxSD = new GasBoxSD(GasBoxSDname);
     SDManager->SetVerboseLevel(1);
     //SDManager->AddNewDetector(myGasBoxSD);
-    SetSensitiveDetector(gas_logic,myGasBoxSD);
+    //SetSensitiveDetector(gas_logic,myGasBoxSD);
 
     //These commands generate the four gas models and connect it to the GasRegion
     G4Region* region = G4RegionStore::GetInstance()->GetRegion("GasRegion");

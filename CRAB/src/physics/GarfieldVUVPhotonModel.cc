@@ -733,13 +733,13 @@ void GarfieldVUVPhotonModel::MakeELPhotonsSimple(G4FastStep& fastStep, G4double 
             G4Track *newTrack=fastStep.CreateSecondaryTrack(Thermalelectron, fakepos, tig4 ,false);
             //newTrack->SetPolarization(G4ThreeVector(0.,0.,1.0));
             newTrack->SetStep(newStep);
-            const G4Track * track=fastStep.GetCurrentTrack();
 
-            const G4Step * aStep=track->GetStep();
+
+
             G4RunManager * runmng=G4RunManager::GetRunManager();
             const int eventID=runmng->GetCurrentEvent()->GetEventID();
             // Add condition that if this is a thermal electron and has any secondaries
-            U4::CollectGenstep_DsG4Scintillation_r4695(track,aStep,colHitsEntries,0,4*ns);
+            U4::CollectGenstep_DsG4Scintillation_r4695(newTrack,newStep,colHitsEntries,0,4*ns);
             int CollectedPhotons=SEvt::GetNumPhotonCollected(eventID);
             int maxPhoton=SEventConfig::MaxPhoton();
             //std::cout<< "Collected Photons: " <<CollectedPhotons<<std::endl;
@@ -750,6 +750,7 @@ void GarfieldVUVPhotonModel::MakeELPhotonsSimple(G4FastStep& fastStep, G4double 
                 G4CXOpticks * g4xc=G4CXOpticks::Get();
                 g4xc->simulate(eventID,0);
             }
+            newTrack->SetTrackStatus(fStopAndKill);
         #endif
 }
 

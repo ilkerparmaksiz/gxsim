@@ -69,7 +69,8 @@ void SteppingAction::UserSteppingAction(const G4Step *aStep)
   Detected= false;
 
   // if (!boundary &&  particle->GetParticleName() == "S2Photon") {
-  if (boundary){
+  Material_Store="None";
+  if (!boundary){
       
       G4ProcessVector* pv = particle->GetProcessManager()->GetProcessList();
       for (size_t i=0; i<pv->size(); i++) {
@@ -98,7 +99,11 @@ void SteppingAction::UserSteppingAction(const G4Step *aStep)
                 reflected = true;
                 Material_Store = aStep->GetPreStepPoint()->GetTouchableHandle()->GetVolume()->GetLogicalVolume()->GetName();
               }*/
-              if(boundary->GetStatus() == Detection)  Detected=true;
+              if(boundary->GetStatus() == Detection  )  {
+                  Detected=true;
+                  Material_Store = aStep->GetPostStepPoint()->GetTouchableHandle()->GetVolume()->GetLogicalVolume()->GetName();
+                  std::cout <<"Material " <<Material_Store<<std::endl;
+              };
               break;
           }
       }
@@ -174,7 +179,8 @@ void SteppingAction::UserSteppingAction(const G4Step *aStep)
     PhotonType = 1;
   }
 
-  if (eVolume){
+  if (eVolume ){
+  //if (Material_Store!="None"){
     //G4cout<<"Volume -->"<<eVolume->GetName()<<G4endl;
     //G4cout<<"Logical Volume -->"<<lVolume->GetName()<<G4endl;
 
@@ -183,6 +189,7 @@ void SteppingAction::UserSteppingAction(const G4Step *aStep)
     // Camera
     //if (lVolume->GetName().find("camLogical")!=std::string::npos){
     id=0;
+    //std::cout<<Material_Store<<std::endl;
     //if (eVname.find("Camera")!=std::string::npos){
     if (lVolume->GetName().find("Camera_logic")!=std::string::npos){
       track->SetTrackStatus(fStopAndKill);
@@ -198,7 +205,7 @@ void SteppingAction::UserSteppingAction(const G4Step *aStep)
       // else  std::cout << "Photon arrived but was not reflected: " << track->GetTrackID() << std::endl;
     }
     id = 4;
-    if (lVolume->GetName().find("Pmt_logic")!=std::string::npos){
+    if (lVolume->GetName().find("S1_PHOTOCATHODE")!=std::string::npos or Material_Store=="S1_PHOTOCATHODE"){
       track->SetTrackStatus(fStopAndKill);
       analysisManager->FillNtupleDColumn(id,0, event+ev_shift);
       analysisManager->FillNtupleDColumn(id,1, pID);

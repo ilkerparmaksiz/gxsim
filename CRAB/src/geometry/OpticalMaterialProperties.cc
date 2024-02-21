@@ -303,14 +303,21 @@ namespace opticalprops {
       G4MaterialPropertiesTable* mpt = new G4MaterialPropertiesTable();
 
       // REFLECTIVITY
-      std::vector<G4double> ENERGIES = {
-              optPhotMinE_,7.20*eV, 7.29 * eV,  optPhotMaxE_
-      };
-      std::vector<G4double> REFLECTIVITY = { 0,0,0,0};
-      std::vector<G4double> EFFICIENCY = { 1,1,1,1};
+      const G4int ri_entries = 100;
+      G4double eWidth = (optPhotMaxE_ - optPhotMinE_) / ri_entries;
+      std::vector<G4double> REFLECTIVITY;
+      std::vector<G4double> EFFICIENCY ;
+      std::vector<G4double> ri_energy;
+      for (int i=0; i<ri_entries; i++)
+      {
+          ri_energy.push_back(optPhotMinE_ + i * eWidth);
+          REFLECTIVITY.push_back(0);
+          EFFICIENCY.push_back(0.9);
+      }
 
-      mpt->AddProperty("REFLECTIVITY", ENERGIES, REFLECTIVITY);
-      mpt->AddProperty("EFFICIENCY", ENERGIES, EFFICIENCY);
+
+      mpt->AddProperty("REFLECTIVITY", ri_energy, REFLECTIVITY);
+      mpt->AddProperty("EFFICIENCY", ri_energy, EFFICIENCY);
       return mpt;
   }
 

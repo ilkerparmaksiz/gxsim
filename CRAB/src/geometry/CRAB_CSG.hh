@@ -70,6 +70,8 @@ class CRAB_CSG  {
     inline G4LogicalVolume * GasLogic(){return gas_logic;}
     inline void SetMotherLab(G4LogicalVolume *mt){Mother=mt;};
     inline void SetOffset(G4double of){Offset=of;};
+    inline G4LogicalVolume * GetCamLogic(){return CamLogic;}
+
 
 
   
@@ -120,6 +122,8 @@ class CRAB_CSG  {
     G4double Offset;
     G4Region* rg;
     G4LogicalVolume* gas_logic;
+    G4LogicalVolume * CamLogic;
+
 
 
 };

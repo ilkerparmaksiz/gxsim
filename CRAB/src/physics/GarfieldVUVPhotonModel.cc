@@ -653,7 +653,7 @@ void GarfieldVUVPhotonModel::MakeELPhotonsFromFile( G4FastStep& fastStep, G4doub
         if(CollectedPhotons>=(maxPhoton-colHitsEntries)){
             std::cout<<"Initiating the simulation ..." <<std::endl;
             G4CXOpticks * g4xc=G4CXOpticks::Get();
-            //g4xc->simulate(eventID,0);
+            g4xc->simulate(eventID,0);
         }
      #endif
 }
@@ -669,7 +669,7 @@ void GarfieldVUVPhotonModel::MakeELPhotonsSimple(G4FastStep& fastStep, G4double 
     colHitsEntries = YoverP * detCon->GetGasPressure()/bar * gapLEM; // with P in bar this time.
     // colHitsEntries*=2; // Max val before G4 cant handle the memory anymore
     //colHitsEntries=1; // This is to turn down S2 so the vis does not get overwelmed
-    colHitsEntries=300;
+    //colHitsEntries=500;
 
     colHitsEntries *= (G4RandGauss::shoot(1.0,res));
 
@@ -721,21 +721,19 @@ void GarfieldVUVPhotonModel::MakeELPhotonsSimple(G4FastStep& fastStep, G4double 
             PoststepPoint->SetProperTime(tig4);
             PoststepPoint->SetMaterial(MaterialGasXe);
             G4StepPoint *PrestepPoint= new G4StepPoint();
-            PrestepPoint->SetPosition(G4ThreeVector(fakepos[0]-2*mm,fakepos[0]-2*mm,zi-2*mm));
+            PrestepPoint->SetPosition(G4ThreeVector(fakepos[0],fakepos[1],fakepos[2]-1*mm));
             PrestepPoint->SetMaterial(MaterialGasXe);
             PrestepPoint->SetProperTime(fastStep.GetCurrentTrack()->GetProperTime());
             newStep->SetPreStepPoint(PrestepPoint);
             newStep->SetPostStepPoint(PoststepPoint);
-            auto* thermal = NEST::NESTThermalElectron::Definition();
 
+            auto* thermal = NEST::NESTThermalElectron::Definition();
             G4DynamicParticle Thermalelectron(thermal,G4RandomDirection(), 1.3*eV);
 
             G4Track *newTrack=fastStep.CreateSecondaryTrack(Thermalelectron, fakepos, tig4 ,false);
             //newTrack->SetPolarization(G4ThreeVector(0.,0.,1.0));
             newTrack->SetStep(newStep);
-
-
-
+            newTrack->SetTrackStatus(fStopAndKill);
             G4RunManager * runmng=G4RunManager::GetRunManager();
             const int eventID=runmng->GetCurrentEvent()->GetEventID();
             // Add condition that if this is a thermal electron and has any secondaries
@@ -749,8 +747,9 @@ void GarfieldVUVPhotonModel::MakeELPhotonsSimple(G4FastStep& fastStep, G4double 
                 std::cout<<"Initiating the simulation ..." <<std::endl;
                 G4CXOpticks * g4xc=G4CXOpticks::Get();
                 g4xc->simulate(eventID,0);
+                cudaDeviceSynchronize();
             }
-            newTrack->SetTrackStatus(fStopAndKill);
+
         #endif
 }
 

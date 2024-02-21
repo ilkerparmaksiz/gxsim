@@ -65,6 +65,8 @@ namespace sensorsd {
     G4ParticleDefinition* pdef = step->GetTrack()->GetDefinition();
     if (pdef != G4OpticalPhoton::Definition() || pdef!=S2Photon::Definition()) return false;
 
+    //GEANT4Hits(step);
+    std::cout <<"-------- Hits ---------" <<std::endl;
     const G4VTouchable* touchable =
       step->GetPostStepPoint()->GetTouchable();
 
@@ -110,16 +112,25 @@ namespace sensorsd {
     {
 #ifdef With_Opticks
         SEvt* sev             = SEvt::Get_EGPU();
+
         unsigned int num_hits = sev->GetNumHit(0);
+
         auto ana=G4AnalysisManager::Instance();
         auto run= G4RunManager::GetRunManager();
         sev->GetNumHit(0);
         int id=8;
-        if(this->GetName()=="Camera") id=7;
+
+        std::cout<< "Name is " << this->GetName() <<std::endl;
         for(int idx = 0; idx < int(num_hits); idx++)
         {
             sphoton hit;
+
+
+            //std::cout << hit.descDetail()  << " id  " <<id <<std::endl;
+
             sev->getHit(hit, idx);
+            if(hit.boundary()==29) id=7;
+            else id=8;
             G4ThreeVector position     = G4ThreeVector(hit.pos.x, hit.pos.y, hit.pos.z);
             G4ThreeVector direction    = G4ThreeVector(hit.mom.x, hit.mom.y, hit.mom.z);
             G4ThreeVector polarization = G4ThreeVector(hit.pol.x, hit.pol.y, hit.pol.z);
@@ -144,6 +155,22 @@ namespace sensorsd {
 #endif
     }
 
+  void SensorSD::GEANT4Hits(G4Step* step){
+      auto analysisManager = G4AnalysisManager::Instance();
+      G4int id;
+      auto track=step->GetTrack();
+      auto event=G4EventManager::GetEventManager()->GetConstCurrentEvent()->GetEventID();
+      if(this->GetName()=="Camera")  id=0;
+      else id=4;
+      analysisManager->FillNtupleDColumn(id,0, event);
+      analysisManager->FillNtupleDColumn(id,1, track->GetTrackID());
+      analysisManager->FillNtupleDColumn(id,2, track->GetProperTime()/CLHEP::ns);
+      analysisManager->FillNtupleDColumn(id,3, track->GetPosition()[0]/CLHEP::mm);
+      analysisManager->FillNtupleDColumn(id,4, track->GetPosition()[1]/CLHEP::mm);
+      analysisManager->FillNtupleDColumn(id,5, track->GetPosition()[2]/CLHEP::mm);
+      analysisManager->AddNtupleRow(id);
+
+  }
   void SensorSD::EndOfEvent(G4HCofThisEvent* /*HCE*/)
   {
     //  int HCID = G4SDManager::GetSDMpointer()->

@@ -71,21 +71,21 @@ void EventAction::EndOfEventAction(const G4Event *evt) {
           std::cout<<g4cx->desc()<<std::endl;
           std::cout<<"--- G4Optickx ---" << g4cx->descSimulate() <<std::endl;
           g4cx->simulate(eventID,0); // For Simulation
-          //cudaDeviceSynchronize();
+          cudaDeviceSynchronize();
           //g4cx->render();  // For Rendering
 
       }
 
 
-    //SensorSD* PMT = (SensorSD*) G4SDManager::GetSDMpointer()->FindSensitiveDetector("PMT");
+    SensorSD* PMT = (SensorSD*) G4SDManager::GetSDMpointer()->FindSensitiveDetector("/PMT_R7378A/S1");
     SensorSD* Camera = (SensorSD*) G4SDManager::GetSDMpointer()->FindSensitiveDetector("/Sensor/Camera");
 
     G4cout << "Number of Steps Generated " <<ngenstep << G4endl;
     G4cout << "Number of Photons Generated " <<nphotons << G4endl;
     G4cout << "Number of Hits Opticks  " <<SEvt::GetNumHit(eventID)<< G4endl;
 
-    if(SEvt::GetNumHit(eventID)>0){
-        //PMT->OpticksHits();
+    if(SEvt::GetNumHit(0)>0){
+        PMT->OpticksHits();
         Camera->OpticksHits();
         G4CXOpticks::Get()->reset(eventID);
 

@@ -62,6 +62,7 @@ namespace sensorsd {
     /// persistency manager to select the collection.
     static G4String GetCollectionUniqueName();
     void OpticksHits();
+    void GEANT4Hits(G4Step* step);
   private:
 
     G4bool ProcessHits(G4Step*, G4TouchableHistory*);

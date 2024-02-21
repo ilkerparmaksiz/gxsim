@@ -99,6 +99,7 @@ class DetectorConstruction : public G4VUserDetectorConstruction {
     G4double fOffset;
     G4double counter;
     G4ThreeVector vertex;
+    G4LogicalVolume *cam;
 
 
     G4double MgF2_window_thickness_;
@@ -113,6 +114,7 @@ class DetectorConstruction : public G4VUserDetectorConstruction {
 
     G4LogicalVolume* gas_logic;
     std::shared_ptr<util::SampleFromSurface>Sampler;
+    G4LogicalVolume * Camera;
 
 
 };

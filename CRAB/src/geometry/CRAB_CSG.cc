@@ -236,12 +236,12 @@ void CRAB_CSG::Construct(){
     pmt2_=new pmt::PmtR7378A();
     pmt1_->SetPMTName("S2");
     pmt2_->SetPMTName("S1");
-    //pmt1_->Construct();
+    pmt1_->Construct();
     pmt2_->Construct();
 
 
     // Adding Logical Volumes for PMTs
-    //G4LogicalVolume * pmt1_logic=pmt1_->GetLogicalVolume();
+    G4LogicalVolume * pmt1_logic=pmt1_->GetLogicalVolume();
     G4LogicalVolume * pmt2_logic=pmt2_->GetLogicalVolume();
 
 
@@ -562,31 +562,34 @@ void CRAB_CSG::Construct(){
 
 
     // Camera
-    G4OpticalSurface* opXenon_Glass = new G4OpticalSurface("XenonCamSurface");
+    G4OpticalSurface* opXenon_Glass = new G4OpticalSurface("CamSurface");
+    //opXenon_Glass->SetMaterialPropertiesTable(opticalprops::PerfectDetector());
     opXenon_Glass->SetMaterialPropertiesTable(opticalprops::Vacuum());
-    opXenon_Glass->SetModel(glisur);                  // SetModel
-    opXenon_Glass->SetType(dielectric_dielectric);   // SetType
-    opXenon_Glass->SetFinish(ground);                 // SetFinish
-    opXenon_Glass->SetPolish(0.0);
-    new G4LogicalBorderSurface("XenonCamSurface",PMT_Tube_Vacuum_Phys0, camPhysical,opXenon_Glass);
+    opXenon_Glass->SetModel(unified);                  // SetModel
+    opXenon_Glass->SetType(dielectric_metal);   // SetType
+    opXenon_Glass->SetFinish(polished);                 // SetFinish
+    new G4LogicalSkinSurface("XenonCamSurface",camLogical,opXenon_Glass);
 
     // Lens
-    G4OpticalSurface* opXenon_Glass2 = new G4OpticalSurface("XenonLensSurface");
-    opXenon_Glass2->SetMaterialPropertiesTable(opticalprops::Vacuum());
+    /*G4OpticalSurface* opXenon_Glass2 = new G4OpticalSurface("XenonLensSurface");
+    opXenon_Glass2->SetMaterialPropertiesTable(opticalprops::MgF2());
     opXenon_Glass2->SetModel(glisur);                  // SetModel
     opXenon_Glass2->SetType(dielectric_dielectric);   // SetType
     opXenon_Glass2->SetFinish(polished);                 // SetFinish
     opXenon_Glass2->SetPolish(0.0);
     new G4LogicalBorderSurface("XenonLensSurface",gas_phys,lensPhysical,opXenon_Glass2);
+    */
 
 
-    /// Camera as Sensitive Detector
+
+    G4LogicalVolumeStore* lvStore = G4LogicalVolumeStore::GetInstance();
+
     G4SDManager *SDManager=G4SDManager::GetSDMpointer();
     sensorsd::SensorSD* CameraSD=new sensorsd::SensorSD("/Sensor/Camera");
     SDManager->AddNewDetector(CameraSD);
     camLogical->SetSensitiveDetector(CameraSD);
 
-
+    CamLogic=camLogical;
 
     // Visuals
     AssignVisuals();
@@ -610,8 +613,8 @@ void CRAB_CSG::AssignVisuals() {
     G4LogicalVolume* Chamber = lvStore->GetVolume("CHAMBER");
     G4VisAttributes *ChamberVa=new G4VisAttributes(G4Colour(1,1,1));
     ChamberVa->SetForceSolid(true);
-    //Chamber->SetVisAttributes(G4VisAttributes::GetInvisible());
-    Chamber->SetVisAttributes(ChamberVa);
+    Chamber->SetVisAttributes(G4VisAttributes::GetInvisible());
+    //Chamber->SetVisAttributes(ChamberVa);
 
 
     //GAS

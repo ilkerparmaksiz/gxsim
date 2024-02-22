@@ -51,6 +51,9 @@
 #include "OpticalMaterialProperties.hh"
 #include "NEST.hh"
 #include "NESTProc.hh"
+#include "SensorSD.hh"
+#include "G4SDManager.hh"
+using namespace sensorsd;
 #endif
 namespace{G4Mutex aMutex = G4MUTEX_INITIALIZER;}
 
@@ -677,7 +680,7 @@ void GarfieldVUVPhotonModel::MakeELPhotonsSimple(G4FastStep& fastStep, G4double 
 
     const G4double vd(2.4); // mm/musec, https://arxiv.org/pdf/1902.05544.pdf. Pretty much flat at our E/p..
 
-    //if(!Opticks){
+    if(!Opticks){
         auto* optphot = S2Photon::OpticalPhotonDefinition();
         //std::cout << colHitsEntries << std::endl;
         //#pragma omp parallel for
@@ -708,7 +711,7 @@ void GarfieldVUVPhotonModel::MakeELPhotonsSimple(G4FastStep& fastStep, G4double 
             //	G4ProcessVectorfAtRestDoItVector = pm->GetAtRestProcessVector(typeDoIt);
           //}
           counter[3]++;
-    // }
+     }
     }
         #ifdef With_Opticks
             //G4cout << "sending photons to opticks" <<G4endl;
@@ -738,16 +741,25 @@ void GarfieldVUVPhotonModel::MakeELPhotonsSimple(G4FastStep& fastStep, G4double 
             const int eventID=runmng->GetCurrentEvent()->GetEventID();
             // Add condition that if this is a thermal electron and has any secondaries
             U4::CollectGenstep_DsG4Scintillation_r4695(newTrack,newStep,colHitsEntries,0,4*ns);
-            int CollectedPhotons=SEvt::GetNumPhotonCollected(eventID);
+            int CollectedPhotons=SEvt::GetNumPhotonCollected(0);
             int maxPhoton=SEventConfig::MaxPhoton();
             //std::cout<< "Collected Photons: " <<CollectedPhotons<<std::endl;
             counter[3]+=colHitsEntries;
             //std::cout<<colHitsEntries<<std::endl;
-            if(CollectedPhotons>=(maxPhoton-colHitsEntries)){
+            if(CollectedPhotons>(maxPhoton-colHitsEntries)){
                 std::cout<<"Initiating the simulation ..." <<std::endl;
                 G4CXOpticks * g4xc=G4CXOpticks::Get();
                 g4xc->simulate(eventID,0);
                 cudaDeviceSynchronize();
+
+                SensorSD* PMT = (SensorSD*) G4SDManager::GetSDMpointer()->FindSensitiveDetector("/PMT_R7378A/S1");
+                SensorSD* Camera = (SensorSD*) G4SDManager::GetSDMpointer()->FindSensitiveDetector("/Sensor/Camera");
+                if(SEvt::GetNumHit(0)>0){
+                    PMT->OpticksHits();
+                    Camera->OpticksHits();
+                }
+                //counter[3]=0;
+                G4CXOpticks::Get()->reset(eventID);
             }
 
         #endif

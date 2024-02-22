@@ -11,7 +11,7 @@
 #include "G4VProcess.hh"
 #include "G4Event.hh"
 #include "G4RunManager.hh"
-// project headers
+// project headersz
 #include "PhotonSD.hh"
 #include "scuda.h"
 #include "SEvt.hh"

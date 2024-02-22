@@ -46,6 +46,7 @@ void EventAction::BeginOfEventAction(const G4Event *ev) {
       }
 
     fEDepPrim = 0.0;
+    G4CXOpticks::Get()->SensitiveDetector_Initialize(ev->GetEventID());
 }
 
 void EventAction::EndOfEventAction(const G4Event *evt) {
@@ -61,8 +62,8 @@ void EventAction::EndOfEventAction(const G4Event *evt) {
     G4CXOpticks * g4cx=G4CXOpticks::Get();
 
     G4int eventID=evt->GetEventID();
-    G4int ngenstep=SEvt::GetNumGenstepFromGenstep(eventID);
-    G4int nphotons=SEvt::GetNumPhotonCollected(eventID);
+    G4int ngenstep=SEvt::GetNumGenstepFromGenstep(0);
+    G4int nphotons=SEvt::GetNumPhotonCollected(0);
 
 
 
@@ -82,7 +83,7 @@ void EventAction::EndOfEventAction(const G4Event *evt) {
 
     G4cout << "Number of Steps Generated " <<ngenstep << G4endl;
     G4cout << "Number of Photons Generated " <<nphotons << G4endl;
-    G4cout << "Number of Hits Opticks  " <<SEvt::GetNumHit(eventID)<< G4endl;
+    G4cout << "Number of Hits Opticks  " <<SEvt::GetNumHit(0)<< G4endl;
 
     if(SEvt::GetNumHit(0)>0){
         PMT->OpticksHits();
@@ -90,7 +91,7 @@ void EventAction::EndOfEventAction(const G4Event *evt) {
         G4CXOpticks::Get()->reset(eventID);
 
     }
-
+    G4CXOpticks::Get()->SensitiveDetector_EndOfEvent(eventID);
 
 #endif
 

@@ -102,7 +102,7 @@ void SteppingAction::UserSteppingAction(const G4Step *aStep)
               if(boundary->GetStatus() == Detection  )  {
                   Detected=true;
                   Material_Store = aStep->GetPostStepPoint()->GetTouchableHandle()->GetVolume()->GetLogicalVolume()->GetName();
-                  std::cout <<"Material " <<Material_Store<<std::endl;
+                 // std::cout <<"Material " <<Material_Store<<std::endl;
               };
               break;
           }

@@ -110,7 +110,6 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
     geo->SetTemperature(temperature);
     geo->Construct();
     gas_logic=geo->GasLogic();
-    Camera=geo->GetCamLogic();
     //Construct a G4Region, connected to the logical volume in which you want to use the G4FastSimulationModel
     G4Region* regionGas = new G4Region("GasRegion");
     regionGas->AddRootLogicalVolume(gas_logic);
@@ -138,11 +137,7 @@ void DetectorConstruction::ConstructSDandField(){
     SDManager->AddNewDetector(myGasBoxSD);
     SetSensitiveDetector(gas_logic,myGasBoxSD);
 
-    // Camera
-    /*sensorsd::SensorSD *cam = new sensorsd::SensorSD("/Sensor/Camera");
-    SDManager->AddNewDetector(cam);
-    SetSensitiveDetector(Camera,cam);
-    */
+
     //These commands generate the four gas models and connect it to the GasRegion
     G4Region* region = G4RegionStore::GetInstance()->GetRegion("GasRegion");
     new DegradModel(fGasModelParameters,"DegradModel",region,this,myGasBoxSD);

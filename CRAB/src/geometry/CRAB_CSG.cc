@@ -563,8 +563,8 @@ void CRAB_CSG::Construct(){
 
     // Camera
     G4OpticalSurface* opXenon_Glass = new G4OpticalSurface("CamSurface");
-    //opXenon_Glass->SetMaterialPropertiesTable(opticalprops::PerfectDetector());
-    opXenon_Glass->SetMaterialPropertiesTable(opticalprops::Vacuum());
+    opXenon_Glass->SetMaterialPropertiesTable(opticalprops::PerfectDetector());
+    //opXenon_Glass->SetMaterialPropertiesTable(opticalprops::Vacuum());
     opXenon_Glass->SetModel(unified);                  // SetModel
     opXenon_Glass->SetType(dielectric_metal);   // SetType
     opXenon_Glass->SetFinish(polished);                 // SetFinish
@@ -580,16 +580,12 @@ void CRAB_CSG::Construct(){
     new G4LogicalBorderSurface("XenonLensSurface",gas_phys,lensPhysical,opXenon_Glass2);
     */
 
-
-
     G4LogicalVolumeStore* lvStore = G4LogicalVolumeStore::GetInstance();
 
     G4SDManager *SDManager=G4SDManager::GetSDMpointer();
     sensorsd::SensorSD* CameraSD=new sensorsd::SensorSD("/Sensor/Camera");
     SDManager->AddNewDetector(CameraSD);
     camLogical->SetSensitiveDetector(CameraSD);
-
-    CamLogic=camLogical;
 
     // Visuals
     AssignVisuals();

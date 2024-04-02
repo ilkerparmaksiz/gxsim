@@ -36,6 +36,10 @@ GasModelParametersMessenger::GasModelParametersMessenger(GasModelParameters* gm)
   setEL_FileCmd->SetDefaultValue(false);
 
   setCOMSOL_Path = new G4UIcmdWithAString("/gasModelParameters/geometry/COMSOL_Path", this);
+
+  GasFilePath=new G4UIcmdWithAString("/gasModelParameters/geometry/GasFile",this);
+
+
   
 }
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -66,5 +70,6 @@ void GasModelParametersMessenger::SetNewValue(G4UIcommand* command, G4String new
 
     if (command == setCOMSOL_Path)
       fGasModelParameters->SetCOMSOL_Path(newValues);
+    if(command==GasFilePath) fGasModelParameters->SetGasFile(newValues);
 
 }

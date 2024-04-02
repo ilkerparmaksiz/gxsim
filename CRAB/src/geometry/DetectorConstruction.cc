@@ -78,7 +78,6 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
 
     G4Material *air = G4NistManager::Instance()->FindOrBuildMaterial("G4_AIR");
     air->SetMaterialPropertiesTable(opticalprops::Vacuum());
-
     // Constructing Lab Space
     G4String lab_name="LAB";
     G4Box * lab_solid_volume = new G4Box(lab_name,Lab_size/2,Lab_size/2,Lab_size/2);
@@ -106,7 +105,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
     geo->SetMotherLab(lab_logic_volume);
     geo->SetOffset(0.2*cm);
     //geo->SetYield(10);
-    geo->SetGasPressure(gas_pressure_);
+    geo->SetGasPressure(detectorMessenger->GetGasPressure());
     geo->SetTemperature(temperature);
     geo->Construct();
     gas_logic=geo->GasLogic();

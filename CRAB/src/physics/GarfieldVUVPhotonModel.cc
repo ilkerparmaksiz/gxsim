@@ -94,7 +94,7 @@ GarfieldVUVPhotonModel::GarfieldVUVPhotonModel(GasModelParameters* gmp, G4String
 
 G4bool GarfieldVUVPhotonModel::IsApplicable(const G4ParticleDefinition& particleType) {
   //  std::cout << "GarfieldVUVPhotonModel::IsApplicable() particleType is " << particleType.GetParticleName() << std::endl;
-  if (particleType.GetParticleName()=="thermalelectron") // || particleType.GetParticleName()=="opticalphoton")
+  if (particleType.GetParticleName()=="thermalelectron" or particleType.GetParticleName()=="ie-") // || particleType.GetParticleName()=="opticalphoton")
     return true;
   return false;
         
@@ -111,7 +111,7 @@ G4bool GarfieldVUVPhotonModel::ModelTrigger(const G4FastTrack& fastTrack){
   
   G4String particleName = fastTrack.GetPrimaryTrack()->GetParticleDefinition()->GetParticleName();
 
-   if (ekin<thermalE && particleName=="thermalelectron")
+   if (ekin<thermalE && (particleName=="thermalelectron" or particleName=="ie-"  ))
     {
       return true;
     }
@@ -188,6 +188,7 @@ void GarfieldVUVPhotonModel::GenerateVUVPhotons(const G4FastTrack& fastTrack, G4
 
     //WHY ?
     if (particleName.find("thermalelectron")!=std::string::npos) particleName = "e-";
+    if (particleName.find("ie-")!=std::string::npos) particleName = "e-";
 
 
     // Debug the electric field
@@ -377,14 +378,7 @@ void GarfieldVUVPhotonModel::InitialisePhysics(){
 
     G4String gas_path(nexus_path);
     std::cout << "Gas Pressure is " << detCon->GetGasPressure() <<std::endl;
-    if(detCon->GetGasPressure()/bar==10)
-        gasFile = gas_path + "data/Xe_100_10bar.gas";
-    else if(detCon->GetGasPressure()/bar==8)
-        gasFile = gas_path + "data/Xe_100_8bar.gas";
-    else if(detCon->GetGasPressure()/bar==6)
-        gasFile = gas_path + "data/Xe_100_6bar.gas";
-    else
-        gasFile = gas_path + "data/Xe_100_10bar.gas";
+    gasFile=fGasModelParameters->GetGasFile();
     G4cout << gasFile << G4endl;
     fMediumMagboltz->LoadGasFile(gasFile.c_str());
     std::cout << "Finished Loading in the gas file --> " <<  gasFile <<std::endl;
@@ -717,15 +711,15 @@ void GarfieldVUVPhotonModel::MakeELPhotonsSimple(G4FastStep& fastStep, G4double 
             //G4cout << "sending photons to opticks" <<G4endl;
             tig4 = fastStep.GetCurrentTrack()->GetProperTime() + gapLEM*10./vd*1E3;
             G4ThreeVector fakepos (xi*10,yi*10.,zi*10); /// ignoring diffusion in small LEM gap, EC 17-June-2022.
-
+            G4Material * Material= fastStep.GetCurrentTrack()->GetMaterial();
             G4Step * newStep = new G4Step();
             G4StepPoint *PoststepPoint= new G4StepPoint();
             PoststepPoint->SetPosition(fakepos);
             PoststepPoint->SetProperTime(tig4);
-            PoststepPoint->SetMaterial(MaterialGasXe);
+            PoststepPoint->SetMaterial(Material);
             G4StepPoint *PrestepPoint= new G4StepPoint();
             PrestepPoint->SetPosition(G4ThreeVector(fakepos[0],fakepos[1],fakepos[2]-1*mm));
-            PrestepPoint->SetMaterial(MaterialGasXe);
+            PrestepPoint->SetMaterial(Material);
             PrestepPoint->SetProperTime(fastStep.GetCurrentTrack()->GetProperTime());
             newStep->SetPreStepPoint(PrestepPoint);
             newStep->SetPostStepPoint(PoststepPoint);
@@ -734,7 +728,7 @@ void GarfieldVUVPhotonModel::MakeELPhotonsSimple(G4FastStep& fastStep, G4double 
             G4DynamicParticle Thermalelectron(thermal,G4RandomDirection(), 1.3*eV);
 
             G4Track *newTrack=fastStep.CreateSecondaryTrack(Thermalelectron, fakepos, tig4 ,false);
-            //newTrack->SetPolarization(G4ThreeVector(0.,0.,1.0));
+            newTrack->SetPolarization(G4ThreeVector(0.,0.,1.0));
             newTrack->SetStep(newStep);
             newTrack->SetTrackStatus(fStopAndKill);
             G4RunManager * runmng=G4RunManager::GetRunManager();

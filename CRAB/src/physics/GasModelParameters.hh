@@ -25,6 +25,8 @@ class GasModelParameters{
 	inline bool GetbComsol(){return useComsol_;};
 	inline bool GetbEL_File(){return useEL_File_;};
 	inline G4String GetCOMSOL_Path(){return COMSOL_Path_;};
+    inline G4String GetGasFile() {return GasFile_;}
+    inline void SetGasFile(G4String g) { GasFile_=g;}
 
 	
 	private:
@@ -34,7 +36,7 @@ class GasModelParameters{
 	G4String COMSOL_Path_;
 	G4bool 	useEL_File_;
 	G4bool 	useComsol_;
-
+    G4String GasFile_;
 };
 
 #endif

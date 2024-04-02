@@ -50,6 +50,6 @@
 ### Pb-210
 /Generator/SingleParticle/Z 82
 /Generator/SingleParticle/A 210
-/run/beamOn 6
+/run/beamOn 100
 
 

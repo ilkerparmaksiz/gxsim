@@ -7,7 +7,7 @@
 
 #include "G4OpAbsorption.hh"
 #include "S2Photon.hh"
-
+#include "NESTS1Photon.hh"
 class OpAbsorption : public G4OpAbsorption{
 public:
      using G4OpAbsorption::G4OpAbsorption;
@@ -18,7 +18,7 @@ public:
 #endif //CRAB_OPABSORPTION_HH
 
 inline G4bool OpAbsorption::IsApplicable(const G4ParticleDefinition &aParticleType) {
-    if(&aParticleType==G4OpticalPhoton::OpticalPhoton() || &aParticleType==S2Photon::OpticalPhoton()){
+    if(&aParticleType==G4OpticalPhoton::OpticalPhoton() || &aParticleType==S2Photon::OpticalPhoton() || &aParticleType==NESTS1Photon::OpticalPhoton()){
         return true;
     }
     return false;

@@ -63,7 +63,7 @@
 #include "G4BaryonConstructor.hh"
 #include "G4MesonConstructor.hh"
 #include "G4BosonConstructor.hh"
-
+#include "NESTS1Photon.hh"
 #include "G4FastSimulationPhysics.hh"
 #include "G4GlobalFastSimulationManager.hh"
 
@@ -83,6 +83,7 @@ PhysicsList::PhysicsList()
   // Particles
   S2Photon::Definition();
   NEST::NESTThermalElectron::Definition();
+  NESTS1Photon::Definition();
   pMessenger = new PhysicsListMessenger(this);
 
 

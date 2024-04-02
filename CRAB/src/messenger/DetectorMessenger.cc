@@ -45,7 +45,8 @@ DetectorMessenger::~DetectorMessenger() {
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 void DetectorMessenger::SetNewValue(G4UIcommand* command, G4String newValues) {
-  if (command == setGasPressCmd)
+  if (command == setGasPressCmd){
     detector->SetGasPressure(setGasPressCmd->GetNewDoubleValue(newValues));
-  
+    Pressure=setGasPressCmd->GetNewDoubleValue(newValues);
+  }
 }

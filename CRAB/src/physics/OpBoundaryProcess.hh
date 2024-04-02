@@ -7,7 +7,7 @@
 
 #include "G4OpBoundaryProcess.hh"
 #include "S2Photon.hh"
-
+#include "NESTS1Photon.hh"
 class OpBoundaryProcess : public G4OpBoundaryProcess{
     using G4OpBoundaryProcess::G4OpBoundaryProcess;
     virtual G4bool IsApplicable(const G4ParticleDefinition& aParticleType) override;
@@ -17,7 +17,7 @@ class OpBoundaryProcess : public G4OpBoundaryProcess{
 #endif //CRAB_OPBOUNDARYPROCESS_HH
 
 inline G4bool OpBoundaryProcess::IsApplicable(const G4ParticleDefinition &aParticleType) {
-    if(&aParticleType==G4OpticalPhoton::OpticalPhoton() || &aParticleType==S2Photon::OpticalPhoton()){
+    if(&aParticleType==G4OpticalPhoton::OpticalPhoton() || &aParticleType==S2Photon::OpticalPhoton() ||  &aParticleType==NESTS1Photon::OpticalPhoton()){
         return true;
     }
     return false;

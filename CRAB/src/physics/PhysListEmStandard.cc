@@ -230,11 +230,13 @@ void PhysListEmStandard::ConstructProcess() {
     // if ( !( particleName.find("e-")!=std::string::npos || particleName.find("alpha")!=std::string::npos  || particleName.find("opticalphoton")!=std::string::npos ) )
     //   continue;
       if (pmanager) {
+        std::cout<<particleName<<std::endl;
         if (theNEST2ScintillationProcess->IsApplicable(*particle) && pmanager) {
         std::cout << "PhysicsList::InitialisePhysics(): particleName, pmanager  " << particleName << ", " << pmanager << "." << std::endl;
         std::cout << "ordDefault, ordInActive " << ordDefault << ", " << ordInActive  << std::endl;
         // This needs to be called because Nest is not aware of the S2Photon
         if(particleName!="S2Photon") pmanager->AddProcess(theNEST2ScintillationProcess, ordDefault + 1, ordInActive, ordDefault + 1);
+        //if(particleName!="NESTS1Photon") pmanager->AddProcess(theNEST2ScintillationProcess, ordDefault + 1, ordInActive, ordDefault + 1);
       }
         OpBoundaryProcess* fBoundaryProcess = new OpBoundaryProcess();
         OpAbsorption* fAbsorptionProcess = new OpAbsorption();
@@ -243,7 +245,7 @@ void PhysListEmStandard::ConstructProcess() {
         OpRayleigh* fTOpRayleigh = new OpRayleigh();
         OpWLS2* fOpWLS2 = new OpWLS2();
 
-    if (((particleName == "opticalphoton") || particleName=="S2Photon") && pmanager) {
+    if (((particleName == "opticalphoton") || particleName=="S2Photon" || particleName=="NESTS1Photon") && pmanager) {
             G4cout << " AddDiscreteProcess to OpticalPhoton " << G4endl;
            pmanager->AddDiscreteProcess(fAbsorptionProcess);
            pmanager->AddDiscreteProcess(fBoundaryProcess);

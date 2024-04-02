@@ -40,6 +40,7 @@ class DetectorMessenger : public G4UImessenger {
   ~DetectorMessenger();
 
   void SetNewValue(G4UIcommand*, G4String);
+  inline G4double GetGasPressure(){return Pressure;}
 
  private:
   DetectorConstruction* detector;
@@ -48,6 +49,7 @@ class DetectorMessenger : public G4UImessenger {
   G4UIdirectory* geometryDir;  ///<\brief /Xenon/geometry/
 
   G4UIcmdWithADoubleAndUnit* setGasPressCmd;
+  G4double Pressure;
     
     
     

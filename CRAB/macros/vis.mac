@@ -99,14 +99,14 @@
 #/gps/polarization 0 0 1
 
 ### circular Plane
-/gps/particle S2Photon
+/gps/particle alpha
 /gps/pos/type Plane
 /gps/pos/shape Circle
 /gps/pos/centre 0 0 -10.5 cm
 /gps/pos/radius 16.52. mm
 /gps/direction 0 0 1
 /gps/polarization 0 0 1
-/gps/ene/mono 7.2 eV
+/gps/ene/mono 1 MeV
 
 
 ## isoTropic

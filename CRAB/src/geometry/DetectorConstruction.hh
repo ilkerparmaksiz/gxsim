@@ -39,11 +39,11 @@
 #include "Garfield/Sensor.hh"
 #include "Garfield/AvalancheMicroscopic.hh"
 #include "Garfield/ComponentUser.hh"
+#include "G4GenericMessenger.hh"
 class G4VSolid;
 class G4LogicalVolume;
 class G4VPhysicalVolume;
 class G4UniformMagField;
-
 
 using namespace std;
 /*! \class  DetectorConstruction*/

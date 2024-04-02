@@ -1,0 +1,53 @@
+
+# Gas Pressure
+/Xenon/geometry/SetGasPressure 10. bar
+
+
+# /gasModelParameters/degrad/thermalenergy 10. eV
+# Lower the threshold to get GarfieldVUVModel to grab up all ionization e's.  EC, 20-Apr-2022
+/gasModelParameters/degrad/thermalenergy 1.3 eV ## 150 gives almost same answer as 450, and 2x nexcitation as with 30. ## NEST e's are 1.13 eV
+
+# For setting the geometry
+/gasModelParameters/geometry/COMSOL_Path /home/argon/Projects/Ilker/CRAB_COMSOL/With_Needles/17k_8k_7k/
+/gasModelParameters/geometry/useEL_File true
+/gasModelParameters/geometry/useComsol true
+
+# Threading
+#/run/numberOfThreads 1 # Currently hard-wired in CRAB.cc, cuz not evident thisis doing anything.
+#/control/cout/ignoreThreadsExcept 0
+#/control/cout/setCoutFile output.dmp
+
+# Physics lists
+/Xenon/phys/setLowLimitE 50. eV
+/Xenon/phys/InitializePhysics  local # emlivermore #EmStandardPhysics_option4  ## must be local to effect NEST physics
+/Xenon/phys/AddParametrisation
+##/process/em/AddPAIRegion all GasRegion PAIphoton
+
+##/process/optical/processActivation Scintillation false ### not with NEST. EC, 6-May-2022.
+
+/run/initialize
+
+/analysis/setFileName alpha.root
+
+####################################
+############ Verbosities ###########
+####################################
+/control/verbose 1
+/tracking/verbose 0
+/run/verbose 0
+/event/verbose 0
+/process/optical/verbose 0
+
+/tracking/storeTrajectory 0
+
+/Action/SteppingAction/event_shift 10
+/Generator/SingleParticle/ParticleType alpha
+/Generator/SingleParticle/energy 5.3 MeV
+/Generator/SingleParticle/pos 0 0 0 cm
+#/Generator/SingleParticle/pos  -1.6 0 -5 cm
+/Generator/SingleParticle/Isotropic true
+/Generator/SingleParticle/Mode Needles
+/Generator/SingleParticle/useNeedle false
+/Generator/SingleParticle/Amount 1
+/run/beamOn 5
+

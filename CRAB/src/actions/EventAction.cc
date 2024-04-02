@@ -88,10 +88,10 @@ void EventAction::EndOfEventAction(const G4Event *evt) {
     if(SEvt::GetNumHit(0)>0){
         PMT->OpticksHits();
         Camera->OpticksHits();
-        G4CXOpticks::Get()->reset(eventID);
 
     }
     G4CXOpticks::Get()->SensitiveDetector_EndOfEvent(eventID);
+    G4CXOpticks::Get()->reset(eventID);
 
 #endif
 

@@ -30,7 +30,6 @@
 #include "G4OpticalSurface.hh"
 #include "U4SensitiveDetector.hh"
 #include "G4VisAttributes.hh"
-#include "PhotonSD.hh"
 #include "G4SDManager.hh"
 SimpleBoxGeo::SimpleBoxGeo() {
 
@@ -120,9 +119,9 @@ void SimpleBoxGeo::Construct() {
 
     Detector=CubeDetectorLogic;
     G4SDManager *Mang = G4SDManager::GetSDMpointer();
-    PhotonSD *SD = new PhotonSD("PMT1");
-    Mang->AddNewDetector(SD);
-    Detector->SetSensitiveDetector(SD);
+    //PhotonSD *SD = new PhotonSD("PMT1");
+    //Mang->AddNewDetector(SD);
+    //Detector->SetSensitiveDetector(SD);
     this->SetGasLogic(logicEnv);
 
 

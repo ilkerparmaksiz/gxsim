@@ -38,7 +38,8 @@ public:
     G4UIcmdWithABool* setEL_FileCmd;
 
     G4UIcmdWithAString* setCOMSOL_Path;
-  
+    G4UIcmdWithAString* GasFilePath;
+
 };
 
 #endif

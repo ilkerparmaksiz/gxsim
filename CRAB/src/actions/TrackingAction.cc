@@ -28,7 +28,7 @@ void TrackingAction::PreUserTrackingAction(const G4Track *aTrack) {
     if(G4OpticalPhoton::Definition()==aTrack->GetParticleDefinition())
         fpTrackingManager->SetStoreTrajectory(false);
     else
-        fpTrackingManager->SetStoreTrajectory(false);
+        fpTrackingManager->SetStoreTrajectory(true);
 
 
   G4int id(12);

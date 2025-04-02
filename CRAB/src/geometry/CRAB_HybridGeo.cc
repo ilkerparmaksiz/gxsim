@@ -132,7 +132,8 @@ G4VPhysicalVolume* CRAB_HybridGeo::Construct(){
     // auto FieldCage=CADMesh::TessellatedMesh::FromSTL(crabpath+"data/CRAB_STL/FieldRings.stl");
     //auto Meshes=CADMesh::TessellatedMesh::FromSTL(crabpath+"data/CRAB_STL/Meshes.stl");
     auto Needle4=CADMesh::TessellatedMesh::FromSTL(crabpath+"data/CRAB_STL/Needle_4cm.stl");
-    auto Needle9=CADMesh::TessellatedMesh::FromSTL(crabpath+"data/CRAB_STL/Needle_9cm.stl");
+    //auto Needle9=CADMesh::TessellatedMesh::FromSTL(crabpath+"data/CRAB_STL/Needle_9cm.stl");
+    auto Needle9=CADMesh::TessellatedMesh::FromSTL(crabpath+"data/CRAB_STL/RotatedNeedle_9cm.stl");
     auto Needle14=CADMesh::TessellatedMesh::FromSTL(crabpath+"data/CRAB_STL/Needle_14cm.stl");
     auto Chamber=CADMesh::TessellatedMesh::FromSTL(crabpath+"data/CRAB_STL/Chamber.stl");
     //auto MgF2Lens=CADMesh::TessellatedMesh::FromSTL(crabpath+"data/CRAB_STL/MgF2Lens.stl");

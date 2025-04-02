@@ -92,15 +92,8 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
 
     // Visuals
 
-
-#ifdef With_Opticks
+    //CRAB_HybridGeo *geo=new CRAB_HybridGeo(fGasModelParameters); // No Opticks
     CRAB_CSG *geo=new CRAB_CSG(fGasModelParameters);
-    //SimpleBoxGeo *geo = new SimpleBoxGeo();
-#endif
-
-#ifndef With_Opticks
-    CRAB_HybridGeo *geo=new CRAB_HybridGeo(fGasModelParameters);
-#endif
 
     geo->SetMotherLab(lab_logic_volume);
     geo->SetOffset(0.2*cm);
@@ -112,8 +105,6 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
     //Construct a G4Region, connected to the logical volume in which you want to use the G4FastSimulationModel
     G4Region* regionGas = new G4Region("GasRegion");
     regionGas->AddRootLogicalVolume(gas_logic);
-
-
 
 
 

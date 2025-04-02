@@ -302,6 +302,16 @@ namespace opticalprops {
   G4MaterialPropertiesTable * PerfectDetector(){
       G4MaterialPropertiesTable* mpt = new G4MaterialPropertiesTable();
 
+
+      /*std::vector<G4double> RIndex;
+      // REFRACTIVE INDEX
+      //https://refractiveindex.info/?shelf=main&book=MgF2&page=Dodge-o
+      G4double um2 = micrometer*micrometer;
+      G4double B[3] = {0.48755108, 0.39875031	, 2.3120353};
+      G4double C[3] = {0.001882178 * um2, 0.008951888 * um2, 566.13559 * um2};
+      SellmeierEquation seq(B, C);
+    */
+
       // REFLECTIVITY
       const G4int ri_entries = 100;
       G4double eWidth = (optPhotMaxE_ - optPhotMinE_) / ri_entries;
@@ -312,12 +322,15 @@ namespace opticalprops {
       {
           ri_energy.push_back(optPhotMinE_ + i * eWidth);
           REFLECTIVITY.push_back(0);
-          EFFICIENCY.push_back(0.9);
+          EFFICIENCY.push_back(1);
+          //RIndex.push_back(seq.RefractiveIndex(h_Planck*c_light/ri_energy[i]));
+
       }
 
 
       mpt->AddProperty("REFLECTIVITY", ri_energy, REFLECTIVITY);
       mpt->AddProperty("EFFICIENCY", ri_energy, EFFICIENCY);
+      //mpt->AddProperty("RINDEX", ri_energy, RIndex);
       return mpt;
   }
 

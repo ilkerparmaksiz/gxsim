@@ -2,7 +2,7 @@
 #include "G4VPhysicalVolume.hh"
 #include "G4VTouchable.hh"
 
-#include "../geometry/CRAB_CSG.hh"
+#include "CRAB_CSG.hh"
 #include "G4Track.hh"
 #include "G4OpticalPhoton.hh"
 
@@ -28,7 +28,7 @@ void TrackingAction::PreUserTrackingAction(const G4Track *aTrack) {
     if(G4OpticalPhoton::Definition()==aTrack->GetParticleDefinition())
         fpTrackingManager->SetStoreTrajectory(false);
     else
-        fpTrackingManager->SetStoreTrajectory(true);
+        fpTrackingManager->SetStoreTrajectory(false);
 
 
   G4int id(12);
@@ -65,7 +65,6 @@ void TrackingAction::PreUserTrackingAction(const G4Track *aTrack) {
   // Turn off the S2 fill since its heavy!
 
   analysisManager->FillNtupleDColumn(id,row, event); row++;
-
   analysisManager->FillNtupleDColumn(id,row, (G4double)pID); row++;
   analysisManager->FillNtupleDColumn(id,row, time/ns); row++;
   analysisManager->FillNtupleDColumn(id,row, pos[0]/mm); row++;

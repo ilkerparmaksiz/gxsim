@@ -60,7 +60,8 @@ namespace{G4Mutex aMutex = G4MUTEX_INITIALIZER;}
 const static G4double torr = 1. / 760. * bar;
 const static G4double gapLEM = 0.7; //cm
 const static G4double fieldDrift = 438.0; // V/cm
-const static G4double fieldLEM   = 11400.0; // V/cm higher than 3k (as used for 2 bar) for 10 bar!
+//const static G4double fieldLEM   = 11400.0; // V/cm higher than 3k (as used for 2 bar) for 10 bar!
+const static G4double fieldLEM   = 7857.14; // V/cm higher than 3k (as used for 2 bar) for 10 bar!
 
 G4double DetChamberL;
 G4double DetChamberR;
@@ -82,12 +83,9 @@ GarfieldVUVPhotonModel::GarfieldVUVPhotonModel(GasModelParameters* gmp, G4String
     OpBoundaryProcess* fBoundaryProcess = new OpBoundaryProcess();
     OpAbsorption* fAbsorptionProcess = new OpAbsorption();
     OpWLS* fTheWLSProcess = new OpWLS();
-    Opticks=false;
     analysisManager= G4AnalysisManager::Instance();
+    ELField_=0;
 
-#ifdef With_Opticks
-    Opticks=true;
-#endif
 
 
 }
@@ -116,7 +114,6 @@ G4bool GarfieldVUVPhotonModel::ModelTrigger(const G4FastTrack& fastTrack){
       return true;
     }
   return false;
-
 } 
     
 void GarfieldVUVPhotonModel::DoIt(const G4FastTrack& fastTrack, G4FastStep& fastStep) 
@@ -162,6 +159,7 @@ void GarfieldVUVPhotonModel::DoIt(const G4FastTrack& fastTrack, G4FastStep& fast
 
 
 }
+
 GarfieldVUVPhotonModel::~GarfieldVUVPhotonModel(){
 
 }
@@ -218,32 +216,9 @@ void GarfieldVUVPhotonModel::GenerateVUVPhotons(const G4FastTrack& fastTrack, G4
     }
     unsigned int n = fAvalancheMC->GetElectrons().at(0).path.size();
     if (n==0) return;
+
     auto DriftLines = fAvalancheMC->GetElectrons().at(0).path;
     auto Diffusion=fAvalancheMC->GetDiffusionParameters();
-
-    if(Diffusion.size()>0){
-        double MEfield,Mdl,Mdt,Mvd;
-        int cnt=0;
-        //Fill the Diffusion info
-        for (unsigned idf=0;idf<Diffusion.size();idf++){
-            if(Diffusion[idf].Efield<600){
-                MEfield+=Diffusion[idf].Efield;
-                Mdl+=Diffusion[idf].dl;
-                Mdt+=Diffusion[idf].dt;
-                Mvd+=Diffusion[idf].vd;
-                cnt++;
-            }
-
-        }
-        MEfield=MEfield/cnt;
-        Mdl=Mdl/cnt;
-        Mdt=Mdt/cnt;
-        Mvd=Mvd/cnt;
-
-        if(MEfield>0)
-            DiffusionFill(MEfield,Mdl,Mdt,Mvd);
-
-    }
 
     double xi,yi,zi,ti;
     int status;
@@ -252,12 +227,57 @@ void GarfieldVUVPhotonModel::GenerateVUVPhotons(const G4FastTrack& fastTrack, G4
     //std::unique_ptr<GarfieldExcitationHitsCollection> garfExcHitsCol (new GarfieldExcitationHitsCollection());
     //#pragma omp parallel for
 
+
+    double MEfield, Mdl, Mdt, Mvd;
+    std::array<double, 3> point{};
+    int cnt=0;
+
     for( unsigned int i=0;i<n;i++){
+
+        // Diffusion Values
+        if(Diffusion.size()>0){
+            MEfield,Mdl,Mdt,Mvd=0;
+            cnt=0;
+            ELField_=0;
+            //Fill the Diffusion info
+            /*
+            for (unsigned idf=0;idf<Diffusion.size();idf++){
+                if(Diffusion[idf].Efield<600){
+                    MEfield+=Diffusion[idf].Efield;
+                    Mdl+=Diffusion[idf].dl;
+                    Mdt+=Diffusion[idf].dt;
+                    Mvd+=Diffusion[idf].vd;
+                    cnt++;
+                }
+
+            }
+            MEfield=MEfield/cnt;
+            Mdl=Mdl/cnt;
+            Mdt=Mdt/cnt;
+            Mvd=Mvd/cnt;
+
+            if(MEfield>0)
+                DiffusionFill(MEfield,Mdl,Mdt,Mvd);
+            */
+            // Get EveryPoint
+                point=Diffusion[i].x0;
+                MEfield=Diffusion[i].Efield;
+                Mdl=Diffusion[i].dl;
+                Mdt=Diffusion[i].dt;
+                Mvd=Diffusion[i].vd;
+                if(MEfield<1) MEfield=0;
+
+                if( std::sqrt(point[0]*point[0] + point[1]*point[1]) < DetActiveR/2.0) // Save Points only in the active region
+                    DiffusionFill(MEfield,Mdl,Mdt,Mvd,point);
+
+
+        }
 
         xi=DriftLines.at(i).x;
         yi=DriftLines.at(i).y;
         zi=DriftLines.at(i).z;
         ti=DriftLines.at(i).t;
+
 
         //fAvalancheMC->GetDriftLinePoint(i,xi,yi,zi,ti);
          //std::cout << "GVUVPM: positions are " << xi<<"," <<yi<<","<<zi <<"," <<ti<< std::endl;
@@ -265,17 +285,21 @@ void GarfieldVUVPhotonModel::GenerateVUVPhotons(const G4FastTrack& fastTrack, G4
         // Drift line point entered LEM
       //std::cout<<"Zi " << zi << " ELPos " <<  ELPos <<  std::endl;
       //std::cout << "EL "<<  (zi < ELPos)  << " Area "<< ( std::sqrt(xi*xi + yi*yi)) <<std::endl;
+      /*if(zi<=ELPos and zi>ELPos-gapLEM){
 
-      if (zi < ELPos && ( std::sqrt(xi*xi + yi*yi) <= DetActiveR) ){
+            //std::cout << " x " << xi << " y " << yi <<" z " << zi << " ELField " << MEfield <<std::endl;
+
+        }
+      else*/  if (zi < ELPos && ( std::sqrt(xi*xi + yi*yi) <= DetActiveR) ){
           //std::cout<<"Photon is being produced"<<std::endl;
           // Electrons in EL
           event=G4EventManager::GetEventManager()->GetConstCurrentEvent()->GetEventID();
-          analysisManager->FillNtupleDColumn(5,0,event );
-          analysisManager->FillNtupleDColumn(5,1, ti/ns);
-          analysisManager->FillNtupleDColumn(5,2, xi);
-          analysisManager->FillNtupleDColumn(5,3, yi);
-          analysisManager->FillNtupleDColumn(5,4, zi);
-          analysisManager->AddNtupleRow(5);
+          analysisManager->FillNtupleDColumn(4,0,event );
+          analysisManager->FillNtupleDColumn(4,1, ti/ns);
+          analysisManager->FillNtupleDColumn(4,2, xi);
+          analysisManager->FillNtupleDColumn(4,3, yi);
+          analysisManager->FillNtupleDColumn(4,4, zi);
+          analysisManager->AddNtupleRow(4);
 	      break;
       }
       // No drift line point meets criteria, so return
@@ -469,7 +493,7 @@ void GarfieldVUVPhotonModel::InitialisePhysics(){
     // Increase the Stepping for the comsol
     //if(fGasModelParameters->GetbComsol()) step=1.0e-3;
     //else step=2e-2;
-    step=1e-2;
+    step=1e-1;
     fAvalancheMC->SetDistanceSteps(step); // cm, 10x example
     fAvalancheMC->EnableDebugging(false); // way too much information.
     fAvalancheMC->DisableAttachment(); // Currently getting warning messages about the attachment. You can supress those by switching this on.
@@ -539,19 +563,21 @@ void GarfieldVUVPhotonModel::S1Fill(const G4FastTrack& ftrk)
     }
 
 }
-void GarfieldVUVPhotonModel::DiffusionFill(const double Efield,const double dl,const double dt,const double vd )
+void GarfieldVUVPhotonModel::DiffusionFill(const double Efield,const double dl,const double dt,const double vd ,const  std::array<double,3> p0)
 {
 
   G4AnalysisManager* analysisManager = G4AnalysisManager::Instance();
   G4int  event = G4EventManager::GetEventManager()->GetConstCurrentEvent()->GetEventID();
 
-  // Weirdly, S1 is filled in two places. Here for the thermal e's and in TrackingAction::PreSteppingAction() for optphotons.
-  analysisManager->FillNtupleDColumn(6,0, event);
-  analysisManager->FillNtupleDColumn(6,1, Efield);
-  analysisManager->FillNtupleDColumn(6,2, dl);
-  analysisManager->FillNtupleDColumn(6,3, dt);
-  analysisManager->FillNtupleDColumn(6,4, vd);
-  analysisManager->AddNtupleRow(6);
+  analysisManager->FillNtupleDColumn(5,0, event);
+  analysisManager->FillNtupleDColumn(5,1, Efield);
+  analysisManager->FillNtupleDColumn(5,2, dl);
+  analysisManager->FillNtupleDColumn(5,3, dt);
+  analysisManager->FillNtupleDColumn(5,4, vd);
+  analysisManager->FillNtupleDColumn(5,5, p0[0]);
+  analysisManager->FillNtupleDColumn(5,6, p0[1]);
+  analysisManager->FillNtupleDColumn(5,7, p0[2]);
+  analysisManager->AddNtupleRow(5);
 
 }
 
@@ -602,7 +628,7 @@ void GarfieldVUVPhotonModel::MakeELPhotonsFromFile( G4FastStep& fastStep, G4doub
     // colHitsEntries=1 ;
 
     G4double tig4(0.);
-    if(!Opticks){
+    #if  not defined(With_Opticks) || defined(With_G4OpticksTest)
 
 	    for (G4int i=0;i<colHitsEntries;i++){
 	      GarfieldExcitationHit *newExcHit=new GarfieldExcitationHit();
@@ -615,51 +641,112 @@ void GarfieldVUVPhotonModel::MakeELPhotonsFromFile( G4FastStep& fastStep, G4doub
 
 	      if (i % (colHitsEntries/colHitsEntries ) == 0){ // 50. Need to uncomment this condition, along with one in degradmodel.cc. EC, 2-Dec-2021.
 	      
-		auto* optphot = S2Photon::OpticalPhotonDefinition();
-		
-		G4DynamicParticle VUVphoton(optphot,G4RandomDirection(), 7.2*eV);
-	       
-		tig4 = ti + EL_profile[i][3]; // in nsec, t = index 3 in vector. Units are ns, so just add it on
-		// std::cout <<  "fakepos,time is " << fakepos[0] << ", " << fakepos[1] << ", " << fakepos[2] << ", " << tig4 << std::endl;
-		
-		newExcHit->SetTime(tig4);
-		fGasBoxSD->InsertGarfieldExcitationHit(newExcHit);
-		G4Track *newTrack=fastStep.CreateSecondaryTrack(VUVphoton, fakepos, tig4 ,false);
-		newTrack->SetPolarization(G4ThreeVector(0.,0.,1.0)); // Needs some pol'n, else we will only ever reflect at an OpBoundary. EC, 8-Aug-2022.
-		//RandomPolarization(newTrack);
-		//	G4ProcessManager* pm= newTrack->GetDefinition()->GetProcessManager();
+            auto* optphot = S2Photon::OpticalPhotonDefinition();
+
+            G4DynamicParticle VUVphoton(optphot,G4RandomDirection(), 7.2*eV);
+
+            tig4 = ti + EL_profile[i][3]; // in nsec, t = index 3 in vector. Units are ns, so just add it on
+            // std::cout <<  "fakepos,time is " << fakepos[0] << ", " << fakepos[1] << ", " << fakepos[2] << ", " << tig4 << std::endl;
+
+            newExcHit->SetTime(tig4);
+            fGasBoxSD->InsertGarfieldExcitationHit(newExcHit);
+            G4Track *newTrack=fastStep.CreateSecondaryTrack(VUVphoton, fakepos, tig4 ,false);
+            newTrack->SetPolarization(G4ThreeVector(0.,0.,1.0)); // Needs some pol'n, else we will only ever reflect at an OpBoundary. EC, 8-Aug-2022.
+            //RandomPolarization(newTrack);
+            //	G4ProcessManager* pm= newTrack->GetDefinition()->GetProcessManager();
 		//	G4ProcessVectorfAtRestDoItVector = pm->GetAtRestProcessVector(typeDoIt);
 	      }
 	      counter[3]++;
 	    }
-    }
-	    
-     #ifdef With_Opticks
-        //G4cout << "sending photons to opticks" <<G4endl;
 
-        const G4Track * track=fastStep.GetCurrentTrack();
-        const G4Step * aStep=track->GetStep();
-        G4RunManager * runmng=G4RunManager::GetRunManager();
-        const int eventID=runmng->GetCurrentEvent()->GetEventID();
-        // Add condition that if this is a thermal electron and has any secondaries
-        //U4::CollectGenstep_DsG4Scintillation_r4695(track,aStep,colHitsEntries,1,4*ns);
-        int CollectedPhotons=SEvt::GetNumPhotonCollected(eventID);
-        counter[3]=counter[3]+colHitsEntries;
-        int maxPhoton=SEventConfig::MaxPhoton();
-        std::cout <<"Collected Photons is " <<CollectedPhotons <<std::endl;
-        if(CollectedPhotons>=(maxPhoton-colHitsEntries)){
-            std::cout<<"Initiating the simulation ..." <<std::endl;
-            G4CXOpticks * g4xc=G4CXOpticks::Get();
-            g4xc->simulate(eventID,0);
+    #endif
+
+#ifdef With_Opticks
+    //G4cout << "sending photons to opticks" <<G4endl;
+    G4Material * Material= fastStep.GetCurrentTrack()->GetMaterial();
+    //std::cout <<Material->GetName()<<std::endl;
+    G4double vd ;
+
+    G4ThreeVector initalPos ( (xi+ EL_profile[0][0])*10., (yi+ EL_profile[0][1])*10., (zi+ EL_profile[0][2])*10. );
+    G4ThreeVector finalPos ( (xi+ EL_profile[colHitsEntries-1][0])*10., (yi+ EL_profile[colHitsEntries][1])*10., (zi+ EL_profile[colHitsEntries-1][2])*10. );
+    // Create a new step for ionization electrons so that opticks can obtain time position and material info
+    tig4=EL_profile[colHitsEntries-1][3];
+    vd=(finalPos[2]-initalPos[2])/(tig4-(EL_profile[0][3]+ti));
+    G4Step * newStep = new G4Step();
+    G4StepPoint *PoststepPoint= new G4StepPoint();
+    PoststepPoint->SetPosition(finalPos);
+    PoststepPoint->SetGlobalTime(fastStep.GetCurrentTrack()->GetProperTime()+tig4);
+    PoststepPoint->SetVelocity(vd);
+    PoststepPoint->SetMaterial(Material);
+
+    tig4=ti+EL_profile[0][3];
+    G4StepPoint *PrestepPoint= new G4StepPoint();
+    PrestepPoint->SetPosition(initalPos);
+    PrestepPoint->SetMaterial(Material);
+    PrestepPoint->SetGlobalTime(fastStep.GetCurrentTrack()->GetGlobalTime()+ti);
+    PrestepPoint->SetVelocity(vd);
+    newStep->SetPreStepPoint(PrestepPoint);
+    newStep->SetPostStepPoint(PoststepPoint);
+
+    auto* thermal = NEST::NESTThermalElectron::Definition();
+    G4DynamicParticle Thermalelectron(thermal,G4RandomDirection(), 1.3*eV);
+    tig4 = fastStep.GetCurrentTrack()->GetGlobalTime() + ti ;
+    G4Track *neweTrack=fastStep.CreateSecondaryTrack(Thermalelectron, initalPos, tig4 ,false);
+    neweTrack->SetPolarization(G4ThreeVector (0,0,1));
+    neweTrack->SetStep(newStep);
+
+    G4RunManager * runmng=G4RunManager::GetRunManager();
+    const int eventID=runmng->GetCurrentEvent()->GetEventID();
+    // Add condition that if this is a thermal electron and has any secondaries
+
+    G4MaterialPropertiesTable *MPT=Material->GetMaterialPropertiesTable();
+    G4double t1,t2=0;
+    G4int singlets,triplets=0;
+    t1=MPT->GetConstProperty(kSCINTILLATIONTIMECONSTANT1);
+    t2=MPT->GetConstProperty(kSCINTILLATIONTIMECONSTANT2);
+
+    singlets= floor(MPT->GetConstProperty(kSCINTILLATIONYIELD1)*colHitsEntries);
+    triplets= ceil(MPT->GetConstProperty(kSCINTILLATIONYIELD2)*colHitsEntries);
+
+
+    if(singlets>0)
+        U4::CollectGenstep_DsG4Scintillation_r4695(neweTrack,newStep,singlets,0,t1);
+    if(triplets>0)
+        U4::CollectGenstep_DsG4Scintillation_r4695(neweTrack,newStep,triplets,1,t2);
+
+    int CollectedPhotons=SEvt::GetNumPhotonCollected(0);
+    int maxPhoton=SEventConfig::MaxPhoton();
+
+    counter[3]+=colHitsEntries;
+
+    if(CollectedPhotons>=(maxPhoton*0.97)){
+        // Get Persistance Manager
+
+        std::cout<<"Simulating Photons in GPU  .." <<std::endl;
+        G4CXOpticks * g4xc=G4CXOpticks::Get();
+        g4xc->simulate(eventID,0);
+        cudaDeviceSynchronize();
+         SensorSD* PMT = (SensorSD*) G4SDManager::GetSDMpointer()->FindSensitiveDetector("/PMT_R7378A/S1");
+         SensorSD* Camera = (SensorSD*) G4SDManager::GetSDMpointer()->FindSensitiveDetector("/Sensor/Camera");
+        if(SEvt::GetNumHit(0)>0){
+            PMT->OpticksHits();
+            Camera->OpticksHits();
         }
-     #endif
+        G4CXOpticks::Get()->reset(eventID);
+    }
+
+    neweTrack->SetTrackStatus(fStopAndKill);
+
+  #endif
 }
+
+
 
 
 
 void GarfieldVUVPhotonModel::MakeELPhotonsSimple(G4FastStep& fastStep, G4double xi, G4double yi, G4double zi, G4double ti){
     
-    G4int colHitsEntries= 0.0; //garfExcHitsCol->entries();
+    G4double colHitsEntries= 0.0; //garfExcHitsCol->entries();
     //	G4cout<<"GarfExcHits entries "<<colHitsEntries<<G4endl; // This one is not cumulative.
 
     const G4double YoverP = 140.*fieldLEM/(detCon->GetGasPressure()/torr) - 116.; // yield/cm/bar, with P in Torr ... JINST 2 p05001 (2007).
@@ -669,19 +756,19 @@ void GarfieldVUVPhotonModel::MakeELPhotonsSimple(G4FastStep& fastStep, G4double 
     //colHitsEntries=500;
 
     colHitsEntries *= (G4RandGauss::shoot(1.0,res));
-
+    //colHitsEntries=colHitsEntries/2;
     G4double tig4(0.);
 
     const G4double vd(2.4); // mm/musec, https://arxiv.org/pdf/1902.05544.pdf. Pretty much flat at our E/p..
+    G4ThreeVector fakepos (xi*10,yi*10.,zi*10.); /// ignoring diffusion in small LEM gap, EC 17-June-2022.
 
-    if(!Opticks){
+    #if not defined(With_Opticks) or defined(With_G4OpticksTest)
         auto* optphot = S2Photon::OpticalPhotonDefinition();
         //std::cout << colHitsEntries << std::endl;
         //#pragma omp parallel for
-        for (G4int i=0;i<colHitsEntries;i++){
+        for (G4int i=0;i<round(colHitsEntries);i++){
           //GarfieldExcitationHit* newExcHit =new GarfieldExcitationHit();
 
-          G4ThreeVector fakepos (xi*10,yi*10.,zi*10.-10*gapLEM*float(i)/float(colHitsEntries)); /// ignoring diffusion in small LEM gap, EC 17-June-2022.
          // newExcHit->SetPos(fakepos);
 
 
@@ -706,11 +793,12 @@ void GarfieldVUVPhotonModel::MakeELPhotonsSimple(G4FastStep& fastStep, G4double 
           //}
           counter[3]++;
      }
-    }
+    #endif
+
         #ifdef With_Opticks
             //G4cout << "sending photons to opticks" <<G4endl;
             tig4 = fastStep.GetCurrentTrack()->GetProperTime() + gapLEM*10./vd*1E3;
-            G4ThreeVector fakepos (xi*10,yi*10.,zi*10); /// ignoring diffusion in small LEM gap, EC 17-June-2022.
+
             G4Material * Material= fastStep.GetCurrentTrack()->GetMaterial();
             G4Step * newStep = new G4Step();
             G4StepPoint *PoststepPoint= new G4StepPoint();
@@ -734,13 +822,27 @@ void GarfieldVUVPhotonModel::MakeELPhotonsSimple(G4FastStep& fastStep, G4double 
             G4RunManager * runmng=G4RunManager::GetRunManager();
             const int eventID=runmng->GetCurrentEvent()->GetEventID();
             // Add condition that if this is a thermal electron and has any secondaries
-            U4::CollectGenstep_DsG4Scintillation_r4695(newTrack,newStep,colHitsEntries,0,4*ns);
+
+
+            G4MaterialPropertiesTable *MPT=Material->GetMaterialPropertiesTable();
+            G4double t1,t2=0;
+            G4int singlets,triplets=0;
+            t1=MPT->GetConstProperty(kSCINTILLATIONTIMECONSTANT1);
+            t2=MPT->GetConstProperty(kSCINTILLATIONTIMECONSTANT2);
+
+            singlets= floor(MPT->GetConstProperty(kSCINTILLATIONYIELD1)*colHitsEntries);
+            triplets= ceil(MPT->GetConstProperty(kSCINTILLATIONYIELD2)*colHitsEntries);
+
+            if(singlets>0)
+                U4::CollectGenstep_DsG4Scintillation_r4695(newTrack,newStep,singlets,0,t1);
+            if(triplets>0)
+                U4::CollectGenstep_DsG4Scintillation_r4695(newTrack,newStep,triplets,1,t2);
             int CollectedPhotons=SEvt::GetNumPhotonCollected(0);
             int maxPhoton=SEventConfig::MaxPhoton();
-            //std::cout<< "Collected Photons: " <<CollectedPhotons<<std::endl;
             counter[3]+=colHitsEntries;
+
             //std::cout<<colHitsEntries<<std::endl;
-            if(CollectedPhotons>(maxPhoton-colHitsEntries)){
+            if(CollectedPhotons>=(maxPhoton*0.97)){
                 std::cout<<"Initiating the simulation ..." <<std::endl;
                 G4CXOpticks * g4xc=G4CXOpticks::Get();
                 g4xc->simulate(eventID,0);
@@ -758,8 +860,6 @@ void GarfieldVUVPhotonModel::MakeELPhotonsSimple(G4FastStep& fastStep, G4double 
 
         #endif
 }
-
-
 void GarfieldVUVPhotonModel::RandomPolarization(G4Track* trk){
     // Just making sure that particle is photon
     if (trk->GetParticleDefinition()!=S2Photon::Definition() or trk->GetParticleDefinition()==G4OpticalPhoton::Definition())

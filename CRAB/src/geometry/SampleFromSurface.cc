@@ -19,7 +19,7 @@ using namespace util;
 
      CRABPATH=getenv("CRABPATH");
      if(CRABPATH=="") G4Exception("SampleFromSurface","CRABPATH",FatalException,"CRAB Path is not defined");
-     AllFilePath=CRABPATH+"data/"+name_+".txt";
+     AllFilePath=CRABPATH+"data/NeedlePoints/"+name_+".txt";
 }
 
 SampleFromSurface::~SampleFromSurface(){}
@@ -27,7 +27,7 @@ SampleFromSurface::~SampleFromSurface(){}
 // Transforms the sample points so they will allign with the geometry
 void SampleFromSurface::FaceTransform(const G4VPhysicalVolume* tr,const G4VPhysicalVolume * Mother) {
    const G4String key=tr->GetName();
-   G4String SingleFilePath=CRABPATH+"data/"+key+".txt";
+   G4String SingleFilePath=CRABPATH+"data/NeedlePoints/"+key+".txt";
    // If the File Exist do not worry of transforming it
    if(file->FileCheck(SingleFilePath) and OverRide==false){
        G4String ss;

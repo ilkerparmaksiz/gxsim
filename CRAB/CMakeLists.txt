@@ -62,11 +62,17 @@ endif()
 
 
 if(With_Opticks)
+
     message(STATUS "WITH_OPTICKS is set ON")
     list(APPEND CMAKE_MODULE_PATH "$ENV{OPTICKS_HOME}/cmake/Modules")
     #list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake/Modules")
     set(OPTICKS_PREFIX "$ENV{OPTICKS_PREFIX}")
     ### we need to Make sure this OPTICKS_PREFIX matches with the one on OpticksBuildOptions
+    option(With_G4OpticksTest "This is used to compare simulated photon events between  G4 and Opticks by producing them in the same event." OFF)
+    if(With_G4OpticksTest)
+        message(STATUS "Warning ! With_G4OpticksTest Option is set ON !")
+        message(STATUS "With_G4OpticksTest Option allows you to save both G4 and Opticks photon hits into same file so hits can be compared between two ")
+    endif ()
     message(STATUS "OPTICKS_PREFIX : $ENV{OPTICKS_PREFIX} ")
     include(OpticksBuildOptions)
     message(STATUS "---- OPTICKS ----")
@@ -82,7 +88,6 @@ if(With_Opticks)
 endif ()
 
 # Setup Geant4 include directories and compile definitions
-include_directories($ENV{PROJECT_SOURCE_DIR}/include)
 
 
 
@@ -108,11 +113,11 @@ file(GLOB sources ${PROJECT_SOURCE_DIR}/src/*/*.cc)
 file(GLOB headers ${PROJECT_SOURCE_DIR}/src/*/*.hh)
 
 # Copy header files to the 'include' binary folder
-file(COPY ${headers} DESTINATION ${PROJECT_SOURCE_DIR}/include/${PROJECT_NAME})
+file(COPY ${headers} DESTINATION ${CMAKE_BINARY_DIR}/include)
 
 
 
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include ${NEST_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS} ${Geant4_INCLUDE_DIRS})
+include_directories( ${CMAKE_BINARY_DIR}/include ${NEST_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS} ${Geant4_INCLUDE_DIRS})
 
 #----------------------------------------------------------------------------
 # Add the executable, and link it to the Geant4 and GARFIELD++ libraries
@@ -143,7 +148,7 @@ if (With_Opticks)
     include_directories(${CMAKE_CURRENT_BINARY_DIR})
 endif()
 #Configure some of the variables
-configure_file(config.h.in ${PROJECT_SOURCE_DIR}/include/${PROJECT_NAME}/config.h)
+configure_file(config.h.in ${CMAKE_BINARY_DIR}/include/config.h)
 
 #####################################
 

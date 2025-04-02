@@ -13,7 +13,7 @@ print("-----------------------------------------------------------------")
 parser=argparse.ArgumentParser(prog='PyBoltzGasFileCreator',description="Generate Gas Files to be used with garfieldpp",epilog="https://github.com/UTA-REST/PyBoltz.git",fromfile_prefix_chars='@')
 
 ## Handling Arguments
-parser.add_argument('-g',nargs="+",type=str,help="Add Gasess you want such as Ar,Xe,CH4 such as G1 G2 G3")
+parser.add_argument('-g',nargs="+",type=str,help="Add Gasess you want such as ARGON,Xe,CH4 such as G1 G2 G3")
 parser.add_argument('-f',nargs="+",type=float,help="add Fraction of the gasses such as F1 F2 F3")
 parser.add_argument('-o',type=str,help="Output File Name")
 parser.add_argument('-p',type=float,help="Pressure in bars")

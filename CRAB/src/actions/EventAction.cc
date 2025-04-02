@@ -46,7 +46,9 @@ void EventAction::BeginOfEventAction(const G4Event *ev) {
       }
 
     fEDepPrim = 0.0;
+#ifdef With_Opticks
     G4CXOpticks::Get()->SensitiveDetector_Initialize(ev->GetEventID());
+#endif
 }
 
 void EventAction::EndOfEventAction(const G4Event *evt) {
@@ -86,12 +88,15 @@ void EventAction::EndOfEventAction(const G4Event *evt) {
     G4cout << "Number of Hits Opticks  " <<SEvt::GetNumHit(0)<< G4endl;
 
     if(SEvt::GetNumHit(0)>0){
-        PMT->OpticksHits();
+        //PMT->OpticksHits();
         Camera->OpticksHits();
 
     }
+    if(ngenstep>0 or nphotons>0){
+        G4CXOpticks::Get()->reset(eventID);
+    }
     G4CXOpticks::Get()->SensitiveDetector_EndOfEvent(eventID);
-    G4CXOpticks::Get()->reset(eventID);
+
 
 #endif
 

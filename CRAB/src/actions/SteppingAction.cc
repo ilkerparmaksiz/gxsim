@@ -66,10 +66,8 @@ void SteppingAction::UserSteppingAction(const G4Step *aStep)
   G4double time   = aStep->GetPreStepPoint()->GetGlobalTime();
 
   G4OpBoundaryProcess* boundary = 0;
-  Detected= false;
 
   // if (!boundary &&  particle->GetParticleName() == "S2Photon") {
-  Material_Store="None";
   if (!boundary){
       
       G4ProcessVector* pv = particle->GetProcessManager()->GetProcessList();
@@ -100,10 +98,19 @@ void SteppingAction::UserSteppingAction(const G4Step *aStep)
                 Material_Store = aStep->GetPreStepPoint()->GetTouchableHandle()->GetVolume()->GetLogicalVolume()->GetName();
               }*/
               if(boundary->GetStatus() == Detection  )  {
-                  Detected=true;
                   Material_Store = aStep->GetPostStepPoint()->GetTouchableHandle()->GetVolume()->GetLogicalVolume()->GetName();
-                 // std::cout <<"Material " <<Material_Store<<std::endl;
-              };
+                  G4String detector_name = aStep->GetPostStepPoint()->GetTouchableHandle()->GetVolume()->GetName();
+
+                  //std::cout<<"saving to file Camera" << std::endl;
+                  analysisManager->FillNtupleDColumn(0,0, event+ev_shift);
+                  analysisManager->FillNtupleDColumn(0,1, aStep->GetTrack()->GetParentID());
+                  analysisManager->FillNtupleDColumn(0,2, time/ns);
+                  analysisManager->FillNtupleDColumn(0,3, tpos[0]/mm); // Get Post step position
+                  analysisManager->FillNtupleDColumn(0,4, tpos[1]/mm);
+                  analysisManager->FillNtupleDColumn(0,5, tpos[2]/mm);
+                  analysisManager->FillNtupleSColumn(0,6, detector_name.c_str());
+                  analysisManager->AddNtupleRow(0);
+              }
               break;
           }
       }
@@ -111,7 +118,10 @@ void SteppingAction::UserSteppingAction(const G4Step *aStep)
 
     #ifdef With_Opticks
 
-
+    if(aStep->GetTrack()->GetDefinition()==G4OpticalPhoton::Definition() and aStep->GetTrack()->GetDefinition()==S2Photon::Definition() ) {
+        aStep->GetTrack()->SetTrackStatus(fStopAndKill);
+        return;
+    }
     //if(particle==G4Alpha::Definition())  SEvt::AddTorchGenstep();
     G4SteppingManager * sMg=G4EventManager::GetEventManager()->GetTrackingManager()->GetSteppingManager();
     G4StepStatus stepStatus=sMg->GetfStepStatus();
@@ -133,13 +143,12 @@ void SteppingAction::UserSteppingAction(const G4Step *aStep)
                     t2=MPT->GetConstProperty(kSCINTILLATIONTIMECONSTANT2);
                     singlets= floor(MPT->GetConstProperty(kSCINTILLATIONYIELD1)*num_photons);
                     triplets= ceil(MPT->GetConstProperty(kSCINTILLATIONYIELD2)*num_photons);
-                    std::cout << "Scintilation "<< num_photons <<" Amount of Singlets " <<singlets <<" Triplets " << triplets <<std::endl;
-                   /* if(singlets>0)
+                    //std::cout << "Scintilation "<< num_photons <<" Amount of Singlets " <<singlets <<" Triplets " << triplets <<std::endl;
+                   if(singlets>0)
                         U4::CollectGenstep_DsG4Scintillation_r4695(track,aStep,singlets,0,t1);
                     if(triplets>0)
                         U4::CollectGenstep_DsG4Scintillation_r4695(track,aStep,triplets,1,t2);
-                    */
-                    //U4::CollectGenstep_DsG4Scintillation_r4695(atrack,step,num_photons,1,t2);
+
                 }
 
             }
@@ -147,29 +156,19 @@ void SteppingAction::UserSteppingAction(const G4Step *aStep)
     }
     #endif
 
-    G4int id(0);
 
-  
-  if (sprocess)
-      startp = sprocess->GetProcessName();
-  if (tprocess)
-      endp = tprocess->GetProcessName();
 
-  
   G4LogicalVolume* lVolume = aStep->GetPreStepPoint()->GetTouchableHandle()
                              ->GetVolume()->GetLogicalVolume();
 
    
   G4TouchableHandle touch = endPoint->GetTouchableHandle();
-  G4VPhysicalVolume* eVolume = touch->GetVolume();
-  //G4VPhysicalVolume* eVolume = nullptr;
-  G4String eVname("null");
 
   if (pID==11 && track->GetKineticEnergy()/keV>0.100 && (lVolume->GetName().find("GAS_")!=std::string::npos)) // don't count the thermale's, just G4 e's
     fEventAction->EDepPrim(aStep->GetTotalEnergyDeposit());
 
 
-  // Here we select if we got an S1 photon or S2 photon
+  /*// Here we select if we got an S1 photon or S2 photon
   // S1  = 1, S2 = 2
   G4int PhotonType = 2;
   if(track->GetParticleDefinition()==S2Photon::OpticalPhoton()){
@@ -178,48 +177,9 @@ void SteppingAction::UserSteppingAction(const G4Step *aStep)
   else if(track->GetParticleDefinition()==G4OpticalPhoton::OpticalPhoton()){
     PhotonType = 1;
   }
-
-  if (eVolume ){
-  //if (Material_Store!="None"){
-    //G4cout<<"Volume -->"<<eVolume->GetName()<<G4endl;
-    //G4cout<<"Logical Volume -->"<<lVolume->GetName()<<G4endl;
-
-      eVname = eVolume->GetName();
-      //G4cout<<"Volume --> "<<eVname<<G4endl;
-    // Camera
-    //if (lVolume->GetName().find("camLogical")!=std::string::npos){
-    id=0;
-    //std::cout<<Material_Store<<std::endl;
-    //if (eVname.find("Camera")!=std::string::npos){
-    if (lVolume->GetName().find("Camera_logic")!=std::string::npos){
-      track->SetTrackStatus(fStopAndKill);
-      analysisManager->FillNtupleDColumn(id,0, event+ev_shift);
-      analysisManager->FillNtupleDColumn(id,1, pID);
-      analysisManager->FillNtupleDColumn(id,2, time/ns);
-      analysisManager->FillNtupleDColumn(id,3, pos[0]/mm);
-      analysisManager->FillNtupleDColumn(id,4, pos[1]/mm);
-      analysisManager->FillNtupleDColumn(id,5, pos[2]/mm);
-      analysisManager->AddNtupleRow(id);
-
-      // if (reflected) std::cout << "Parent ID from reflected photon Detected: " << track->GetTrackID() << "  Material:  " << Material_Store << std::endl;
-      // else  std::cout << "Photon arrived but was not reflected: " << track->GetTrackID() << std::endl;
-    }
-    id = 4;
-    if (lVolume->GetName().find("S1_PHOTOCATHODE")!=std::string::npos or Material_Store=="S1_PHOTOCATHODE"){
-      track->SetTrackStatus(fStopAndKill);
-      analysisManager->FillNtupleDColumn(id,0, event+ev_shift);
-      analysisManager->FillNtupleDColumn(id,1, pID);
-      analysisManager->FillNtupleDColumn(id,2, time/ns);
-      analysisManager->FillNtupleDColumn(id,3, pos[0]/mm);
-      analysisManager->FillNtupleDColumn(id,4, pos[1]/mm);
-      analysisManager->FillNtupleDColumn(id,5, pos[2]/mm);
-      analysisManager->AddNtupleRow(id);
-    }
-  }
+    */
 
 
-  // if particle == thermale, opticalphoton and parent == primary and stepID==1, or trackID<=2
-  // count the NEST e-s/photons into a class variable from the primary particle. Retrieve at EndEvent().
 }
 
 

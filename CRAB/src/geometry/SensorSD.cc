@@ -118,7 +118,7 @@ namespace sensorsd {
         auto ana=G4AnalysisManager::Instance();
         auto run= G4RunManager::GetRunManager();
         sev->GetNumHit(0);
-        int id=8;
+        int id=6;
 
         std::cout<< "Name is " << this->GetName() <<std::endl;
         for(int idx = 0; idx < int(num_hits); idx++)
@@ -129,8 +129,7 @@ namespace sensorsd {
             //std::cout << hit.descDetail()  << " id  " <<id <<std::endl;
 
             sev->getHit(hit, idx);
-            if(hit.boundary()==29) id=7;
-            else id=8;
+
             G4ThreeVector position     = G4ThreeVector(hit.pos.x, hit.pos.y, hit.pos.z);
             G4ThreeVector direction    = G4ThreeVector(hit.mom.x, hit.mom.y, hit.mom.z);
             G4ThreeVector polarization = G4ThreeVector(hit.pol.x, hit.pol.y, hit.pol.z);
@@ -150,25 +149,13 @@ namespace sensorsd {
             ana->FillNtupleFColumn(id,10,hit.pol.y);
             ana->FillNtupleFColumn(id,11,hit.pol.z);
             ana->FillNtupleFColumn(id,12,hit.wavelength);
+            ana->FillNtupleIColumn(id,13,(int) hit.boundary());
             ana->AddNtupleRow(id);
         }
 #endif
     }
 
   void SensorSD::GEANT4Hits(G4Step* step){
-      auto analysisManager = G4AnalysisManager::Instance();
-      G4int id;
-      auto track=step->GetTrack();
-      auto event=G4EventManager::GetEventManager()->GetConstCurrentEvent()->GetEventID();
-      if(this->GetName()=="Camera")  id=0;
-      else id=4;
-      analysisManager->FillNtupleDColumn(id,0, event);
-      analysisManager->FillNtupleDColumn(id,1, track->GetTrackID());
-      analysisManager->FillNtupleDColumn(id,2, track->GetProperTime()/CLHEP::ns);
-      analysisManager->FillNtupleDColumn(id,3, track->GetPosition()[0]/CLHEP::mm);
-      analysisManager->FillNtupleDColumn(id,4, track->GetPosition()[1]/CLHEP::mm);
-      analysisManager->FillNtupleDColumn(id,5, track->GetPosition()[2]/CLHEP::mm);
-      analysisManager->AddNtupleRow(id);
 
   }
   void SensorSD::EndOfEvent(G4HCofThisEvent* /*HCE*/)

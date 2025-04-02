@@ -28,6 +28,7 @@
 #include "Visibilities.hh"
 #include "HexagonMeshTools.hh"
 #include "SensorSD.hh"
+#include "config.h"
 #include "G4SDManager.hh"
 
 
@@ -159,15 +160,15 @@ void CRAB_CSG::Construct(){
 #ifndef With_Opticks
     // Define the Stainless steel mesh cylinder to subtract hex pattern from
 
-    //G4Tubs* Mesh_Disk = new G4Tubs("Mesh_Disk", 0., EL_OD/2.0 , EL_mesh_thick/2., 0., twopi); // Use OD so mesh stays within the logical
+    G4Tubs* Mesh_Disk = new G4Tubs("Mesh_Disk", 0., EL_OD/2.0 , EL_mesh_thick/2., 0., twopi); // Use OD so mesh stays within the logical
 
-    //HexagonMeshTools::HexagonMeshTools* HexCreator; // Hexagonal Mesh Tool
-    //G4ExtrudedSolid* HexPrism = HexCreator->CreateHexagon(EL_mesh_thick, hex_circumR);
+    HexagonMeshTools::HexagonMeshTools* HexCreator; // Hexagonal Mesh Tool
+    G4ExtrudedSolid* HexPrism = HexCreator->CreateHexagon(EL_mesh_thick, hex_circumR);
 
-    //G4LogicalVolume *ELP_Disk_logic     = new G4LogicalVolume(Mesh_Disk, Steel, "ELP_Mesh_Logic");
-    //G4LogicalVolume *ELPP_Disk_logic    = new G4LogicalVolume(Mesh_Disk, Steel, "ELPP_Mesh_Logic");
-    //G4LogicalVolume *Cathode_Disk_logic = new G4LogicalVolume(Mesh_Disk, Steel, "Cathode_Mesh_Logic");
-    //G4LogicalVolume *EL_Hex_logic       = new G4LogicalVolume(HexPrism, gxe,    "Mesh_Hex");
+    G4LogicalVolume *ELP_Disk_logic     = new G4LogicalVolume(Mesh_Disk, Steel, "ELP_Mesh_Logic");
+    G4LogicalVolume *ELPP_Disk_logic    = new G4LogicalVolume(Mesh_Disk, Steel, "ELPP_Mesh_Logic");
+    G4LogicalVolume *Cathode_Disk_logic = new G4LogicalVolume(Mesh_Disk, Steel, "Cathode_Mesh_Logic");
+    G4LogicalVolume *EL_Hex_logic       = new G4LogicalVolume(HexPrism, gxe,    "Mesh_Hex");
 #endif
 
     // FieldCage -- needs to be updated to rings and PEEK rods
@@ -425,17 +426,17 @@ void CRAB_CSG::Construct(){
 
     // Place the Mesh bits
 #ifndef With_Opticks
-    //G4VPhysicalVolume * EL_Mesh_Plus_plus = new G4PVPlacement(rotateMesh, G4ThreeVector(0.,0., EL_thick/2.0 - FR_thick - 4*(FR_thick + PEEK_Rod_thick) - 2.5*cm - EL_thick - EL_thick/2.0+Offset), ELP_Disk_logic, ELP_Disk_logic->GetName(), gas_logic, 0,0, false);
+    G4VPhysicalVolume * EL_Mesh_Plus_plus = new G4PVPlacement(rotateMesh, G4ThreeVector(0.,0., EL_thick/2.0 - FR_thick - 4*(FR_thick + PEEK_Rod_thick) - 2.5*cm - EL_thick - EL_thick/2.0+Offset), ELP_Disk_logic, ELP_Disk_logic->GetName(), gas_logic, 0,0, false);
 
-    //HexCreator->PlaceHexagons(nHole, EL_hex_size,  EL_mesh_thick, ELP_Disk_logic, EL_Hex_logic);
+    HexCreator->PlaceHexagons(nHole, EL_hex_size,  EL_mesh_thick, ELP_Disk_logic, EL_Hex_logic);
 #endif
     G4VPhysicalVolume * EL_Ring_Plus_plus   = new G4PVPlacement(0, G4ThreeVector(0.,0., EL_thick/2.0 - FR_thick - 4*(FR_thick + PEEK_Rod_thick) - 2.5*cm - EL_thick - ElGap_ - EL_thick+Offset), EL_ring_logic, EL_solid->GetName(), gas_logic, 0,0, false);
 
     // Place the Mesh bits
 #ifndef With_Opticks
-    //G4VPhysicalVolume * EL_Mesh_Plus = new G4PVPlacement(0, G4ThreeVector(0.,0.,  EL_thick/2.0 - FR_thick - 4*(FR_thick + PEEK_Rod_thick) - 2.5*cm - EL_thick - ElGap_ - EL_thick + EL_thick/2.0+Offset), ELPP_Disk_logic, ELPP_Disk_logic->GetName(), gas_logic, 0,0, false);
+    G4VPhysicalVolume * EL_Mesh_Plus = new G4PVPlacement(0, G4ThreeVector(0.,0.,  EL_thick/2.0 - FR_thick - 4*(FR_thick + PEEK_Rod_thick) - 2.5*cm - EL_thick - ElGap_ - EL_thick + EL_thick/2.0+Offset), ELPP_Disk_logic, ELPP_Disk_logic->GetName(), gas_logic, 0,0, false);
 
-    //HexCreator->PlaceHexagons(nHole, EL_hex_size,  EL_mesh_thick, ELPP_Disk_logic, EL_Hex_logic);
+    HexCreator->PlaceHexagons(nHole, EL_hex_size,  EL_mesh_thick, ELPP_Disk_logic, EL_Hex_logic);
 #endif
 
     // Cathode
@@ -443,9 +444,9 @@ void CRAB_CSG::Construct(){
 
     // Place the Mesh bits
 #ifndef With_Opticks
-    //G4VPhysicalVolume * Cathode_EL_Mesh = new G4PVPlacement(rotateMesh, G4ThreeVector(0.,0.,  EL_thick/2.0 + 1*cm + 5*(FR_thick + PEEK_Rod_thick ) - EL_thick/2.0+Offset), Cathode_Disk_logic, Cathode_Disk_logic->GetName(), gas_logic, 0,0, false);
+    G4VPhysicalVolume * Cathode_EL_Mesh = new G4PVPlacement(rotateMesh, G4ThreeVector(0.,0.,  EL_thick/2.0 + 1*cm + 5*(FR_thick + PEEK_Rod_thick ) - EL_thick/2.0+Offset), Cathode_Disk_logic, Cathode_Disk_logic->GetName(), gas_logic, 0,0, false);
 
-    //HexCreator->PlaceHexagons(nHole, EL_hex_size,  EL_mesh_thick, Cathode_Disk_logic, EL_Hex_logic);
+    HexCreator->PlaceHexagons(nHole, EL_hex_size,  EL_mesh_thick, Cathode_Disk_logic, EL_Hex_logic);
 #endif
 
     // MgF2 Windows
@@ -565,12 +566,12 @@ void CRAB_CSG::Construct(){
     G4OpticalSurface* opXenon_Glass = new G4OpticalSurface("CamSurface");
     opXenon_Glass->SetMaterialPropertiesTable(opticalprops::PerfectDetector());
     opXenon_Glass->SetModel(unified);                  // SetModel
-    opXenon_Glass->SetType(dielectric_metal);   // SetType
+    opXenon_Glass->SetType(dielectric_dielectric);   // SetType
     opXenon_Glass->SetFinish(polished);                 // SetFinish
     new G4LogicalSkinSurface("XenonCamSurface",camLogical,opXenon_Glass);
+    //new G4LogicalBorderSurface("XenonCamSurface",PMT_Tube_Vacuum_Phys0, camPhysical,opXenon_Glass);
 
 
-    G4LogicalVolumeStore* lvStore = G4LogicalVolumeStore::GetInstance();
 
     G4SDManager *SDManager=G4SDManager::GetSDMpointer();
     sensorsd::SensorSD* CameraSD=new sensorsd::SensorSD("/Sensor/Camera");

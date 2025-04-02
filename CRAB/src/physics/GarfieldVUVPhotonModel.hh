@@ -86,7 +86,7 @@ public:
 
     void RandomPolarization(G4Track *trk) ;
 
-    void DiffusionFill(const double Efield,const double dl,const double dt,const double vd );
+    void DiffusionFill(const double Efield,const double dl,const double dt,const double vd,const std::array<double,3> p0 );
 
     void ELRandomTimeSampling(G4Track *trk);
 private:
@@ -112,7 +112,7 @@ private:
     GasBoxSD* fGasBoxSD;
     Garfield::TrackHeed* fTrackHeed;
     std::vector<uint> counter {0,0,0,0};
-
+    double ELField_;
     // Variable to store the EL timing profiles to sample from
     // <event> <photon> <x,y,z,t of photon>
     std::vector<std::vector<std::vector<G4double>>> EL_profiles;

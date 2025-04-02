@@ -193,7 +193,7 @@ void PrimaryGenerator::GeneratePrimaryVertexIon(G4Event* event, std::vector<doub
 
   //pmod = 500*keV;
   //p = pmod * momentum_;
-
+    pmod = std::sqrt(energy*energy - mass*mass);
     if(Iso_){
         G4ThreeVector SphericalCoord;
         G4double iniPhi=0;
@@ -204,6 +204,7 @@ void PrimaryGenerator::GeneratePrimaryVertexIon(G4Event* event, std::vector<doub
         G4double theta=(iniPhi+(G4UniformRand() * deltatheta));
         G4double rad = 1;
         SphericalCoord ={rad*sin(phi)*cos(theta),rad*sin(phi)*sin(theta),rad*cos(phi)};
+
         p=SphericalCoord*pmod;
 
     }else{

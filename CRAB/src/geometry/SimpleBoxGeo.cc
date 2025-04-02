@@ -23,12 +23,13 @@
 #include <globals.hh>
 #include "U4Scint.h"
 #include "U4Material.hh"
+#include "U4SensitiveDetector.hh"
+
 #endif
 #include "MaterialsList.hh"
 #include "OpticalMaterialProperties.hh"
 #include "G4LogicalBorderSurface.hh"
 #include "G4OpticalSurface.hh"
-#include "U4SensitiveDetector.hh"
 #include "G4VisAttributes.hh"
 #include "G4SDManager.hh"
 SimpleBoxGeo::SimpleBoxGeo() {

@@ -10,18 +10,19 @@
 start=`date +%s`
 
 # Set the configurable variables
-JOBNAME="10_Bar"
-TYPE="CRAB"
-N_EVENTS=500
+JOBNAME="8bar_G4"
+
+TYPE="CRAB/4cm"
+N_EVENTS=2
 
 # Create the directory
 source "/home/argon/Projects/Ilker/gxsim/CRAB/macros/run.sh test"
 cd /media/argon/Data/CRAB/Sim
 mkdir -p $JOBNAME/$TYPE/jobid_"${SLURM_ARRAY_TASK_ID}"
 cd $JOBNAME/$TYPE/jobid_"${SLURM_ARRAY_TASK_ID}"
-
 # Copy the macro file
-cp $CRABPATH/macros/Single_alpha.mac .
+cp $CRABPATH/macros/Single_alpha_G4.mac .
+filePath=/media/argon/Data/CRAB/Sim/$JOBNAME/$TYPE/jobid_"${SLURM_ARRAY_TASK_ID}"/alpha.root
 
 # Setup nexus and run
 echo "Setting Up Code" 2>&1 | tee -a log_crab"${SLURM_ARRAY_TASK_ID}".txt
@@ -31,13 +32,14 @@ echo "Setting Up Code" 2>&1 | tee -a log_crab"${SLURM_ARRAY_TASK_ID}".txt
 SEED=$((${N_EVENTS}*(${SLURM_ARRAY_TASK_ID} - 1) + ${N_EVENTS}))
 echo "The seed number is: ${SEED}" 2>&1 | tee -a log_crab"${SLURM_ARRAY_TASK_ID}".txt
 
-# Replace the number of events in the file as well as the event index
-sed -i "s#.*event_shift.*#/Action/SteppingAction/event_shift ${SEED}#" Single_alpha.mac
-sed -i "s#.*beamOn.*#/run/beamOn ${N_EVENTS}#" Single_alpha.mac
 
+# Replace the number of events in the file as well as the event index
+sed -i "s#.*event_shift.*#/Action/SteppingAction/event_shift ${SEED}#" Single_alpha_G4.mac
+sed -i "s#.*beamOn.*#/run/beamOn ${N_EVENTS}#" Single_alpha_G4.mac
+sed -i "s#.*setFileName.*#/analysis/setFileName ${filePath}#" Single_alpha_G4.mac
 # NEXUS
 echo "Running GXeSim" 2>&1 | tee -a log_crab"${SLURM_ARRAY_TASK_ID}".txt
-$CRABPATH/build/CRAB Single_alpha.mac ${SEED} 2>&1 | tee -a log_crab"${SLURM_ARRAY_TASK_ID}".txt
+$CRABPATH/build_Geant4/CRAB Single_alpha_G4.mac ${SEED} 2>&1 | tee -a log_crab"${SLURM_ARRAY_TASK_ID}".txt
 
 echo; echo; echo;
 

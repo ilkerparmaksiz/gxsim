@@ -43,36 +43,40 @@ void RunAction::BeginOfRunAction(const G4Run* aRun) {
 
   auto analysisManager = G4AnalysisManager::Instance();
   analysisManager->OpenFile();
-  
-  analysisManager->CreateNtuple("Camera", "Camera Hits"); 
+
+  // id 0
+  analysisManager->CreateNtuple("Hits", "Camera Hits");
   analysisManager->CreateNtupleDColumn("Event");     //column 0
   analysisManager->CreateNtupleDColumn("PID");       //column 1
   analysisManager->CreateNtupleDColumn("Time");      //column 2
-  analysisManager->CreateNtupleDColumn("X");         //column 3
-  analysisManager->CreateNtupleDColumn("Y");         //column 4
-  analysisManager->CreateNtupleDColumn("Z");         //column 5
-  analysisManager->FinishNtuple();
+  analysisManager->CreateNtupleDColumn("x");         //column 3
+  analysisManager->CreateNtupleDColumn("y");         //column 4
+  analysisManager->CreateNtupleDColumn("z");         //column 5
+  analysisManager->CreateNtupleSColumn("detName");   //column 6
 
+  analysisManager->FinishNtuple();
+  // id 1
   analysisManager->CreateNtuple("S1", "S1 particles"); 
   analysisManager->CreateNtupleDColumn("Event");    //column 0
   analysisManager->CreateNtupleDColumn("PID");      //column 1
   analysisManager->CreateNtupleDColumn("Time");     //column 2
-  analysisManager->CreateNtupleDColumn("X");        //column 3
-  analysisManager->CreateNtupleDColumn("Y");        //column 4
-  analysisManager->CreateNtupleDColumn("Z");        //column 5
+  analysisManager->CreateNtupleDColumn("x");        //column 3
+  analysisManager->CreateNtupleDColumn("y");        //column 4
+  analysisManager->CreateNtupleDColumn("z");        //column 5
   analysisManager->CreateNtupleSColumn("Process");  //column 6
   analysisManager->FinishNtuple();
 
+  // id 2
   analysisManager->CreateNtuple("S2", "S2 particles"); 
   analysisManager->CreateNtupleDColumn("Event");    //column 0
   analysisManager->CreateNtupleDColumn("PID");      //column 1
   analysisManager->CreateNtupleDColumn("Time");     //column 2
-  analysisManager->CreateNtupleDColumn("X");        //column 3
-  analysisManager->CreateNtupleDColumn("Y");        //column 4
-  analysisManager->CreateNtupleDColumn("Z");        //column 5
+  analysisManager->CreateNtupleDColumn("x");        //column 3
+  analysisManager->CreateNtupleDColumn("y");        //column 4
+  analysisManager->CreateNtupleDColumn("z");        //column 5
   analysisManager->CreateNtupleSColumn("Process");  //column 6
   analysisManager->FinishNtuple();
-
+  // id 3
   analysisManager->CreateNtuple("Event", "Event stats"); 
   analysisManager->CreateNtupleDColumn("Event");    //column 0
   analysisManager->CreateNtupleDColumn("PPID");     //column 1 Primary PPartCode
@@ -80,38 +84,33 @@ void RunAction::BeginOfRunAction(const G4Run* aRun) {
   analysisManager->CreateNtupleDColumn("PEDep");     //column 3 Primary final KE
   analysisManager->FinishNtuple();
 
-
-  analysisManager->CreateNtuple("PMT", "PMT Hits");
-  analysisManager->CreateNtupleDColumn("Event");     //column 0
-  analysisManager->CreateNtupleDColumn("PID");       //column 1
-  analysisManager->CreateNtupleDColumn("Time");      //column 2
-  analysisManager->CreateNtupleDColumn("X");         //column 3
-  analysisManager->CreateNtupleDColumn("Y");         //column 4
-  analysisManager->CreateNtupleDColumn("Z");         //column 5
-  analysisManager->FinishNtuple();
-
+  // id 4
   analysisManager->CreateNtuple("EL", "EL Hits");
   analysisManager->CreateNtupleDColumn("Event");     //column 0
   analysisManager->CreateNtupleDColumn("Time");      //column 2
-  analysisManager->CreateNtupleDColumn("X");         //column 3
-  analysisManager->CreateNtupleDColumn("Y");         //column 4
-  analysisManager->CreateNtupleDColumn("Z");         //column 5
+  analysisManager->CreateNtupleDColumn("x");         //column 3
+  analysisManager->CreateNtupleDColumn("y");         //column 4
+  analysisManager->CreateNtupleDColumn("z");         //column 5
   analysisManager->FinishNtuple();
 
 
-
+  // id 5
   // Diffusion values
   analysisManager->CreateNtuple("Diffusion", "Simulated DL");
   analysisManager->CreateNtupleDColumn("Event");     //column 0
   analysisManager->CreateNtupleDColumn("Efield");     //column 1
   analysisManager->CreateNtupleDColumn("dl");      //column 2
   analysisManager->CreateNtupleDColumn("dt");         //column 3
-  analysisManager->CreateNtupleDColumn("vd");         //column 4
+  analysisManager->CreateNtupleDColumn("dv");         //column 3
+  analysisManager->CreateNtupleDColumn("x");         //column 4
+  analysisManager->CreateNtupleDColumn("y");         //column 4
+  analysisManager->CreateNtupleDColumn("z");         //column 4
   analysisManager->FinishNtuple();
 
 #ifdef With_Opticks
+    // id 6
     // Opticks PMT Hits
-    analysisManager->CreateNtuple("Opticks_Camera_Hits", "Opticks Camera Hits");
+    analysisManager->CreateNtuple("Opticks_Hits", "Opticks  Hits");
     analysisManager->CreateNtupleIColumn("Event");
     analysisManager->CreateNtupleIColumn("id");
     analysisManager->CreateNtupleFColumn("x");
@@ -125,22 +124,7 @@ void RunAction::BeginOfRunAction(const G4Run* aRun) {
     analysisManager->CreateNtupleFColumn("py");
     analysisManager->CreateNtupleFColumn("pz");
     analysisManager->CreateNtupleFColumn("wavelength");
-    analysisManager->FinishNtuple();
-
-    analysisManager->CreateNtuple("Opticks_PMT_Hits", "Opticks PMT Hits");
-    analysisManager->CreateNtupleIColumn("Event");
-    analysisManager->CreateNtupleIColumn("id");
-    analysisManager->CreateNtupleFColumn("x");
-    analysisManager->CreateNtupleFColumn("y");
-    analysisManager->CreateNtupleFColumn("z");
-    analysisManager->CreateNtupleFColumn("t");
-    analysisManager->CreateNtupleFColumn("mx");
-    analysisManager->CreateNtupleFColumn("my");
-    analysisManager->CreateNtupleFColumn("mz");
-    analysisManager->CreateNtupleFColumn("px");
-    analysisManager->CreateNtupleFColumn("py");
-    analysisManager->CreateNtupleFColumn("pz");
-    analysisManager->CreateNtupleFColumn("wavelength");
+    analysisManager->CreateNtupleIColumn("boundary");
     analysisManager->FinishNtuple();
 #endif
     analysisManager->SetNtupleActivation(true);

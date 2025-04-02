@@ -1,7 +1,7 @@
 
 # Gas Pressure
-/Xenon/geometry/SetGasPressure 5.89 bar
-#/Xenon/geometry/SetGasPressure 8.09 bar
+#/Xenon/geometry/SetGasPressure 5.89 bar
+/Xenon/geometry/SetGasPressure 8.09 bar
 
 
 # /gasModelParameters/degrad/thermalenergy 10. eV
@@ -9,10 +9,12 @@
 /gasModelParameters/degrad/thermalenergy 1.3 eV ## 150 gives almost same answer as 450, and 2x nexcitation as with 30. ## NEST e's are 1.13 eV
 
 # For setting the geometry
-/gasModelParameters/geometry/COMSOL_Path /home/argon/Downloads/MeshTest/
-#/gasModelParameters/geometry/COMSOL_Path /home/argon/Projects/Ilker/CRAB_COMSOL/With_Needles/13.5k_8k_7k/8bar/
+#/gasModelParameters/geometry/COMSOL_Path /home/argon/Projects/Ilker/CRAB_COMSOL/With_Needles/13.5k_8k_7k/5.89bar/
+/gasModelParameters/geometry/COMSOL_Path /home/argon/Projects/Ilker/CRAB_COMSOL/With_Needles/13.5k_8k_7k/8bar/
+
 /gasModelParameters/geometry/useEL_File false
 /gasModelParameters/geometry/useComsol true
+
 #/gasModelParameters/geometry/GasFile /home/argon/Projects/Ilker/CRAB_Diffusion/CRAB/GasFiles/Xe100_5_89bar.gas
 /gasModelParameters/geometry/GasFile /home/argon/Projects/Ilker/CRAB_Diffusion/CRAB/GasFiles/Xe100_8.09bar.gas
 
@@ -31,8 +33,8 @@
 
 /run/initialize
 
-#/analysis/setFileName /home/argon/Projects/Ilker/CRAB_COMSOL/With_Needles/13.5k_8k_7k/5.89bar/RootFiles/Needle_14cm_100_NoComsol.root
-/analysis/setFileName test.root
+/analysis/setFileName test/Testing_WithRefractiveIndex.root
+
 
 ####################################
 ############ Verbosities ###########
@@ -47,12 +49,11 @@
 
 /Action/SteppingAction/event_shift 0
 /Generator/SingleParticle/ParticleType alpha
-/Generator/SingleParticle/energy 10 keV
+/Generator/SingleParticle/energy 5.4 MeV
 /Generator/SingleParticle/pos 0 0 0 cm
 #/Generator/SingleParticle/pos  -1.6 0 -5 cm
 /Generator/SingleParticle/Isotropic true
-/Generator/SingleParticle/Mode Needles
+/Generator/SingleParticle/Mode Needle_14cm
 /Generator/SingleParticle/useNeedle false
 /Generator/SingleParticle/Amount 1
-/run/beamOn 5
-
+/run/beamOn 10
